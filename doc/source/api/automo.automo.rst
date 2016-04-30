@@ -11,4 +11,4 @@
    .. autosummary::
    
       create_cmd
-      create_tomo
+      run_tomo

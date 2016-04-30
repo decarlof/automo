@@ -6,10 +6,11 @@ Example script
 """
 
 from __future__ import print_function
-import automo
-from os.path import expanduser
-import ConfigParser
+
 import os
+import automo
+import ConfigParser
+from os.path import expanduser
 
 
 if __name__ == "__main__":
@@ -24,4 +25,4 @@ if __name__ == "__main__":
     processes = processes.split(', ')
     h5_fname = cf.get('settings', 'h5_fname')
        
-    automo.create_tomo(sys.argv[1:])
+    automo.run_tomo(sys.argv[1:])

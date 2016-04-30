@@ -47,7 +47,7 @@
 # #########################################################################
 
 """
-Module to create basic tomo directory structure.
+Module to create basic tomography data analyis automation.
 
 """
 
@@ -63,51 +63,9 @@ __author__ = "Francesco De Carlo"
 __copyright__ = "Copyright (c) 2016, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
 __all__ = ['create_cmd',
-           'create_tomo']
+           'run_tomo']
 
 
-def create_cmd_old(folder):
-    """
-    Function description.
-
-    Parameters
-    ----------
-    parameter_01 : type
-        Description.
-
-    parameter_02 : type
-        Description.
-
-    parameter_03 : type
-        Description.
-
-    Returns
-    -------
-    return_01
-        Description.
-    """
-    
-    # files are sorted alphabetically
-    files = sorted(os.listdir(folder))
-    cmd = []
-    try:
-        for fname in files:
-            sname = fname.split('.')
-            try:
-                ext = sname[1]
-                if ext == "h5":
-                    for subfolder in subfolders:
-                        cmd.append("mkdir " + sys.argv[1] + sname[0] + os.sep + subfolder)
-                    cmd.append("mv " + sys.argv[1] + fname + " " + sys.argv[1] + sname[0] + os.sep + h5_fname)
-            except: # does not have an extension
-                if os.path.isdir(folder + fname): # is a folder?
-                    for process in processes:
-                        cmd.append("python " + process + ".py " + folder + fname + os.sep)                     
-                pass    
-        return cmd
-    except OSError:
-        pass
-    
 def create_cmd(folder):
     """
     Function description.
@@ -150,7 +108,7 @@ def create_cmd(folder):
         pass
 
 
-def create_tomo(argv):
+def run_tomo(argv):
     """
     Function description.
 
