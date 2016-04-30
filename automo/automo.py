@@ -49,16 +49,6 @@
 """
 Module to create basic tomo directory structure.
 
-To use create a 
-
-~/.tomo/tomo.ini
-
-[settings]
-h5_fname = data.h5
-python_proc = center, recon, preview, dquality
-python_proc_dir = ~/.tomo/
-
-
 """
 
 import os
