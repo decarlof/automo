@@ -5,9 +5,9 @@ API reference
 
 .. toctree::
 
+   api/automo.automo
    api/automo.module_01
    api/automo.module_02
-   api/automo.automo
 
 .. automodule:: automo
    :members:

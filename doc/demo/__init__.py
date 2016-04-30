@@ -46,4 +46,14 @@
 # POSSIBILITY OF SUCH DAMAGE.                                             #
 # #########################################################################
 
-from __future__ import absolute_import, division, print_function
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+from automo.module_01 import *
+from automo.module_02 import *
+from automo.automo import *
+
+try:
+    import pkg_resources
+    __version__ = pkg_resources.working_set.require("automo")[0].version
+except:
+    pass
