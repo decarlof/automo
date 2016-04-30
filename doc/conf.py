@@ -322,7 +322,14 @@ class Mock(object):
     def __radd__(self, other):
         return Mock()
 
-MOCK_MODULES = ['numpy']
+#MOCK_MODULES = ['numpy']
+
+MOCK_MODULES = [
+    'numpy', 'scipy', 'scipy.misc', 'scipy.optimize', 'h5py', 'ctypes',
+    'matplotlib', 'matplotlib.pylab', 'tifffile', 'EdfFile', 'netCDF4',  
+    'spefile', 'scipy.ndimage', 'pywt', 'scikit-image', 'skimage',
+    'skimage.io', 'skimage.filter', 'skimage.morphology', 'DM3lib']
+
 
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()
