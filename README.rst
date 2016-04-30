@@ -1,23 +1,23 @@
 ========
-Project
+Automo
 ========
 
 
-`Project <https://github.com/decarlof/project>`_ provides an template doc to add to any project.
+`Automo <https://github.com/decarlof/automo>`_ provides tomography automation.
 
 Documentation
 -------------
-* https://project.readthedocs.org
+* https://automo.readthedocs.org
 
 Features
 --------
 
-* Example of how to add documentation to any project.
+* Example of how to add documentation to any automo.
 
 Contribute
 ----------
 
-* Documentation: https://github.com/decarlof/project/tree/master/doc
-* Issue Tracker: https://github.com/decarlof/project/docs/issues
-* Source Code: https://github.com/decarlof/project/project
+* Documentation: https://github.com/decarlof/automo/tree/master/doc
+* Issue Tracker: https://github.com/decarlof/automo/docs/issues
+* Source Code: https://github.com/decarlof/automo/automo
 
