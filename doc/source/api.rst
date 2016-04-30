@@ -1,15 +1,15 @@
 API reference
 =============
 
-.. rubric:: **project Modules:**
+.. rubric:: **automo Modules:**
 
 .. toctree::
 
-   api/project.module_01
-   api/project.module_02
-   api/project.automo
+   api/automo.module_01
+   api/automo.module_02
+   api/automo.automo
 
-.. automodule:: project
+.. automodule:: automo
    :members:
    :undoc-members:
    :show-inheritance: 
