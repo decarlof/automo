@@ -218,23 +218,15 @@ def run_tomo(argv):
 
 def clean_folder_name(directory):
     """
-    Function description.
+    Clean the folder name from unsupported characters before
+    creating it.
+    
 
     Parameters
     ----------
-    parameter_01 : type
-        Description.
+    folder : str
+        Folder that will be containing multiple h5 files.
 
-    parameter_02 : type
-        Description.
-
-    parameter_03 : type
-        Description.
-
-    Returns
-    -------
-    return_01
-        Description.
     """
 
     valid_folder_name_chars = "-_"+ os.sep + "%s%s" % (string.ascii_letters, string.digits)

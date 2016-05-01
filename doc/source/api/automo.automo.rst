@@ -10,6 +10,6 @@
 
    .. autosummary::
 
-      clean_folder
+      clean_folder_name
       create_mv_cmd
       mv_tomo
