@@ -70,7 +70,7 @@ __all__ = ['clean_folder_name',
            'run_tomo']
 
 
-if __name__ == '__main__':
+def init():
     home = expanduser("~")
     tomo = os.path.join(home, '.tomo/automo.ini')
     cf = ConfigParser.ConfigParser()
@@ -265,5 +265,6 @@ def _try_folder(directory):
         return False
 
 
-
+if __name__ == '__main__':
+    init()
 
