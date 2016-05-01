@@ -1,1 +1,1 @@
-Examples========Here we describe what the examples are doing. You can cite with :cite:`reference:01`... toctree::   demo/doc.demo.example_01   demo/doc.demo.example_02.. automodule:: project   :members:   :undoc-members:   :show-inheritance: 
+Examples========Here are some examples on how to use Automo... toctree::   demo/doc.demo.default_processing.. automodule:: project   :members:   :undoc-members:   :show-inheritance: 

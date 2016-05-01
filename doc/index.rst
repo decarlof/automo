@@ -2,15 +2,18 @@
 Automo
 ======
 
-`Automo <https://github.com/decarlof/automo>`_ provides an template doc to add to any project.
-Here is how to add a link to your documentation
-`Docs <http://automo.readthedocs.org/>`_ and here is how to add a reference :cite:`cite:01`
+.. image:: source/img/fraud-bot-home.png
+   :width: 320px
+   :alt: DMagic
+
+`Automo <https://github.com/decarlof/automo>`_ provides automation to several tomography
+data analysis tasks. 
 
 
 Features
 --------
 
-* Example of how to write documentation 
+* Automation for tomography processing.
 
 
 Contribute
