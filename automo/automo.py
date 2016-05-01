@@ -66,8 +66,9 @@ __copyright__ = "Copyright (c) 2016, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
 __all__ = ['clean_folder_name',
            'create_move',
+           'create_test',
            'move',
-           'run_test']
+           'test']
 
 
 def init():
@@ -157,7 +158,7 @@ def move(argv):
         pass
 
 
-def create_run_cmd(folder):
+def create_test(folder):
     """
     Create a list of commands to run a set of default functions 
     on data.h5 files located in folder/user_selected_name/data.h5
@@ -198,7 +199,7 @@ def create_run_cmd(folder):
         pass
 
 
-def run_test(argv):
+def test(argv):
     """
     Execute all test listed in the ~/.tomo folder
 
@@ -216,7 +217,7 @@ def run_test(argv):
     try: 
         folder = os.path.normpath(clean_folder_name(args.folder)) + os.sep # will add the trailing slash if it's not already there.
         if _try_folder(folder):
-            cmd_list = create_run_cmd(folder)
+            cmd_list = create_test(folder)
             for cmd in cmd_list:
                 print cmd
                 #os.system(cmd)
