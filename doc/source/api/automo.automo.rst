@@ -11,5 +11,6 @@
    .. autosummary::
 
       clean_folder_name
-      create_mv_cmd
-      mv_tomo
+      create_move
+      move
+      run_test

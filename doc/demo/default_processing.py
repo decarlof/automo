@@ -14,5 +14,5 @@ import automo
 if __name__ == "__main__":
 
     
-    automo.mv_tomo(sys.argv[1:])
-    automo.run_tomo(sys.argv[1:])
+    automo.move(sys.argv[1:])
+    automo.run_test(sys.argv[1:])
