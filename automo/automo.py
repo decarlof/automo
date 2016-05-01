@@ -65,9 +65,9 @@ __author__ = "Francesco De Carlo"
 __copyright__ = "Copyright (c) 2016, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
 __all__ = ['clean_folder_name',
-           'create_mv_cmd',
-           'mv_tomo',
-           'run_tomo']
+           'create_move',
+           'move',
+           'run_test']
 
 
 def init():
@@ -82,7 +82,7 @@ def init():
     h5_fname = cf.get('settings', 'h5_fname')
 
 
-def create_mv_cmd(folder):
+def create_move(folder):
     """
     Create a list of commands to move all user_selected_name.h5 files in 
     folder to folder/user_selected_name/data.h5
@@ -125,7 +125,7 @@ def create_mv_cmd(folder):
         pass
 
 
-def mv_tomo(argv):
+def move(argv):
     """
     Move all user_selected_name.h5 files in the folder 
     (passed as argv) to folder/user_selected_name/data.h5    
@@ -142,10 +142,14 @@ def mv_tomo(argv):
         List of mkdir and mv commands.
     """
    
+    parser = argparse.ArgumentParser()
+    parser.add_argument("folder", help="new or existing folder")
+    args = parser.parse_args()
+
     try: 
         folder = os.path.normpath(clean_folder_name(args.folder)) + os.sep # will add the trailing slash if it's not already there.
         if _try_folder(folder):
-            cmd_list = create_mv_cmd(folder)
+            cmd_list = create_move(folder)
             for cmd in cmd_list:
                 #print cmd
                 os.system(cmd)
@@ -178,6 +182,7 @@ def create_run_cmd(folder):
     # files are sorted alphabetically
     files = sorted(os.listdir(folder))
     cmd = []
+
     try:
         for fname in files:
             sname = fname.split('.')
@@ -193,7 +198,7 @@ def create_run_cmd(folder):
         pass
 
 
-def run_tomo(argv):
+def run_test(argv):
     """
     Execute all test listed in the ~/.tomo folder
 
@@ -207,7 +212,7 @@ def run_tomo(argv):
     parser = argparse.ArgumentParser()
     parser.add_argument("folder", help="new or existing folder")
     args = parser.parse_args()
-    
+
     try: 
         folder = os.path.normpath(clean_folder_name(args.folder)) + os.sep # will add the trailing slash if it's not already there.
         if _try_folder(folder):
