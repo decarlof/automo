@@ -56,35 +56,47 @@ import sys
 import string
 import argparse
 import unicodedata
+import ConfigParser
+from os.path import expanduser
 
 from distutils.dir_util import mkpath
 
 __author__ = "Francesco De Carlo"
 __copyright__ = "Copyright (c) 2016, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
-__all__ = ['create_cmd',
+__all__ = ['clean_folder_name',
+           'create_mv_cmd',
+           'mv_tomo',
            'run_tomo']
 
 
-def create_cmd(folder):
+home = expanduser("~")
+tomo = os.path.join(home, '.tomo/automo.ini')
+cf = ConfigParser.ConfigParser()
+cf.read(tomo)
+
+pdir = cf.get('settings', 'python_proc_dir')
+processes = cf.get('settings', 'python_proc')
+processes = processes.split(', ')
+h5_fname = cf.get('settings', 'h5_fname')
+
+
+def create_mv_cmd(folder):
     """
-    Function description.
+    Create a list of commands to move all user_selected_name.h5 files in 
+    folder to folder/user_selected_name/data.h5
+    
 
     Parameters
     ----------
-    parameter_01 : type
-        Description.
+    folder : str
+        Folder containing multiple h5 files.
 
-    parameter_02 : type
-        Description.
-
-    parameter_03 : type
-        Description.
 
     Returns
     -------
-    return_01
-        Description.
+    cmd : list
+        List of mkdir and mv commands.
     """
     
     # files are sorted alphabetically
@@ -99,10 +111,70 @@ def create_cmd(folder):
                     cmd.append("mkdir " + sys.argv[1] + sname[0] + os.sep)
                     cmd.append("mv " + sys.argv[1] + fname + " " + sys.argv[1] + sname[0] + os.sep + h5_fname)
             except: # does not have an extension
+                pass
+        return cmd
+    except OSError:
+        pass
+
+
+def mv_tomo(argv):
+    """
+    Move all user_selected_name.h5 files in the folder 
+    (passed as argv) to folder/user_selected_name/data.h5    
+
+    Parameters
+    ----------
+    folder : str
+        Folder containing multiple h5 files.
+
+
+    Returns
+    -------
+    cmd : list
+        List of mkdir and mv commands.
+    """
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("folder", help="new or existing folder")
+    args = parser.parse_args()
+    
+    try: 
+        folder = os.path.normpath(clean_folder_name(args.folder)) + os.sep # will add the trailing slash if it's not already there.
+        if _try_folder(folder):
+            cmd_list = create_mv_cmd(folder)
+            for cmd in cmd_list:
+                #print cmd
+                os.system(cmd)
+    except: 
+        pass
+
+
+def create_run_cmd(folder):
+    """
+    Create a list of commands to run a set of default functions 
+    on data.h5 files located in folder/user_selected_name/data.h5
+    
+
+    Parameters
+    ----------
+    folder : str
+        Folder containing multiple h5 files.
+
+    """
+    
+    # files are sorted alphabetically
+    files = sorted(os.listdir(folder))
+    cmd = []
+    try:
+        for fname in files:
+            sname = fname.split('.')
+            try:
+                ext = sname[1]
+            except: # does not have an extension
                 if os.path.isdir(folder + fname): # is a folder?
                     for process in processes:
-                        cmd.append("python " + process + ".py " + folder + fname + os.sep)                     
-                pass    
+                        cmd.append("python " + pdir + process + ".py " + folder + fname + os.sep)                     
+                pass
         return cmd
     except OSError:
         pass
@@ -134,17 +206,16 @@ def run_tomo(argv):
     args = parser.parse_args()
     
     try: 
-        folder = os.path.normpath(_clean_folder_name(args.folder)) + os.sep # will add the trailing slash if it's not already there.
+        folder = os.path.normpath(clean_folder_name(args.folder)) + os.sep # will add the trailing slash if it's not already there.
         if _try_folder(folder):
-            cmd_list = create_cmd(folder)
+            cmd_list = create_run_cmd(folder)
             for cmd in cmd_list:
                 print cmd
-                os.system(cmd)
+                #os.system(cmd)
     except: 
         pass
 
-
-def _clean_folder_name(directory):
+def clean_folder_name(directory):
     """
     Function description.
 
@@ -194,7 +265,6 @@ def _try_folder(directory):
 
     try:
         if os.path.isdir(directory):
-            print directory + " exists"
             return True
         else:
             print directory + " does not exist"
@@ -210,6 +280,7 @@ def _try_folder(directory):
         pass # or raise
     else: 
         return False
+
 
 
 
