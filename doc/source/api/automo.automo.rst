@@ -11,6 +11,8 @@
    .. autosummary::
 
       clean_folder_name
-      create_move
       move
-      run_test
+      create_move
+      test
+      create_test
+
