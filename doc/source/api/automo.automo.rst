@@ -9,6 +9,7 @@
    .. rubric:: **Functions:**
 
    .. autosummary::
-   
-      create_cmd
-      run_tomo
+
+      clean_folder
+      create_mv_cmd
+      mv_tomo
