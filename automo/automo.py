@@ -265,6 +265,15 @@ def _try_folder(directory):
         return False
 
 
-if __name__ == '__main__':
-    init()
+#if __name__ == '__main__':
+#    init()
+home = expanduser("~")
+tomo = os.path.join(home, '.tomo/automo.ini')
+cf = ConfigParser.ConfigParser()
+cf.read(tomo)
+
+pdir = cf.get('settings', 'python_proc_dir')
+processes = cf.get('settings', 'python_proc')
+processes = processes.split(', ')
+h5_fname = cf.get('settings', 'h5_fname')
 
