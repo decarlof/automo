@@ -183,23 +183,13 @@ def create_run_cmd(folder):
 
 def run_tomo(argv):
     """
-    Function description.
+    Execute all test listed in the ~/.tomo folder
 
     Parameters
     ----------
-    parameter_01 : type
-        Description.
+    folder : str
+        Folder containing multiple h5 files.
 
-    parameter_02 : type
-        Description.
-
-    parameter_03 : type
-        Description.
-
-    Returns
-    -------
-    return_01
-        Description.
     """
 
     parser = argparse.ArgumentParser()
