@@ -70,15 +70,16 @@ __all__ = ['clean_folder_name',
            'run_tomo']
 
 
-home = expanduser("~")
-tomo = os.path.join(home, '.tomo/automo.ini')
-cf = ConfigParser.ConfigParser()
-cf.read(tomo)
+if __name__ == '__main__':
+    home = expanduser("~")
+    tomo = os.path.join(home, '.tomo/automo.ini')
+    cf = ConfigParser.ConfigParser()
+    cf.read(tomo)
 
-pdir = cf.get('settings', 'python_proc_dir')
-processes = cf.get('settings', 'python_proc')
-processes = processes.split(', ')
-h5_fname = cf.get('settings', 'h5_fname')
+    pdir = cf.get('settings', 'python_proc_dir')
+    processes = cf.get('settings', 'python_proc')
+    processes = processes.split(', ')
+    h5_fname = cf.get('settings', 'h5_fname')
 
 
 def create_mv_cmd(folder):
