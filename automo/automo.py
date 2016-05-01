@@ -100,6 +100,13 @@ def create_mv_cmd(folder):
         List of mkdir and mv commands.
     """
     
+    home = expanduser("~")
+    tomo = os.path.join(home, '.tomo/automo.ini')
+    cf = ConfigParser.ConfigParser()
+    cf.read(tomo)
+
+    h5_fname = cf.get('settings', 'h5_fname')
+
     # files are sorted alphabetically
     files = sorted(os.listdir(folder))
     cmd = []
@@ -134,11 +141,7 @@ def mv_tomo(argv):
     cmd : list
         List of mkdir and mv commands.
     """
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("folder", help="new or existing folder")
-    args = parser.parse_args()
-    
+   
     try: 
         folder = os.path.normpath(clean_folder_name(args.folder)) + os.sep # will add the trailing slash if it's not already there.
         if _try_folder(folder):
@@ -163,6 +166,15 @@ def create_run_cmd(folder):
 
     """
     
+    home = expanduser("~")
+    tomo = os.path.join(home, '.tomo/automo.ini')
+    cf = ConfigParser.ConfigParser()
+    cf.read(tomo)
+
+    pdir = cf.get('settings', 'python_proc_dir')
+    processes = cf.get('settings', 'python_proc')
+    processes = processes.split(', ')
+
     # files are sorted alphabetically
     files = sorted(os.listdir(folder))
     cmd = []
@@ -264,16 +276,4 @@ def _try_folder(directory):
     else: 
         return False
 
-
-if __name__ == '__main__':
-    init()
-home = expanduser("~")
-tomo = os.path.join(home, '.tomo/automo.ini')
-cf = ConfigParser.ConfigParser()
-cf.read(tomo)
-
-pdir = cf.get('settings', 'python_proc_dir')
-processes = cf.get('settings', 'python_proc')
-processes = processes.split(', ')
-h5_fname = cf.get('settings', 'h5_fname')
 
