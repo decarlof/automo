@@ -64,8 +64,7 @@ from distutils.dir_util import mkpath
 __author__ = "Francesco De Carlo"
 __copyright__ = "Copyright (c) 2016, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
-__all__ = ['clean_folder_name',
-           'create_move',
+__all__ = ['create_move',
            'create_test',
            'move',
            'test']
