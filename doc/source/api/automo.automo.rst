@@ -10,7 +10,6 @@
 
    .. autosummary::
 
-      clean_folder_name
       move
       create_move
       test
