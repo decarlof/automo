@@ -147,7 +147,7 @@ def move(argv):
     args = parser.parse_args()
 
     try: 
-        folder = os.path.normpath(clean_folder_name(args.folder)) + os.sep # will add the trailing slash if it's not already there.
+        folder = os.path.normpath(_clean_folder_name(args.folder)) + os.sep # will add the trailing slash if it's not already there.
         if _try_folder(folder):
             cmd_list = create_move(folder)
             for cmd in cmd_list:
@@ -214,7 +214,7 @@ def test(argv):
     args = parser.parse_args()
 
     try: 
-        folder = os.path.normpath(clean_folder_name(args.folder)) + os.sep # will add the trailing slash if it's not already there.
+        folder = os.path.normpath(_clean_folder_name(args.folder)) + os.sep # will add the trailing slash if it's not already there.
         if _try_folder(folder):
             cmd_list = create_test(folder)
             for cmd in cmd_list:
@@ -223,7 +223,7 @@ def test(argv):
     except: 
         pass
 
-def clean_folder_name(directory):
+def _clean_folder_name(directory):
     """
     Clean the folder name from unsupported characters before
     creating it.
