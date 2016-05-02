@@ -1,7 +1,7 @@
 API reference
 =============
 
-.. rubric:: **Automo Modules:**
+.. rubric:: **auTomo Modules:**
 
 .. toctree::
 

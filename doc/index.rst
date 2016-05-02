@@ -1,12 +1,12 @@
 ======
-Automo
+auTomo
 ======
 
 .. image:: source/img/fraud-bot-home.png
    :width: 320px
    :alt: DMagic
 
-`Automo <https://github.com/decarlof/automo>`_ provides automation to several tomography
+`auTomo <https://github.com/decarlof/automo>`_ provides automation to several tomography
 data analysis tasks. 
 
 

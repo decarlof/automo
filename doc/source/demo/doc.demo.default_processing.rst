@@ -1,7 +1,7 @@
 Default Processing 
 ==================
 
-Automo directory generation and default processing 
+auTomo directory generation and default processing 
 (:download:`default_processing.py<../../../doc/demo/default_processing.py>`).
 
 
