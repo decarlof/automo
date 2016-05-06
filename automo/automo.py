@@ -66,6 +66,7 @@ __copyright__ = "Copyright (c) 2016, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
 __all__ = ['create_move',
            'create_test',
+           '_clean_folder_name',
            'move',
            'test']
 
@@ -79,7 +80,7 @@ def init():
     pdir = cf.get('settings', 'python_proc_dir')
     processes = cf.get('settings', 'python_proc')
     processes = processes.split(', ')
-    h5_fname = cf.get('settings', 'h5_fname')
+    default_h5_fname = cf.get('settings', 'default_h5_fname')
 
 
 def create_move(folder):
@@ -105,7 +106,7 @@ def create_move(folder):
     cf = ConfigParser.ConfigParser()
     cf.read(tomo)
 
-    h5_fname = cf.get('settings', 'h5_fname')
+    default_h5_fname = cf.get('settings', 'default_h5_fname')
 
     # files are sorted alphabetically
     files = sorted(os.listdir(folder))
@@ -117,7 +118,7 @@ def create_move(folder):
                 ext = sname[1]
                 if ext == "h5":
                     cmd.append("mkdir " + sys.argv[1] + sname[0] + os.sep)
-                    cmd.append("mv " + sys.argv[1] + fname + " " + sys.argv[1] + sname[0] + os.sep + h5_fname)
+                    cmd.append("mv " + sys.argv[1] + fname + " " + sys.argv[1] + sname[0] + os.sep + default_h5_fname)
             except: # does not have an extension
                 pass
         return cmd
@@ -151,8 +152,8 @@ def move(argv):
         if _try_folder(folder):
             cmd_list = create_move(folder)
             for cmd in cmd_list:
-                #print cmd
-                os.system(cmd)
+                print cmd
+                #os.system(cmd)
     except: 
         pass
 
@@ -179,6 +180,8 @@ def create_test(folder):
     processes = cf.get('settings', 'python_proc')
     processes = processes.split(', ')
 
+    default_h5_fname = cf.get('settings', 'default_h5_fname')
+
     # files are sorted alphabetically
     files = sorted(os.listdir(folder))
     cmd = []
@@ -191,7 +194,7 @@ def create_test(folder):
             except: # does not have an extension
                 if os.path.isdir(folder + fname): # is a folder?
                     for process in processes:
-                        cmd.append("python " + pdir + process + ".py " + folder + fname + os.sep)                     
+                        cmd.append("python " + pdir + process + ".py " + folder + fname + os.sep + default_h5_fname + " -1, -1, -1")                     
                 pass
         return cmd
     except OSError:
@@ -222,6 +225,7 @@ def test(argv):
                 #os.system(cmd)
     except: 
         pass
+
 
 def _clean_folder_name(directory):
     """

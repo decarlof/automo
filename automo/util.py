@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 # #########################################################################
-# Copyright (c) 2015, UChicago Argonne, LLC. All rights reserved.         #
+# Copyright (c) 2016, UChicago Argonne, LLC. All rights reserved.         #
 #                                                                         #
-# Copyright 2015. UChicago Argonne, LLC. This software was produced       #
+# Copyright 2016. UChicago Argonne, LLC. This software was produced       #
 # under U.S. Government contract DE-AC02-06CH11357 for Argonne National   #
 # Laboratory (ANL), which is operated by UChicago Argonne, LLC for the    #
 # U.S. Department of Energy. The U.S. Government has rights to use,       #
@@ -46,15 +46,127 @@
 # POSSIBILITY OF SUCH DAMAGE.                                             #
 # #########################################################################
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-from automo.module_01 import *
-from automo.module_02 import *
-from automo.automo import *
-from automo.util import *
+"""
+Module to create basic tomography data analyis automation.
 
-try:
-    import pkg_resources
-    __version__ = pkg_resources.working_set.require("automo")[0].version
-except:
-    pass
+"""
+
+import os
+import sys
+import h5py
+import string
+import argparse
+import unicodedata
+import ConfigParser
+from os.path import expanduser
+import dxchange.reader as dxreader
+
+from distutils.dir_util import mkpath
+
+__author__ = "Francesco De Carlo"
+__copyright__ = "Copyright (c) 2016, UChicago Argonne, LLC."
+__docformat__ = 'restructuredtext en'
+__all__ = ['dataset_dims']
+
+
+    
+
+def read_hdf5_dims(fname, dataset):
+    """
+    Read data from hdf5 file array dims for a specific group.
+
+    Parameters
+    ----------
+    fname : str
+        String defining the path of file or file name.
+    dataset : str
+        Path to the dataset inside hdf5 file where data is located.
+
+    Returns
+    -------
+    dims : list
+        
+    """
+    try:
+        with h5py.File(fname, "r") as f:
+            try:
+                data = f[dataset]
+            except KeyError:
+                return None
+            shape = data.shape
+    except KeyError:
+        shape = None
+    return shape
+
+
+def dataset_info(fname):
+    """
+    Determine the tomographic data set array dimentions    
+
+    Parameters
+    ----------
+    fname : str
+        h5 full path file name.
+
+
+    Returns
+    -------
+    dims : list
+        List containing the data set array dimentions.
+    """
+    
+    exchange_base = "exchange"
+    tomo_grp = '/'.join([exchange_base, 'data'])
+    flat_grp = '/'.join([exchange_base, 'data_white'])
+    dark_grp = '/'.join([exchange_base, 'data_dark'])
+    theta_grp = '/'.join([exchange_base, 'theta'])
+    theta_flat_grp = '/'.join([exchange_base, 'theta_white'])
+    tomo_list = []
+    try: 
+        tomo = read_hdf5_dims(fname, tomo_grp)
+        flat = read_hdf5_dims(fname, flat_grp)
+        dark = read_hdf5_dims(fname, dark_grp)
+        theta = read_hdf5_dims(fname, theta_grp)
+        theta_flat = read_hdf5_dims(fname, theta_flat_grp)
+        tomo_list.append('tomo')
+        tomo_list.append(tomo)
+        tomo_list.append('flat')
+        tomo_list.append(flat)
+        tomo_list.append('dark')
+        tomo_list.append(dark)
+        tomo_list.append('theta')
+        tomo_list.append(theta)
+        tomo_list.append('theta_flat')
+        tomo_list.append(theta_flat)
+        return tomo_list
+    except OSError:
+        pass
+
+
+def dataset_dims(fname, img_type = 'data_white'):
+    """
+    Determine the tomographic data set info    
+
+    Parameters
+    ----------
+    fname : str
+        h5 full path file name.
+
+
+    Returns
+    -------
+    info : list
+        List containing the data set array info.
+    """
+    array = img_type
+    exchange_base = "exchange"
+    flat_grp = '/'.join([exchange_base, array])
+
+    try: 
+        flat = dxreader.read_hdf5(fname, flat_grp)
+        return flat.shape
+        
+    except OSError:
+        pass
+
+
