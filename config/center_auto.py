@@ -16,16 +16,17 @@ import automo.util as util
 import argparse
 import ConfigParser
 from os.path import expanduser
+import dxchange
 
 
 def main(arg):
 
     parser = argparse.ArgumentParser()
     parser.add_argument("file_name", help="existing hdf5 file name")
-    parser.add_argument("rot_start", help="rotation axis start location")
-    parser.add_argument("rot_end", help="rotation axis end location")
-    parser.add_argument("rot_step", help="rotation axis end location")
-    parser.add_argument("slice", help="slice to run center.py")
+    parser.add_argument("rot_center", help="rotation axis starting location")
+    parser.add_argument("slice", help="slice to run center_auto.py")
+    parser.add_argument("dummy_02", help="not used, enter -1")
+    parser.add_argument("dummy_03", help="not used, enter -1")
     args = parser.parse_args()
 
     home = expanduser("~")
@@ -38,18 +39,9 @@ def main(arg):
     array_dims = util.h5group_dims(fname)
 
     # Select the rotation center range.
-    rot_start = int(args.rot_start)
-    rot_end = int(args.rot_end)    
-    if (rot_start < 0) or (rot_end > array_dims[2]):
+    rot_center = args.rot_center
+    if (rot_center < 0) or (rot_center > array_dims[2]):
         rot_center = array_dims[2]/2
-        rot_start = rot_center - 30
-        rot_end = rot_center + 30
-
-    rot_step = args.rot_step
-    if (rot_step < 0) or (rot_step > (rot_end - rot_start)):
-        rot_step = 1
-    center_range=[rot_start, rot_end, rot_step]
-    print ("Center:", center_range)
 
     # Select the sinogram range to reconstruct.
     sino_start = int(args.slice)
@@ -62,6 +54,7 @@ def main(arg):
 
     print (fname)
     folder = os.path.dirname(fname) + os.sep
+
     try:        
         if os.path.isfile(fname):
             # Read the APS raw data.
@@ -73,11 +66,18 @@ def main(arg):
             # Flat-field correction of raw data.
             proj = tomopy.normalize(proj, flat[15:20], dark[8:10])
             
-            tomopy.minus_log(proj)
+            center = tomopy.find_center_pc(proj[0], proj[proj.shape[0] - 1])
+            print ("Center:", center)
 
-            rec_fname = (folder + 'center' + os.sep)
-            print (rec_fname)
-            rec = tomopy.write_center(proj, theta, dpath=rec_fname, cen_range=[rot_start, rot_end, rot_step], ind=0, mask=True)
+            rec = tomopy.recon(proj, theta, center=center, algorithm='gridrec')
+            #rec = tomopy.write_center(proj, theta, dpath=rec_fname, cen_range=[rot_start, rot_end, rot_step], ind=0, mask=True)
+    
+            # Mask each reconstructed slice with a circle.
+            rec = tomopy.circ_mask(rec, axis=0, ratio=0.95)
+
+            rec_fname = (folder + 'center_auto' + os.sep + 'data')
+            # Write data as stack of TIFs.
+            dxchange.write_tiff_stack(rec, fname=rec_fname)    
     except:
         print (folder, 'does not contain the expected file hdf5 file')
         pass

@@ -194,7 +194,7 @@ def create_test(folder):
             except: # does not have an extension
                 if os.path.isdir(folder + fname): # is a folder?
                     for process in processes:
-                        cmd.append("python " + pdir + process + ".py " + folder + fname + os.sep + default_h5_fname + " -1 -1 -1")                     
+                        cmd.append("python " + pdir + process + ".py " + folder + fname + os.sep + default_h5_fname + " -1 -1 -1 -1")                     
                 pass
         return cmd
     except OSError:
