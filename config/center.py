@@ -58,6 +58,7 @@ def main(arg):
     print ("Sino:", sino)
 
     print (fname)
+    folder = os.path.dirname(fname) + os.sep
     try:        
         if os.path.isfile(fname):
             # Read the APS raw data.
@@ -69,10 +70,10 @@ def main(arg):
             # Flat-field correction of raw data.
             proj = tomopy.normalize(proj, flat, dark)
             
-            tomopy.minus_log(proj)
+            #tomopy.minus_log(proj)
 
-            folder = os.path.dirname(fname) + os.sep
             rec_fname = (folder + 'center' + os.sep)
+            print (rec_fname)
             rec = tomopy.write_center(proj, theta, dpath=rec_fname, cen_range=[rot_start, rot_end, 5], ind=0, mask=True)
     except:
         print (folder, 'does not contain the expected file hdf5 file')
