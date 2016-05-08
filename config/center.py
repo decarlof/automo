@@ -58,9 +58,8 @@ def main(arg):
 
     sino_end = sino_start + 2
     sino = [sino_start, sino_end]
-    print ("Sino:", sino)
+    print ("Sino: ", sino)
 
-    print (fname)
     folder = os.path.dirname(fname) + os.sep
     try:        
         if os.path.isfile(fname):
@@ -76,8 +75,9 @@ def main(arg):
             tomopy.minus_log(proj)
 
             rec_fname = (folder + 'center' + os.sep)
-            print (rec_fname)
+            print("Rec folder: ", rec_fname)
             rec = tomopy.write_center(proj, theta, dpath=rec_fname, cen_range=[rot_start, rot_end, rot_step], ind=0, mask=True)
+            print("#################################")
     except:
         print (folder, 'does not contain the expected file hdf5 file')
         pass

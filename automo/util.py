@@ -65,7 +65,8 @@ from distutils.dir_util import mkpath
 __author__ = "Francesco De Carlo"
 __copyright__ = "Copyright (c) 2016, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
-__all__ = ['append', 
+__all__ = ['append',
+           'clean_entry', 
            'dataset_info',
            'h5group_dims',
            'touch']
@@ -73,8 +74,29 @@ __all__ = ['append',
 
 def touch(path):
     with open(path, 'a'):        os.utime(path, None)
+
 def append(fname, process):
-    with open(fname, "a") as pfile:        pfile.write(process)def h5group_dims(fname, dataset='exchange/data'):
+    with open(fname, "a") as pfile:        pfile.write(process)
+def clean_entry(entry):
+    """
+    Remove from user last name characters that are not compatible folder names.
+     
+    Parameters
+    ----------
+    entry : str
+        user last name    
+    Returns
+    -------
+    entry : str
+        user last name compatible with directory name   
+    """
+
+    
+    valid_folder_entry_chars = "-_%s%s" % (string.ascii_letters, string.digits)
+
+    cleaned_folder_name = unicodedata.normalize('NFKD', entry.decode('utf-8', 'ignore')).encode('ASCII', 'ignore')
+    return ''.join(c for c in cleaned_folder_name if c in valid_folder_entry_chars)
+def h5group_dims(fname, dataset='exchange/data'):
     """
     Read data from hdf5 file array dims for a specific group.
 
