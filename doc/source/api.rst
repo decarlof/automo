@@ -5,7 +5,8 @@ API reference
 
 .. toctree::
 
-   api/automo.automo
+   api/automo.robo
+   api/automo.util
    api/automo.module_01
    api/automo.module_02
 

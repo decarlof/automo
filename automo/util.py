@@ -65,11 +65,16 @@ from distutils.dir_util import mkpath
 __author__ = "Francesco De Carlo"
 __copyright__ = "Copyright (c) 2016, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
-__all__ = ['dataset_info',
-           'h5group_dims']
+__all__ = ['append', 
+           'dataset_info',
+           'h5group_dims',
+           'touch']
 
 
-def h5group_dims(fname, dataset='exchange/data'):
+def touch(path):
+    with open(path, 'a'):        os.utime(path, None)
+def append(fname, process):
+    with open(fname, "a") as pfile:        pfile.write(process)def h5group_dims(fname, dataset='exchange/data'):
     """
     Read data from hdf5 file array dims for a specific group.
 

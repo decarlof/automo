@@ -8,11 +8,11 @@ Example script
 from __future__ import print_function
 
 import sys
-import automo
+import automo.robo as robo
 
 
 if __name__ == "__main__":
 
     
-    automo.move(sys.argv[1:])
-    automo.test(sys.argv[1:])
+    robo.move(sys.argv[1:])
+    robo.test(sys.argv[1:])

@@ -79,7 +79,7 @@ def main(arg):
 
             rec_fname = (folder + 'center_auto' + os.sep + 'data')
             # Write data as stack of TIFs.
-            dxchange.write_tiff_stack(rec, fname=rec_fname)    
+            dxchange.write_tiff_stack(rec, fname=rec_fname, overwrite=True)    
     except:
         print (folder, 'does not contain the expected file hdf5 file')
         pass
