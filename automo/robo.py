@@ -163,8 +163,8 @@ def move(argv):
         if _try_folder(folder):
             cmd_list = create_move(folder)
             for cmd in cmd_list:
-                #print cmd
-                os.system(cmd)
+                print cmd
+                #os.system(cmd)
                 cmd = '\n' + cmd
                 util.append(folder + default_proc_fname, cmd)
     except: 
@@ -241,9 +241,10 @@ def test(argv):
         if _try_folder(folder):
             cmd_list = create_test(folder)
             for cmd in cmd_list:
+                #print cmd
                 os.system(cmd)
-                cmd = '\n' + cmd
-                util.append(folder + default_proc_fname, cmd)
+                cmd1 = '\n' + cmd
+                util.append(folder + default_proc_fname, cmd1)
     except: 
         pass
 
