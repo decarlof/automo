@@ -22,7 +22,7 @@ import dxchange.reader as dxreader
 def main(arg):
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("folder", help="existing data folder")
+    parser.add_argument("file_name", help="existing hdf5 file name")
     parser.add_argument("rot_start", help="rotation axis start location")
     parser.add_argument("rot_end", help="rotation axis end location")
     parser.add_argument("slice", help="slice to run center.py")
@@ -33,14 +33,9 @@ def main(arg):
     cf = ConfigParser.ConfigParser()
     cf.read(tomo)
 
-    default_h5_fname = cf.get('settings', 'default_h5_fname')
-
-    # will add the trailing slash if it's not already there.
-    folder = os.path.normpath(automo._clean_folder_name(args.folder)) + os.sep 
-    fname = folder + default_h5_fname
+    fname = args.file_name
 
     array_dims = util.h5group_dims(fname)
-    print (array_dims)
 
     # Select the rotation center range.
     rot_start = int(args.rot_start)
@@ -61,32 +56,26 @@ def main(arg):
     sino_end = sino_start + 2
     sino = [sino_start, sino_end]
     print ("Sino:", sino)
-        
-    exchange_base = "exchange"
-    flat_grp = '/'.join([exchange_base, 'data_white'])
 
-    try: 
-
-        flat = dxreader.read_hdf5(fname, flat_grp)
-        
+    print (fname)
+    try:        
         if os.path.isfile(fname):
             # Read the APS raw data.
             proj, flat, dark = dxchange.read_aps_32id(fname, sino=sino)
-            print (proj.shape, flat.shape, dark.shape)
             
             # Set data collection angles as equally spaced between 0-180 degrees.
             theta = tomopy.angles(proj.shape[0])
 
             # Flat-field correction of raw data.
             proj = tomopy.normalize(proj, flat, dark)
-            print (proj.shape)
             
             tomopy.minus_log(proj)
 
-            rec_fname = (folder + 'center' + os.sep).split('.')[0]
-            #rec = tomopy.write_center(proj, theta, dpath=rec_fname, center_range=[rot_start, rot_end, 5], ind=0, mask=True)
+            folder = os.path.dirname(fname) + os.sep
+            rec_fname = (folder + 'center' + os.sep)
+            rec = tomopy.write_center(proj, theta, dpath=rec_fname, cen_range=[rot_start, rot_end, 5], ind=0, mask=True)
     except:
-        print (folder, 'does not contain the expected file:', default_h5_fname)
+        print (folder, 'does not contain the expected file hdf5 file')
         pass
 
 

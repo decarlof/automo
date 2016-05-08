@@ -152,8 +152,8 @@ def move(argv):
         if _try_folder(folder):
             cmd_list = create_move(folder)
             for cmd in cmd_list:
-                print cmd
-                #os.system(cmd)
+                #print cmd
+                os.system(cmd)
     except: 
         pass
 
@@ -194,7 +194,7 @@ def create_test(folder):
             except: # does not have an extension
                 if os.path.isdir(folder + fname): # is a folder?
                     for process in processes:
-                        cmd.append("python " + pdir + process + ".py " + folder + fname + os.sep + default_h5_fname + " -1, -1, -1")                     
+                        cmd.append("python " + pdir + process + ".py " + folder + fname + os.sep + default_h5_fname + " -1 -1 -1")                     
                 pass
         return cmd
     except OSError:
@@ -221,8 +221,8 @@ def test(argv):
         if _try_folder(folder):
             cmd_list = create_test(folder)
             for cmd in cmd_list:
-                print cmd
-                #os.system(cmd)
+                #print cmd
+                os.system(cmd)
     except: 
         pass
 
