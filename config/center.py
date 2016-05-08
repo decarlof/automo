@@ -42,10 +42,11 @@ def main(arg):
     rot_end = int(args.rot_end)    
     if (rot_start < 0) or (rot_end > array_dims[2]):
         rot_center = array_dims[2]/2
-        rot_start = rot_center - 150
-        rot_end = rot_center + 150
+        rot_start = rot_center - 30
+        rot_end = rot_center + 30
 
-    center_range=[rot_start, rot_end, 5]
+    step = 1
+    center_range=[rot_start, rot_end, step]
     print ("Center:", center_range)
 
     # Select the sinogram range to reconstruct.
@@ -68,13 +69,13 @@ def main(arg):
             theta = tomopy.angles(proj.shape[0])
 
             # Flat-field correction of raw data.
-            proj = tomopy.normalize(proj, flat, dark)
+            proj = tomopy.normalize(proj, flat[15:20], dark[8:10])
             
             #tomopy.minus_log(proj)
 
             rec_fname = (folder + 'center' + os.sep)
             print (rec_fname)
-            rec = tomopy.write_center(proj, theta, dpath=rec_fname, cen_range=[rot_start, rot_end, 5], ind=0, mask=True)
+            rec = tomopy.write_center(proj, theta, dpath=rec_fname, cen_range=[rot_start, rot_end, step], ind=0, mask=True)
     except:
         print (folder, 'does not contain the expected file hdf5 file')
         pass
