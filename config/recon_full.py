@@ -27,7 +27,7 @@ def main(arg):
     parser.add_argument("slice_end", help="recon slice end; for full rec enter -1")
     parser.add_argument("slice_step", help="recon slice step; for full rec enter -1")
     parser.add_argument("rot_center", help="rotation center; for auto center enter -1")
-    parser.add_argument("save_dir", help="relative save directory")
+#    parser.add_argument("save_dir", help="relative save directory")
     args = parser.parse_args()
 
     home = expanduser("~")
@@ -86,9 +86,10 @@ def main(arg):
             rec = tomopy.circ_mask(rec, axis=0, ratio=0.95)
 
             # Write data as stack of TIFs.
-            rec_fname = (folder + util.clean_entry(args.save_dir) + os.sep + 'data')
+            rec_fname = (folder + 'recon_full' + os.sep + 'data')
             print("Rec folder: ", rec_fname)
             dxchange.write_tiff_stack(rec, fname=rec_fname, overwrite=True)    
+            print("#################################")
     except:
         print(folder, 'does not contain the expected file hdf5 file')
         pass
