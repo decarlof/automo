@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 # #########################################################################
 # Copyright (c) 2016, UChicago Argonne, LLC. All rights reserved.         #
 #                                                                         #
@@ -66,12 +65,11 @@ from distutils.dir_util import mkpath
 __author__ = "Francesco De Carlo"
 __copyright__ = "Copyright (c) 2016, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
-__all__ = ['dataset_dims']
+__all__ = ['dataset_info',
+           'h5group_dims']
 
 
-    
-
-def read_hdf5_dims(fname, dataset):
+def h5group_dims(fname, dataset='exchange/data'):
     """
     Read data from hdf5 file array dims for a specific group.
 
@@ -123,11 +121,11 @@ def dataset_info(fname):
     theta_flat_grp = '/'.join([exchange_base, 'theta_white'])
     tomo_list = []
     try: 
-        tomo = read_hdf5_dims(fname, tomo_grp)
-        flat = read_hdf5_dims(fname, flat_grp)
-        dark = read_hdf5_dims(fname, dark_grp)
-        theta = read_hdf5_dims(fname, theta_grp)
-        theta_flat = read_hdf5_dims(fname, theta_flat_grp)
+        tomo = h5group_dims(fname, tomo_grp)
+        flat = h5group_dims(fname, flat_grp)
+        dark = h5group_dims(fname, dark_grp)
+        theta = h5group_dims(fname, theta_grp)
+        theta_flat = h5group_dims(fname, theta_flat_grp)
         tomo_list.append('tomo')
         tomo_list.append(tomo)
         tomo_list.append('flat')
@@ -141,32 +139,4 @@ def dataset_info(fname):
         return tomo_list
     except OSError:
         pass
-
-
-def dataset_dims(fname, img_type = 'data_white'):
-    """
-    Determine the tomographic data set info    
-
-    Parameters
-    ----------
-    fname : str
-        h5 full path file name.
-
-
-    Returns
-    -------
-    info : list
-        List containing the data set array info.
-    """
-    array = img_type
-    exchange_base = "exchange"
-    flat_grp = '/'.join([exchange_base, array])
-
-    try: 
-        flat = dxreader.read_hdf5(fname, flat_grp)
-        return flat.shape
-        
-    except OSError:
-        pass
-
 
