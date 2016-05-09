@@ -60,7 +60,6 @@ import ConfigParser
 from os.path import expanduser
 
 import automo.util as util
-#import automo.robo as robo
 
 from distutils.dir_util import mkpath
 
@@ -69,7 +68,6 @@ __copyright__ = "Copyright (c) 2016, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
 __all__ = ['create_move',
            'create_test',
-           '_clean_folder_name',
            'move',
            'test']
 
@@ -159,8 +157,8 @@ def move(argv):
     default_proc_fname = cf.get('settings', 'default_proc_fname')
 
     try: 
-        folder = os.path.normpath(_clean_folder_name(args.folder)) + os.sep # will add the trailing slash if it's not already there.
-        if _try_folder(folder):
+        folder = os.path.normpath(util.clean_folder_name(args.folder)) + os.sep # will add the trailing slash if it's not already there.
+        if util.try_folder(folder):
             cmd_list = create_move(folder)
             for cmd in cmd_list:
                 print cmd
@@ -238,8 +236,8 @@ def test(argv):
     default_proc_fname = cf.get('settings', 'default_proc_fname')
 
     try: 
-        folder = os.path.normpath(_clean_folder_name(args.folder)) + os.sep # will add the trailing slash if it's not already there.
-        if _try_folder(folder):
+        folder = os.path.normpath(util.clean_folder_name(args.folder)) + os.sep # will add the trailing slash if it's not already there.
+        if util.try_folder(folder):
             cmd_list = create_test(folder)
             for cmd in cmd_list:
                 print cmd
@@ -249,64 +247,5 @@ def test(argv):
         print("-----------------------------------------------------------")
     except: 
         pass
-
-
-def _clean_folder_name(directory):
-    """
-    Clean the folder name from unsupported characters before
-    creating it.
-    
-
-    Parameters
-    ----------
-    folder : str
-        Folder that will be containing multiple h5 files.
-
-    """
-
-    valid_folder_name_chars = "-_"+ os.sep + "%s%s" % (string.ascii_letters, string.digits)
-    cleaned_folder_name = unicodedata.normalize('NFKD', directory.decode('utf-8', 'ignore')).encode('ASCII', 'ignore')
-    
-    return ''.join(c for c in cleaned_folder_name if c in valid_folder_name_chars)
-
-
-def _try_folder(directory):
-    """
-    Function description.
-
-    Parameters
-    ----------
-    parameter_01 : type
-        Description.
-
-    parameter_02 : type
-        Description.
-
-    parameter_03 : type
-        Description.
-
-    Returns
-    -------
-    return_01
-        Description.
-    """
-
-    try:
-        if os.path.isdir(directory):
-            return True
-        else:
-            print directory + " does not exist"
-            a = raw_input('Would you like to create ' + directory + ' ? ').lower()
-            if a.startswith('y'): 
-                mkpath(directory)
-                print("Great!")
-                return True
-            else:
-                print ("Sorry for asking...")
-                return False
-    except: 
-        pass # or raise
-    else: 
-        return False
 
 

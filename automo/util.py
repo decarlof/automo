@@ -66,37 +66,15 @@ __author__ = "Francesco De Carlo"
 __copyright__ = "Copyright (c) 2016, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
 __all__ = ['append',
-           'clean_entry', 
+           'clean_entry',
+           'clean_folder_name', 
            'dataset_info',
+           'try_folder',
            'h5group_dims',
            'touch']
 
 
-def touch(path):
-    with open(path, 'a'):        os.utime(path, None)
-
-def append(fname, process):
-    with open(fname, "a") as pfile:        pfile.write(process)
-def clean_entry(entry):
-    """
-    Remove from user last name characters that are not compatible folder names.
-     
-    Parameters
-    ----------
-    entry : str
-        user last name    
-    Returns
-    -------
-    entry : str
-        user last name compatible with directory name   
-    """
-
-    
-    valid_folder_entry_chars = "-_%s%s" % (string.ascii_letters, string.digits)
-
-    cleaned_folder_name = unicodedata.normalize('NFKD', entry.decode('utf-8', 'ignore')).encode('ASCII', 'ignore')
-    return ''.join(c for c in cleaned_folder_name if c in valid_folder_entry_chars)
-def h5group_dims(fname, dataset='exchange/data'):
+def h5group_dims(fname, dataset='exchange/data'):
     """
     Read data from hdf5 file array dims for a specific group.
 
@@ -166,4 +144,74 @@ def dataset_info(fname):
         return tomo_list
     except OSError:
         pass
+
+
+def clean_entry(entry):
+    """
+    Remove from user last name characters that are not compatible folder names.
+     
+    Parameters
+    ----------
+    entry : str
+        user last name    
+    Returns
+    -------
+    entry : str
+        user last name compatible with directory name   
+    """
+
+    
+    valid_folder_entry_chars = "-_%s%s" % (string.ascii_letters, string.digits)
+
+    cleaned_folder_name = unicodedata.normalize('NFKD', entry.decode('utf-8', 'ignore')).encode('ASCII', 'ignore')
+    return ''.join(c for c in cleaned_folder_name if c in valid_folder_entry_chars)
+
+def clean_folder_name(directory):    """    Clean the folder name from unsupported characters before    creating it.        Parameters    ----------    folder : str        Folder that will be containing multiple h5 files.    """    valid_folder_name_chars = "-_"+ os.sep + "%s%s" % (string.ascii_letters, string.digits)    cleaned_folder_name = unicodedata.normalize('NFKD', directory.decode('utf-8', 'ignore')).encode('ASCII', 'ignore')        return ''.join(c for c in cleaned_folder_name if c in valid_folder_name_chars)
+def try_folder(directory):
+    """
+    Function description.
+
+    Parameters
+    ----------
+    parameter_01 : type
+        Description.
+
+    parameter_02 : type
+        Description.
+
+    parameter_03 : type
+        Description.
+
+    Returns
+    -------
+    return_01
+        Description.
+    """
+
+    try:
+        if os.path.isdir(directory):
+            return True
+        else:
+            print directory + " does not exist"
+            a = raw_input('Would you like to create ' + directory + ' ? ').lower()
+            if a.startswith('y'): 
+                mkpath(directory)
+                print("Great!")
+                return True
+            else:
+                print ("Sorry for asking...")
+                return False
+    except: 
+        pass # or raise
+    else: 
+        return False
+
+
+def touch(path):
+    with open(path, 'a'):        os.utime(path, None)
+
+
+def append(fname, process):
+    with open(fname, "a") as pfile:        pfile.write(process)
+
 
