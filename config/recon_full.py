@@ -52,7 +52,7 @@ def main(arg):
 
     sino_step_range = range(0, array_dims[1]-1)
     if not sino_step in sino_step_range:
-        sino_step =50
+        sino_step =1
     
     sino = [sino_start, sino_end, sino_step]
     folder = os.path.dirname(fname) + os.sep
