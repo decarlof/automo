@@ -9,39 +9,47 @@ TomoPy example script to generate a series of preview projections.
 from __future__ import print_function
 import os
 import sys
-import tomopy
 import dxchange
-import automo
 import argparse
 import ConfigParser
 from os.path import expanduser
-import dxchange.reader as dxreader
+import automo.util as util
 
 
 def main(arg):
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("folder", help="existing folder")
+    parser.add_argument("file_name", help="existing hdf5 file name")
+    parser.add_argument("slice_start", help="recon slice start; for full rec enter -1")
+    parser.add_argument("slice_end", help="recon slice end; for full rec enter -1")
+    parser.add_argument("slice_step", help="recon slice step; for full rec enter -1")
+    parser.add_argument("rot_center", help="rotation center; for auto center enter -1")
+    #parser.add_argument("save_dir", help="relative save directory")
     args = parser.parse_args()
+
     home = expanduser("~")
     tomo = os.path.join(home, '.tomo/automo.ini')
     cf = ConfigParser.ConfigParser()
     cf.read(tomo)
 
-    h5_fname = cf.get('settings', 'h5_fname')
+    fname = args.file_name
+
+    array_dims = util.h5group_dims(fname)
+
+    folder = os.path.dirname(fname) + os.sep
  
     try: 
-        # will add the trailing slash if it's not already there.
-        folder = os.path.normpath(automo.clean_folder_name(args.folder)) + os.sep 
-        fname = folder + h5_fname
+        if os.path.isfile(fname):
 
-        exchange_base = "exchange"
-        tomo_grp = '/'.join([exchange_base, 'data'])
-        proj, flat, dark = dxchange.read_aps_32id(fname)
-        tomo = dxreader.read_hdf5(fname, tomo_grp, slc=((0,(proj.shape)[0], 50), None))
+            # Read the APS raw data projections.
+            proj, flat, dark = dxchange.read_aps_32id(fname, proj=(0, array_dims[0], 20))
+            print("Proj Preview: ", proj.shape)        
 
-        proj_fname = (folder + 'preview' + os.sep) + h5_fname.split('.')[0]
-        dxchange.write_tiff_stack(tomo, fname=proj_fname, axis=0, digit=5, start=0, overwrite=False)          
+            proj_fname = (folder + 'preview' + os.sep + 'data')
+            print("Proj folder: ", proj_fname)        
+
+            dxchange.write_tiff_stack(proj, fname=proj_fname, axis=0, digit=5, start=0, overwrite=True)          
+            print("#################################")
 
     except:
         pass
