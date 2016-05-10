@@ -59,8 +59,8 @@ import unicodedata
 import ConfigParser
 from os.path import expanduser
 
-#from automo import util as util
-import automo.util as util
+from automo import util as util
+#import automo.util as util
 
 from distutils.dir_util import mkpath
 
