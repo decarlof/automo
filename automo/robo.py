@@ -59,6 +59,7 @@ import unicodedata
 import ConfigParser
 from os.path import expanduser
 
+#from automo import util as util
 import automo.util as util
 
 from distutils.dir_util import mkpath
@@ -66,10 +67,8 @@ from distutils.dir_util import mkpath
 __author__ = "Francesco De Carlo"
 __copyright__ = "Copyright (c) 2016, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
-__all__ = ['create_move',
-           'create_test',
-           'move',
-           'test']
+__all__ = ['create_process',
+           'process']
 
 
 def init():
@@ -85,92 +84,7 @@ def init():
     default_proc_fname = cf.get('settings', 'default_proc_fname')
 
 
-def create_move(folder):
-    """
-    Create a list of commands to move all user_selected_name.h5 files in 
-    folder to folder/user_selected_name/data.h5
-    
-
-    Parameters
-    ----------
-    folder : str
-        Folder containing multiple h5 files.
-
-
-    Returns
-    -------
-    cmd : list
-        List of mkdir and mv commands.
-    """
-    
-    home = expanduser("~")
-    tomo = os.path.join(home, '.tomo/automo.ini')
-    cf = ConfigParser.ConfigParser()
-    cf.read(tomo)
-
-    default_h5_fname = cf.get('settings', 'default_h5_fname')
-    
-    # files are sorted alphabetically
-    files = sorted(os.listdir(folder))
-    cmd = []
-    try:
-        for fname in files:
-            sname = fname.split('.')
-            try:
-                ext = sname[1]
-                if ext == "h5":
-                    cmd.append("mkdir " + sys.argv[1] + sname[0] + os.sep)
-                    cmd.append("mv " + sys.argv[1] + fname + " " + sys.argv[1] + sname[0] + os.sep + default_h5_fname)
-            except: # does not have an extension
-                pass
-        return cmd
-    except OSError:
-        pass
-
-
-def move(argv):
-    """
-    Move all user_selected_name.h5 files in the folder 
-    (passed as argv) to folder/user_selected_name/data.h5    
-
-    Parameters
-    ----------
-    folder : str
-        Folder containing multiple h5 files.
-
-
-    Returns
-    -------
-    cmd : list
-        List of mkdir and mv commands.
-    """
-   
-    parser = argparse.ArgumentParser()
-    parser.add_argument("folder", help="new or existing folder")
-    args = parser.parse_args()
-
-    home = expanduser("~")
-    tomo = os.path.join(home, '.tomo/automo.ini')
-    cf = ConfigParser.ConfigParser()
-    cf.read(tomo)
-
-    default_proc_fname = cf.get('settings', 'default_proc_fname')
-
-    try: 
-        folder = os.path.normpath(util.clean_folder_name(args.folder)) + os.sep # will add the trailing slash if it's not already there.
-        if util.try_folder(folder):
-            cmd_list = create_move(folder)
-            for cmd in cmd_list:
-                print cmd
-                os.system(cmd)
-                cmd = '\n' + cmd
-                util.append(folder + default_proc_fname, cmd)
-        print("-----------------------------------------------------------")
-    except: 
-        pass
-
-
-def create_test(folder):
+def create_process(folder):
     """
     Create a list of commands to run a set of default functions 
     on data.h5 files located in folder/user_selected_name/data.h5
@@ -193,27 +107,26 @@ def create_test(folder):
     processes = processes.split(', ')
 
     default_h5_fname = cf.get('settings', 'default_h5_fname')
-
+    
     # files are sorted alphabetically
     files = sorted(os.listdir(folder))
     cmd = []
+    
+    for fname in files:
+        sname = fname.split('.')
+        try:
+            ext = sname[1]
+            if ext == "h5":
+                cmd.append("mkdir " + sys.argv[1] + sname[0] + os.sep)
+                cmd.append("mv " + sys.argv[1] + fname + " " + sys.argv[1] + sname[0] + os.sep + default_h5_fname)
+                for process in processes:
+                    cmd.append("python " + pdir + process + ".py " + folder + fname + os.sep + default_h5_fname + " -1 -1 -1 -1")                       
+        except: # does not have an extension
+            pass
+    return cmd
 
-    try:
-        for fname in files:
-            sname = fname.split('.')
-            try:
-                ext = sname[1]
-            except: # does not have an extension
-                if os.path.isdir(folder + fname): # is a folder?
-                    for process in processes:
-                        cmd.append("python " + pdir + process + ".py " + folder + fname + os.sep + default_h5_fname + " -1 -1 -1 -1")   
-                pass
-        return cmd
-    except OSError:
-        pass
 
-
-def test(argv):
+def process(argv):
     """
     Execute all test listed in the ~/.tomo folder
 
@@ -234,16 +147,14 @@ def test(argv):
     cf.read(tomo)
 
     default_proc_fname = cf.get('settings', 'default_proc_fname')
-
     try: 
-        folder = os.path.normpath(util.clean_folder_name(args.folder)) + os.sep # will add the trailing slash if it's not already there.
-        if util.try_folder(folder):
-            cmd_list = create_test(folder)
+        if util.try_folder(args.folder):
+            cmd_list = create_process(args.folder)
             for cmd in cmd_list:
                 print cmd
-                os.system(cmd)
+                #os.system(cmd)
                 cmd1 = '\n' + cmd
-                util.append(folder + default_proc_fname, cmd1)
+                util.append(args.folder + default_proc_fname, cmd1)
         print("-----------------------------------------------------------")
     except: 
         pass
