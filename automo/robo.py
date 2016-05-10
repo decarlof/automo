@@ -59,8 +59,8 @@ import unicodedata
 import ConfigParser
 from os.path import expanduser
 
-#from automo import util
-import automo.util as util
+from automo import util as util
+#import automo.util as util
 
 from distutils.dir_util import mkpath
 
@@ -141,7 +141,13 @@ def process(argv):
     parser.add_argument("folder", help="new or existing folder")
     args = parser.parse_args()
 
-    home = expanduser("~")    tomo = os.path.join(home, '.tomo/automo.ini')    cf = ConfigParser.ConfigParser()    cf.read(tomo)    default_proc_fname = cf.get('settings', 'default_proc_fname')    try: 
+    home = expanduser("~")
+    tomo = os.path.join(home, '.tomo/automo.ini')
+    cf = ConfigParser.ConfigParser()
+    cf.read(tomo)
+
+    default_proc_fname = cf.get('settings', 'default_proc_fname')
+    try: 
         if util.try_folder(args.folder):
             cmd_list = create_process(args.folder)
             for cmd in cmd_list:
