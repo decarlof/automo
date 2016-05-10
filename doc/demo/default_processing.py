@@ -13,6 +13,4 @@ import automo.robo as robo
 
 if __name__ == "__main__":
 
-    
-    robo.move(sys.argv[1:])
-    robo.test(sys.argv[1:])
+    robo.process(sys.argv[1:])
