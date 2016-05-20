@@ -209,7 +209,7 @@ def semaphore(argv):
             for cmd in cmd_list:
                 print cmd
                 #os.system(cmd)
-         print("-----------------------------------------------------------")
+        print("-----------------------------------------------------------")
     except: 
         pass
 
