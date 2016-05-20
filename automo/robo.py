@@ -199,16 +199,17 @@ def semaphore(argv):
         Folder containing multiple h5 files.
 
     """
+    parser = argparse.ArgumentParser()
+    parser.add_argument("folder", help="new or existing folder")
+    args = parser.parse_args()
 
     try: 
         if util.try_folder(args.folder):
-            cmd_list = create_process(args.folder)
+            cmd_list = create_semaphore(args.folder)
             for cmd in cmd_list:
                 print cmd
                 #os.system(cmd)
-                #cmd1 = '\n' + cmd
-                #util.append(args.folder + default_proc_fname, cmd1)
-        print("-----------------------------------------------------------")
+         print("-----------------------------------------------------------")
     except: 
         pass
 

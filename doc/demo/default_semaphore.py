@@ -13,4 +13,5 @@ import automo.robo as robo
 
 if __name__ == "__main__":
 
+    print ("1")
     robo.semaphore(sys.argv[1:])
