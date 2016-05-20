@@ -63,7 +63,9 @@ from os.path import expanduser
 import automo.util as util
 
 from distutils.dir_util import mkpath
+import logging
 
+logger = logging.getLogger(__name__)
 __author__ = "Francesco De Carlo"
 __copyright__ = "Copyright (c) 2016, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
@@ -137,6 +139,7 @@ def process(argv):
 
     """
 
+    logger.info('2Hello baby')
     parser = argparse.ArgumentParser()
     parser.add_argument("folder", help="new or existing folder")
     args = parser.parse_args()
@@ -159,4 +162,53 @@ def process(argv):
     except: 
         pass
 
+
+def create_semaphore(folder):
+    """
+    Create a list of commands to generate empty files called sample_name.sem  
+
+    Parameters
+    ----------
+    folder : str
+        Folder containing multiple h5 files.
+
+    """
+       
+    # files are sorted alphabetically
+    files = sorted(os.listdir(folder))
+    cmd = []
+    
+    for fname in files:
+        
+        sname = fname.split('.')
+        try:
+            ext = sname[1]
+            if ext == "h5":
+                cmd.append("touch " + folder + sname[0] + ".sem")
+        except: # does not have an extension
+            pass
+    return cmd
+    
+def semaphore(argv):
+    """
+    Execute the creation of semaphores
+
+    Parameters
+    ----------
+    folder : str
+        Folder containing multiple h5 files.
+
+    """
+
+    try: 
+        if util.try_folder(args.folder):
+            cmd_list = create_process(args.folder)
+            for cmd in cmd_list:
+                print cmd
+                #os.system(cmd)
+                #cmd1 = '\n' + cmd
+                #util.append(args.folder + default_proc_fname, cmd1)
+        print("-----------------------------------------------------------")
+    except: 
+        pass
 
