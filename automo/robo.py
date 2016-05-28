@@ -71,8 +71,7 @@ logger = logging.getLogger(__name__)
 __author__ = "Francesco De Carlo"
 __copyright__ = "Copyright (c) 2016, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
-__all__ = ['create_process',
-           'process']
+__all__ = ['process_folder']
 
 class automo_exp:
     user_home = ''
