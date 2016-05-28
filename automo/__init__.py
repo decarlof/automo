@@ -48,10 +48,9 @@
 
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
-                        
-from automo.module_01 import *
-from automo.module_02 import *
-from automo.robo import *from automo.util import *
+
+from automo.robo import *
+from automo.util import *
 try:
     import pkg_resources
     __version__ = pkg_resources.working_set.require("automo")[0].version

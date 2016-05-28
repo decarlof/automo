@@ -53,6 +53,7 @@ Module to create basic tomography data analyis automation.
 
 import os
 import glob
+import shutil
 import sys
 import re
 import string
@@ -81,6 +82,7 @@ class automo_exp:
     def_h5_fname = ''
     proc_list = ''
     macro_list = ''
+    proc_folder = ''
 
 class automo_robo:
     type = ''
@@ -96,7 +98,7 @@ def init():
 
     exp.cf_file = os.path.join(exp.proc_dir, 'automo.ini')
     exp.cf = ConfigParser.ConfigParser()
-    exp.cf.read(cf_file)
+    exp.cf.read(exp.cf_file)
 
     if exp.cf.has_option('settings', 'default_h5_fname'):
         exp.def_h5_fname = exp.cf.get('settings', 'default_h5_fname')
@@ -106,7 +108,7 @@ def init():
         exp.proc_dir = exp.cf.get('settings', 'python_proc_dir')
 
     exp.proc_list = exp.cf.options('robos')
-    exp.macro_list = [f for f in os.listdir(proc_dir) if re.match(r'.+.py', f)]
+    exp.macro_list = [f for f in os.listdir(exp.proc_dir) if re.match(r'.+.py', f)]
     return exp
 
 
@@ -123,7 +125,10 @@ def process_folder(folder):
 
     exp = init()
     # files are sorted alphabetically
-    files = [f for f in sorted(os.listdir(folder)) if re.match(r'.+.h5', f)]
+    exp.folder = folder
+    files = [f for f in sorted(os.listdir(exp.folder)) if re.match(r'.+.h5', f)]
+
+    os.chdir(exp.folder)
 
     for kfile in files:
         create_process(exp, kfile)
@@ -142,27 +147,25 @@ def create_process(file):
     """
 
     robo_type = 'tomo'
-    robo_att = get_robo_att(robo_type)
-    exec_process(folder, fname, exp, robo_att) if robo_att
+    robo_att = get_robo_att(exp, robo_type)
+    exec_process(fname, exp, robo_att) if robo_att
     return
 
 
 def exec_process(folder, fname, robo_att):
-    new_folder = robo_move(folder, fname, robo_att.move)
+    new_folder = robo_move(exp, fname, robo_att.move)
     os.chdir(new_folder)
 
-    new_fname = robo_rename(folder, fname, robo_att.rename)
+    new_fname = robo_rename(exp, fname, robo_att.rename)
 
-    robo_process(folder, fname, robo_att.processes)
+    robo_process(exp, new_fname, robo_att.proc_list)
 
     os.chdir(folder)
     return
 
 def get_robo_att(exp, robo_type):
-
     global robo_att
     robo_att = automo_robo()
-
     if exp.cf.has_option('robos', robo_type):
         robo_att.type = robo_type
         processes = exp.cf.get('robos', robo_type)
@@ -171,8 +174,7 @@ def get_robo_att(exp, robo_type):
             robo_att.move = exp.cf.get('robos_move', robo_type)
         else:
             robo_att.move = new_folder
-
-        if cf.has_option('robos_rename', robo_type):
+        if exp.cf.has_option('robos_rename', robo_type):
             robo_att.rename = exp.cf.get('robos_rename', robo_type)
         else:
             robo_att.rename = False
@@ -182,18 +184,33 @@ def get_robo_att(exp, robo_type):
         robo_att = None
     return robo_att
 
-def robo_move(folder, file, move_type):
-    print 'batatas'
+def get_file_name(file):
+    basename = os.path.splitext(file)[0]
+    return basename
+
+def robo_move(exp, file, move_type):
+    basename = get_file_name(file)
+    if move_type=='new_folder':
+        os.mkdir(basename)
+        shutil.move (file, os.path.join(basename,file))
+    elif move_type=='same_folder':
+        print 'not implemented'
+    else:
+        print 'not implemented'
+    return basename
 
 def robo_rename(file, rename_type):
-    print 'batatas'
+    if rename_type:
+        os.rename(file,exp.def_h5_fname)
+        return exp.def_h5_fname
+    else:
+        return file
 
-def robo_process(file, proc_list):
-    for cmd in cmd_list:
-        print cmd
-        #os.system(cmd)
-        cmd1 = '\n' + cmd
-        util.append(folder + default_proc_fname, cmd1)
+def robo_process(exp, file, proc_list):
+    for proc in proc_list:
+        runtime_line = "python " + os.path.join(exp.proc_dir, proc)+ ".py " + file + " -1 -1 -1 -1"
+        print runtime_line
+        #os.system(runtime_line)
 
 
 if __name__ == "__main__":
