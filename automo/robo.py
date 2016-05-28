@@ -60,7 +60,7 @@ import argparse
 import unicodedata
 import ConfigParser
 from os.path import expanduser
-
+import h5py
 import automo.util as util
 
 from distutils.dir_util import mkpath
@@ -73,26 +73,41 @@ __docformat__ = 'restructuredtext en'
 __all__ = ['create_process',
            'process']
 
+class automo_exp:
+    user_home = ''
+    proc_dir = ''
+    cf_file = ''
+    cf = ''
+    def_h5_fname = ''
+    proc_list = ''
+    macro_list = ''
+
+class automo_robo:
+    type = ''
+    move = ''
+    rename = ''
+    proc_list = ''
 
 def init():
-    user_home = expanduser("~")
-    proc_dir = os.path.join(user_home, '.automo')
+    global exp
+    exp = automo_exp()
+    exp.user_home = expanduser("~")
+    exp.proc_dir = os.path.join(exp.user_home, '.automo')
 
-    cf_file = os.path.join(proc_dir, 'automo.ini')
-    cf = ConfigParser.ConfigParser()
-    cf.read(cf_file)
+    exp.cf_file = os.path.join(exp.proc_dir, 'automo.ini')
+    exp.cf = ConfigParser.ConfigParser()
+    exp.cf.read(cf_file)
 
-    if cf.has_option('settings', 'default_h5_fname'):
-        default_h5_fname = cf.get('settings', 'default_h5_fname')
+    if exp.cf.has_option('settings', 'default_h5_fname'):
+        exp.def_h5_fname = exp.cf.get('settings', 'default_h5_fname')
 
     # specify a different process folder
-    if cf.has_option('settings', 'python_proc_dir'):
-        proc_dir = cf.get('settings', 'python_proc_dir')
+    if exp.cf.has_option('settings', 'python_proc_dir'):
+        exp.proc_dir = exp.cf.get('settings', 'python_proc_dir')
 
-    proc_list = cf.options('robos')
-    macro_list = os.listdir(proc_dir)
-    macro_list = [f for f in os.listdir(proc_dir) if re.match(r'.+.py', f)]
-
+    exp.proc_list = exp.cf.options('robos')
+    exp.macro_list = [f for f in os.listdir(proc_dir) if re.match(r'.+.py', f)]
+    return exp
 
 
 def process_folder(folder):
@@ -105,11 +120,13 @@ def process_folder(folder):
         Folder containing multiple h5 files.
     """
 
+
+    exp = init()
     # files are sorted alphabetically
     files = [f for f in sorted(os.listdir(folder)) if re.match(r'.+.h5', f)]
 
     for kfile in files:
-        create_process(file)
+        create_process(exp, kfile)
 
     return
 
@@ -126,7 +143,7 @@ def create_process(file):
 
     robo_type = 'tomo'
     robo_att = get_robo_att(robo_type)
-    exec_process(folder, fname, robo_att) if robo_att
+    exec_process(folder, fname, exp, robo_att) if robo_att
     return
 
 
@@ -141,18 +158,22 @@ def exec_process(folder, fname, robo_att):
     os.chdir(folder)
     return
 
-def get_robo_att(robo_type):
-    if cf.has_option('robos', robo_type):
-        robo_att.robo_type = robo_type
-        processes = cf.get('robos', robo_type)
-        robo_att.processes = processes.split(', ')
-        if cf.has_option('robos_move', robo_type):
-            robo_att.move = cf.get('robos_move', robo_type)
+def get_robo_att(exp, robo_type):
+
+    global robo_att
+    robo_att = automo_robo()
+
+    if exp.cf.has_option('robos', robo_type):
+        robo_att.type = robo_type
+        processes = exp.cf.get('robos', robo_type)
+        robo_att.proc_list = processes.split(', ')
+        if exp.cf.has_option('robos_move', robo_type):
+            robo_att.move = exp.cf.get('robos_move', robo_type)
         else:
             robo_att.move = new_folder
 
         if cf.has_option('robos_rename', robo_type):
-            robo_att.rename = cf.get('robos_rename', robo_type)
+            robo_att.rename = exp.cf.get('robos_rename', robo_type)
         else:
             robo_att.rename = False
     else:
