@@ -134,7 +134,7 @@ def process_folder(folder):
 
     return
 
-def create_process(file):
+def create_process(exp, file):
     """
     Create a list of commands to run a set of default functions
     on .h5 files located in folder/user_selected_name/data.h5
@@ -148,7 +148,7 @@ def create_process(file):
     robo_type = 'tomo'
     robo_att = get_robo_att(exp, robo_type)
     if robo_att:
-        exec_process(fname, exp, robo_att)
+        exec_process(file, exp, robo_att)
     return
 
 
