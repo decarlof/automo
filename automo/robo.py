@@ -52,7 +52,9 @@ Module to create basic tomography data analyis automation.
 """
 
 import os
+import glob
 import sys
+import re
 import string
 import argparse
 import unicodedata
@@ -62,119 +64,40 @@ from os.path import expanduser
 import automo.util as util
 
 from distutils.dir_util import mkpath
+import logging
 
+logger = logging.getLogger(__name__)
 __author__ = "Francesco De Carlo"
 __copyright__ = "Copyright (c) 2016, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
-__all__ = ['create_move',
-           'create_test',
-           'move',
-           'test']
+__all__ = ['create_process',
+           'process']
 
 
 def init():
-    home = expanduser("~")
-    tomo = os.path.join(home, '.tomo/automo.ini')
+    user_home = expanduser("~")
+    proc_dir = os.path.join(user_home, '.automo')
+
+    cf_file = os.path.join(proc_dir, 'automo.ini')
     cf = ConfigParser.ConfigParser()
-    cf.read(tomo)
+    cf.read(cf_file)
 
-    pdir = cf.get('settings', 'python_proc_dir')
-    processes = cf.get('settings', 'python_proc')
-    processes = processes.split(', ')
-    default_h5_fname = cf.get('settings', 'default_h5_fname')
-    default_proc_fname = cf.get('settings', 'default_proc_fname')
+    if cf.has_option('settings', 'default_h5_fname'):
+        default_h5_fname = cf.get('settings', 'default_h5_fname')
+
+    # specify a different process folder
+    if cf.has_option('settings', 'python_proc_dir'):
+        proc_dir = cf.get('settings', 'python_proc_dir')
+
+    proc_list = cf.options('robos')
+    macro_list = os.listdir(proc_dir)
+    macro_list = [f for f in os.listdir(proc_dir) if re.match(r'.+.py', f)]
 
 
-def create_move(folder):
+
+def process_folder(folder):
     """
-    Create a list of commands to move all user_selected_name.h5 files in 
-    folder to folder/user_selected_name/data.h5
-    
-
-    Parameters
-    ----------
-    folder : str
-        Folder containing multiple h5 files.
-
-
-    Returns
-    -------
-    cmd : list
-        List of mkdir and mv commands.
-    """
-    
-    home = expanduser("~")
-    tomo = os.path.join(home, '.tomo/automo.ini')
-    cf = ConfigParser.ConfigParser()
-    cf.read(tomo)
-
-    default_h5_fname = cf.get('settings', 'default_h5_fname')
-    
-    # files are sorted alphabetically
-    files = sorted(os.listdir(folder))
-    cmd = []
-    try:
-        for fname in files:
-            sname = fname.split('.')
-            try:
-                ext = sname[1]
-                if ext == "h5":
-                    cmd.append("mkdir " + sys.argv[1] + sname[0] + os.sep)
-                    cmd.append("mv " + sys.argv[1] + fname + " " + sys.argv[1] + sname[0] + os.sep + default_h5_fname)
-            except: # does not have an extension
-                pass
-        return cmd
-    except OSError:
-        pass
-
-
-def move(argv):
-    """
-    Move all user_selected_name.h5 files in the folder 
-    (passed as argv) to folder/user_selected_name/data.h5    
-
-    Parameters
-    ----------
-    folder : str
-        Folder containing multiple h5 files.
-
-
-    Returns
-    -------
-    cmd : list
-        List of mkdir and mv commands.
-    """
-   
-    parser = argparse.ArgumentParser()
-    parser.add_argument("folder", help="new or existing folder")
-    args = parser.parse_args()
-
-    home = expanduser("~")
-    tomo = os.path.join(home, '.tomo/automo.ini')
-    cf = ConfigParser.ConfigParser()
-    cf.read(tomo)
-
-    default_proc_fname = cf.get('settings', 'default_proc_fname')
-
-    try: 
-        folder = os.path.normpath(util.clean_folder_name(args.folder)) + os.sep # will add the trailing slash if it's not already there.
-        if util.try_folder(folder):
-            cmd_list = create_move(folder)
-            for cmd in cmd_list:
-                print cmd
-                os.system(cmd)
-                cmd = '\n' + cmd
-                util.append(folder + default_proc_fname, cmd)
-        print("-----------------------------------------------------------")
-    except: 
-        pass
-
-
-def create_test(folder):
-    """
-    Create a list of commands to run a set of default functions 
-    on data.h5 files located in folder/user_selected_name/data.h5
-    
+    Create process list for all files in a folder
 
     Parameters
     ----------
@@ -182,40 +105,19 @@ def create_test(folder):
         Folder containing multiple h5 files.
 
     """
-    
-    home = expanduser("~")
-    tomo = os.path.join(home, '.tomo/automo.ini')
-    cf = ConfigParser.ConfigParser()
-    cf.read(tomo)
-
-    pdir = cf.get('settings', 'python_proc_dir')
-    processes = cf.get('settings', 'python_proc')
-    processes = processes.split(', ')
-
-    default_h5_fname = cf.get('settings', 'default_h5_fname')
 
     # files are sorted alphabetically
-    files = sorted(os.listdir(folder))
-    cmd = []
+    files = [f for f in sorted(os.listdir(folder)) if re.match(r'.+.h5', f)]
 
-    try:
-        for fname in files:
-            sname = fname.split('.')
-            try:
-                ext = sname[1]
-            except: # does not have an extension
-                if os.path.isdir(folder + fname): # is a folder?
-                    for process in processes:
-                        cmd.append("python " + pdir + process + ".py " + folder + fname + os.sep + default_h5_fname + " -1 -1 -1 -1")   
-                pass
-        return cmd
-    except OSError:
-        pass
+    for kfile in files:
+        create_process(file)
 
 
-def test(argv):
+def create_process(file):
     """
-    Execute all test listed in the ~/.tomo folder
+    Create a list of commands to run a set of default functions
+    on .h5 files located in folder/user_selected_name/data.h5
+
 
     Parameters
     ----------
@@ -223,29 +125,48 @@ def test(argv):
         Folder containing multiple h5 files.
 
     """
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("folder", help="new or existing folder")
-    args = parser.parse_args()
-
-    home = expanduser("~")
-    tomo = os.path.join(home, '.tomo/automo.ini')
-    cf = ConfigParser.ConfigParser()
-    cf.read(tomo)
-
-    default_proc_fname = cf.get('settings', 'default_proc_fname')
-
-    try: 
-        folder = os.path.normpath(util.clean_folder_name(args.folder)) + os.sep # will add the trailing slash if it's not already there.
-        if util.try_folder(folder):
-            cmd_list = create_test(folder)
-            for cmd in cmd_list:
-                print cmd
-                os.system(cmd)
-                cmd1 = '\n' + cmd
-                util.append(folder + default_proc_fname, cmd1)
-        print("-----------------------------------------------------------")
-    except: 
-        pass
+    robo_type = 'tomo'
+    robo_att = get_robo_att(robo_type)
+    if robo_att exec_process(folder, fname, robo_att)
+return
 
 
+def exec_process(folder, fname, robo_att):
+
+    folder, fname = robo_move(folder,fname,robo_att.move)
+    folder, fname = robo_rename(folder,fname,robo_att.rename)
+    folder, fname = robo_process(folder, fname, robo_att.processes)
+    return
+
+def get_robo_att(robo_type):
+    if cf.has_option('robos', robo_type):
+        robo_att.robo_type = robo_type
+        processes = cf.get('robos', robo_type)
+        robo_att.processes = processes.split(', ')
+        if cf.has_option('robos_move', robo_type):
+            robo_att.move = cf.get('robos_move', robo_type)
+        else:
+            robo_att.move = new_folder
+
+        if cf.has_option('robos_rename', robo_type):
+            robo_att.rename = cf.get('robos_rename', robo_type)
+        else:
+            robo_att.rename = False
+    else:
+        print('Robo type not found!!!')
+        print('Doing nothing.')
+        robo_att = None
+    return robo_att
+
+def robo_move(folder, file, move_type):
+    print 'batatas'
+
+def robo_rename(file, rename_type):
+    print 'batatas'
+
+def robo_process(file, proc_list):
+    for cmd in cmd_list:
+        print cmd
+        #os.system(cmd)
+        cmd1 = '\n' + cmd
+        util.append(folder + default_proc_fname, cmd1)

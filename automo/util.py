@@ -188,6 +188,7 @@ def clean_folder_name(directory):    """    Clean the folder name from unsuppo
         Description.
     """
 
+    print ("2")
     try:
         if os.path.isdir(directory):
             return True

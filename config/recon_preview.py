@@ -11,12 +11,10 @@ import os
 import sys
 import tomopy
 import dxchange
-import automo
 import automo.util as util
 import argparse
 import ConfigParser
 from os.path import expanduser
-import dxchange
 
 
 def main(arg):
