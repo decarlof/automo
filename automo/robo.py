@@ -103,7 +103,6 @@ def process_folder(folder):
     ----------
     folder : str
         Folder containing multiple h5 files.
-
     """
 
     # files are sorted alphabetically
@@ -112,30 +111,34 @@ def process_folder(folder):
     for kfile in files:
         create_process(file)
 
+    return
 
 def create_process(file):
     """
     Create a list of commands to run a set of default functions
     on .h5 files located in folder/user_selected_name/data.h5
 
-
     Parameters
     ----------
     folder : str
         Folder containing multiple h5 files.
-
     """
+
     robo_type = 'tomo'
     robo_att = get_robo_att(robo_type)
-    if robo_att exec_process(folder, fname, robo_att)
-return
+    exec_process(folder, fname, robo_att) if robo_att
+    return
 
 
 def exec_process(folder, fname, robo_att):
+    new_folder = robo_move(folder, fname, robo_att.move)
+    os.chdir(new_folder)
 
-    folder, fname = robo_move(folder,fname,robo_att.move)
-    folder, fname = robo_rename(folder,fname,robo_att.rename)
-    folder, fname = robo_process(folder, fname, robo_att.processes)
+    new_fname = robo_rename(folder, fname, robo_att.rename)
+
+    robo_process(folder, fname, robo_att.processes)
+
+    os.chdir(folder)
     return
 
 def get_robo_att(robo_type):
@@ -170,3 +173,7 @@ def robo_process(file, proc_list):
         #os.system(cmd)
         cmd1 = '\n' + cmd
         util.append(folder + default_proc_fname, cmd1)
+
+
+if __name__ == "__main__":
+    process_folder(sys.argv[1])
