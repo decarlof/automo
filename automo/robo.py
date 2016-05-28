@@ -148,7 +148,8 @@ def create_process(file):
 
     robo_type = 'tomo'
     robo_att = get_robo_att(exp, robo_type)
-    exec_process(fname, exp, robo_att) if robo_att
+    if robo_att:
+        exec_process(fname, exp, robo_att)
     return
 
 
