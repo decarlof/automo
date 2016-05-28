@@ -3,7 +3,7 @@ $PYTHON setup.py install
 
 # Add more build steps here, if they are necessary.
 
-mkdir ~/.automo
+mkdir -p ~/.automo
 cp config/* ~/.automo
 
 # See
