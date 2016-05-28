@@ -148,11 +148,11 @@ def create_process(exp, file):
     robo_type = 'tomo'
     robo_att = get_robo_att(exp, robo_type)
     if robo_att:
-        exec_process(file, exp, robo_att)
+        exec_process(exp, file, robo_att)
     return
 
 
-def exec_process(folder, fname, robo_att):
+def exec_process(exp, fname, robo_att):
     new_folder = robo_move(exp, fname, robo_att.move)
     os.chdir(new_folder)
 
@@ -160,7 +160,7 @@ def exec_process(folder, fname, robo_att):
 
     robo_process(exp, new_fname, robo_att.proc_list)
 
-    os.chdir(folder)
+    os.chdir(exp.folder)
     return
 
 def get_robo_att(exp, robo_type):
@@ -185,6 +185,7 @@ def get_robo_att(exp, robo_type):
     return robo_att
 
 def get_file_name(file):
+    print file
     basename = os.path.splitext(file)[0]
     return basename
 
@@ -199,7 +200,7 @@ def robo_move(exp, file, move_type):
         print 'not implemented'
     return basename
 
-def robo_rename(file, rename_type):
+def robo_rename(exp, file, rename_type):
     if rename_type:
         os.rename(file,exp.def_h5_fname)
         return exp.def_h5_fname
