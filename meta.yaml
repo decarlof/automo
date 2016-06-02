@@ -1,10 +1,10 @@
 package:
-  name: project
-  version: '0.0.1'
+  name: automo
+  version: '0.0.2'
 
 source:
-  git_url: https://github.com/decarlof/automo.git
-  
+   path: .
+     
 build:
   number: 0
 
@@ -12,10 +12,14 @@ requirements:
   build:
     - python
     - setuptools
+    - h5py
+    - dxchange
  
   run:
+    - dxchange
     - python
-    - numpy    
+    - numpy
+    - h5py
     
 test:
   # Python imports
