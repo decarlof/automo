@@ -1,10 +1,10 @@
 package:
   name: automo
-  version: '0.0.1'
+  version: '0.0.2'
 
 source:
-  git_url: https://github.com/ravescovi/automo.git
-  
+   path: .
+     
 build:
   number: 0
 

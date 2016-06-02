@@ -82,6 +82,8 @@ class automo_exp:
     proc_list = ''
     macro_list = ''
     proc_folder = ''
+    log_file = ''
+    log_name = '    '
 
 class automo_robo:
     type = ''
@@ -121,13 +123,17 @@ def process_folder(folder):
         Folder containing multiple h5 files.
     """
 
-
     exp = init()
     # files are sorted alphabetically
     exp.folder = folder
+
+    exp.log = folder+exp.log_name
+
     files = [f for f in sorted(os.listdir(exp.folder)) if re.match(r'.+.h5', f)]
 
     os.chdir(exp.folder)
+
+
 
     for kfile in files:
         create_process(exp, kfile)
