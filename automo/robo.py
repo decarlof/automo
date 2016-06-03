@@ -144,21 +144,30 @@ def create_process(exp, file):
     """
     Create a list of commands to run a set of default functions
     on .h5 files located in folder/user_selected_name/data.h5
+    This is still calling exec_process.
+    The action list will be executed.
 
     Parameters
     ----------
-    folder : str
-        Folder containing multiple h5 files.
+    exp : automo_exp
+        Automo Experiment Class (already initialized)
+    file : str
+        File name to execute the robo actions.
     """
 
+    #todo: There should be a gatekeeper here
     robo_type = 'tomo'
+
+    #Find the robo actions:
     robo_att = get_robo_att(exp, robo_type)
     if robo_att:
+        print ("Executing robo actions for type: " + robo_att.type)
         exec_process(exp, file, robo_att)
     return
 
 
 def exec_process(exp, fname, robo_att):
+
     new_folder = robo_move(exp, fname, robo_att.move)
     os.chdir(new_folder)
 
@@ -217,7 +226,7 @@ def robo_process(exp, file, proc_list):
     for proc in proc_list:
         runtime_line = "python " + os.path.join(exp.proc_dir, proc)+ ".py " + file + " -1 -1 -1 -1"
         print runtime_line
-        #os.system(runtime_line)
+        os.system(runtime_line)
 
 
 if __name__ == "__main__":
