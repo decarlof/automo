@@ -112,7 +112,6 @@ def init():
     exp.macro_list = [f for f in os.listdir(exp.proc_dir) if re.match(r'.+.py', f)]
     return exp
 
-
 def process_folder(folder):
     """
     Create process list for all files in a folder
@@ -150,7 +149,6 @@ def create_process(exp, file):
     folder : str
         Folder containing multiple h5 files.
     """
-
     robo_type = 'tomo'
     robo_att = get_robo_att(exp, robo_type)
     if robo_att:

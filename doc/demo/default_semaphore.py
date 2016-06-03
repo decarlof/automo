@@ -12,5 +12,6 @@ import automo.robo as robo
 
 
 if __name__ == "__main__":
-    robo.process_folder(sys.argv[1:])
 
+    print ("1")
+    robo.semaphore(sys.argv[1:])
