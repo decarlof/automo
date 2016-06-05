@@ -8,6 +8,7 @@ Example script
 from __future__ import print_function
 
 import sys
+
 import automo.robo as robo
 
 

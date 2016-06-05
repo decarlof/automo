@@ -7,12 +7,15 @@ TomoPy example script to generate a series of preview projections.
 """
 
 from __future__ import print_function
+
+import ConfigParser
+import argparse
 import os
 import sys
-import dxchange
-import argparse
-import ConfigParser
 from os.path import expanduser
+
+import dxchange
+
 import automo.util as util
 
 

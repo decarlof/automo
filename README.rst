@@ -1,6 +1,6 @@
-========
+======
 Automo
-========
+======
 
 
 `Automo <https://github.com/decarlof/automo>`_ provides tomography automation.

@@ -7,15 +7,17 @@ TomoPy example script to reconstruct tomography data with different center.
 """
 
 from __future__ import print_function
+
+import ConfigParser
+import argparse
 import os
 import sys
-import tomopy
-import dxchange
-import automo
-import automo.util as util
-import argparse
-import ConfigParser
 from os.path import expanduser
+
+import dxchange
+import tomopy
+
+import automo.util as util
 
 
 def main(arg):

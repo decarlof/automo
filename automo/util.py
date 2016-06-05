@@ -51,16 +51,11 @@ Module to create basic tomography data analyis automation.
 """
 
 import os
-import sys
-import h5py
 import string
-import argparse
 import unicodedata
-import ConfigParser
-from os.path import expanduser
-import dxchange.reader as dxreader
-
 from distutils.dir_util import mkpath
+
+import h5py
 
 __author__ = "Francesco De Carlo"
 __copyright__ = "Copyright (c) 2016, UChicago Argonne, LLC."
@@ -166,8 +161,25 @@ def clean_entry(entry):
     cleaned_folder_name = unicodedata.normalize('NFKD', entry.decode('utf-8', 'ignore')).encode('ASCII', 'ignore')
     return ''.join(c for c in cleaned_folder_name if c in valid_folder_entry_chars)
 
-def clean_folder_name(directory):    """    Clean the folder name from unsupported characters before    creating it.        Parameters    ----------    folder : str        Folder that will be containing multiple h5 files.    """    valid_folder_name_chars = "-_"+ os.sep + "%s%s" % (string.ascii_letters, string.digits)    cleaned_folder_name = unicodedata.normalize('NFKD', directory.decode('utf-8', 'ignore')).encode('ASCII', 'ignore')        return ''.join(c for c in cleaned_folder_name if c in valid_folder_name_chars)
-def try_folder(directory):
+def clean_folder_name(directory):
+    """
+    Clean the folder name from unsupported characters before
+    creating it.
+    
+
+    Parameters
+    ----------
+    folder : str
+        Folder that will be containing multiple h5 files.
+
+    """
+
+    valid_folder_name_chars = "-_"+ os.sep + "%s%s" % (string.ascii_letters, string.digits)
+    cleaned_folder_name = unicodedata.normalize('NFKD', directory.decode('utf-8', 'ignore')).encode('ASCII', 'ignore')
+    
+    return ''.join(c for c in cleaned_folder_name if c in valid_folder_name_chars)
+
+def try_folder(directory):
     """
     Function description.
 
@@ -209,10 +221,12 @@ def clean_folder_name(directory):    """    Clean the folder name from unsuppo
 
 
 def touch(path):
-    with open(path, 'a'):        os.utime(path, None)
+    with open(path, 'a'):
+        os.utime(path, None)
 
 
 def append(fname, process):
-    with open(fname, "a") as pfile:        pfile.write(process)
+    with open(fname, "a") as pfile:
+        pfile.write(process)
 
 

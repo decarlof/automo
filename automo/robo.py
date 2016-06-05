@@ -51,24 +51,16 @@ Module to create basic tomography data analyis automation.
 
 """
 
+import ConfigParser
+import logging
 import os
-import glob
+import re
 import shutil
 import sys
-import re
-import string
-import argparse
-import unicodedata
-import ConfigParser
 from os.path import expanduser
-import h5py
-import automo.util as util
-
-from distutils.dir_util import mkpath
-import logging
 
 logger = logging.getLogger(__name__)
-__author__ = "Francesco De Carlo"
+__author__ = "Francesco De Carlo, Rafael Vescovi"
 __copyright__ = "Copyright (c) 2016, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
 __all__ = ['process_folder']
