@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='automo',
-    author='Francesco De Carlo',
+    author='Francesco De Carlo, Rafael Vescovi',
     packages=find_packages(),
     version=open('VERSION').read().strip(),
     description = 'Automation for tomography.',

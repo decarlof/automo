@@ -112,6 +112,7 @@ def init():
     exp.macro_list = [f for f in os.listdir(exp.proc_dir) if re.match(r'.+.py', f)]
     return exp
 
+
 def process_folder(folder):
     """
     Create process list for all files in a folder
