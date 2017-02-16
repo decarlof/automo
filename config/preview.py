@@ -13,8 +13,9 @@ import argparse
 import os
 import sys
 from os.path import expanduser
-
 import dxchange
+import warnings
+import numpy as np
 
 import automo.util as util
 
@@ -23,10 +24,13 @@ def main(arg):
 
     parser = argparse.ArgumentParser()
     parser.add_argument("file_name", help="existing hdf5 file name")
-    parser.add_argument("slice_start", help="recon slice start; for full rec enter -1")
-    parser.add_argument("slice_end", help="recon slice end; for full rec enter -1")
-    parser.add_argument("slice_step", help="recon slice step; for full rec enter -1")
-    parser.add_argument("rot_center", help="rotation center; for auto center enter -1")
+    parser.add_argument("proj_start", help="preview projection start; for full rec enter -1")
+    parser.add_argument("proj_end", help="preview projection end; for full rec enter -1")
+    parser.add_argument("proj_step", help="preview projection step; for full rec enter -1")
+    parser.add_argument("slice_start", help="preview slice start; for full rec enter -1")
+    parser.add_argument("slice_end", help="preview slice end; for full rec enter -1")
+    parser.add_argument("slice_step", help="preview slice step; for full rec enter -1")
+    # parser.add_argument("rot_center", help="rotation center; for auto center enter -1")
     #parser.add_argument("save_dir", help="relative save directory")
     args = parser.parse_args()
 
@@ -36,26 +40,41 @@ def main(arg):
     cf.read(tomo)
 
     fname = args.file_name
+    proj_st = int(args.proj_start)
+    proj_end = int(args.proj_end)
+    proj_step = int(args.proj_step)
+    slice_st = int(args.slice_start)
+    slice_end = int(args.slice_end)
+    slice_step = int(args.slice_step)
 
-    array_dims = util.h5group_dims(fname)
+    # rot_center = args.rot_center
 
-    folder = os.path.dirname(fname) + os.sep
- 
+    #folder = os.path.dirname(fname) + os.sep
+    folder = './'
+
     try: 
         if os.path.isfile(fname):
 
             # Read the APS raw data projections.
-            proj, flat, dark = dxchange.read_aps_32id(fname, proj=(0, array_dims[0], 20))
+            proj, flat, dark = dxchange.read_aps_32id(fname, proj=(proj_st, proj_end, proj_step))
             print("Proj Preview: ", proj.shape)        
 
-            proj_fname = (folder + 'preview' + os.sep + 'data')
+            proj_fname = (folder + 'preview' + os.sep + 'proj')
             print("Proj folder: ", proj_fname)        
 
+            sino, flat, dark = dxchange.read_aps_32id(fname, sino=(slice_st, slice_end, slice_step))
+            print("Sino Preview: ", sino.shape)
+
+            sino_fname = (folder + 'preview' + os.sep + 'sino')
+            sino = np.swapaxes(sino, 0, 1)
+            print("Proj folder: ", proj_fname)
+
             dxchange.write_tiff_stack(proj, fname=proj_fname, axis=0, digit=5, start=0, overwrite=True)          
+            dxchange.write_tiff_stack(sino, fname=sino_fname, axis=0, digit=5, start=0, overwrite=True)
             print("#################################")
 
     except:
-        pass
+        warnings.warn('Runtime error at {:s}'.format(os.getcwd()))
 
 
 if __name__ == "__main__":
