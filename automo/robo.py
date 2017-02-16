@@ -112,20 +112,6 @@ def init():
     exp.macro_list = [f for f in os.listdir(exp.proc_dir) if re.match(r'.+.py', f)]
     return exp
 
-#
-# def classify_kwargs(exp, **kwargs):
-#
-#     option_dict = {}
-#     if 'preview' in exp.proc_list:
-#         opt = {'slice_st':kwargs['slice_st'],
-#                'slice_end':kwargs['slice_end'],
-#                'slice_step':kwargs['slice_step'],
-#                'rot_center':kwargs['rot_center']}
-#         option_dict['preview'] = opt
-#
-#     return option_dict
-
-
 
 def process_folder(folder, **kwargs):
     """
@@ -236,6 +222,9 @@ def robo_process(exp, file, proc_list, **kwargs):
         if proc == 'preview':
             opts = [kwargs['preview']['proj_st'], kwargs['preview']['proj_end'], kwargs['preview']['proj_step'],
                     kwargs['preview']['slice_st'], kwargs['preview']['slice_end'], kwargs['preview']['slice_step']]
+        elif proc == 'center':
+            opts = [kwargs['center']['rot_start'], kwargs['center']['rot_end'], kwargs['center']['rot_step'],
+                    kwargs['center']['slice']]
         opts = ' '.join(map(str, opts))
         opts = ' ' + opts
         runtime_line = "python " + os.path.join(exp.proc_dir, proc)+ ".py " + file + opts
