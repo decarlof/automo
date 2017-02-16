@@ -123,10 +123,13 @@ def main(arg):
             print('\n** Down sampling done!\n')
             print('## Debug: after down sampling:')
             print('\n** Min and max val in prj before recon: %0.5f, %0.3f' % (np.min(prj), np.max(prj)))
-
-        tomopy.write_center(prj, theta, dpath='center',
-                            cen_range=[rot_start/pow(2,level), rot_end/pow(2, level),
+        
+        outpath = os.path.join(os.getcwd(), 'center')
+        print([rot_start/pow(2,level), rot_end/pow(2, level),
                                        ((rot_end - rot_start)/float(N_recon))/pow(2, level)])
+        tomopy.write_center(prj, theta, dpath=outpath,
+                            cen_range=[rot_start/pow(2,level), rot_end/pow(2, level),
+                                       rot_step/pow(2, level)])
         print("#################################")
 
     except:
