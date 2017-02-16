@@ -15,6 +15,7 @@ import sys
 from os.path import expanduser
 import dxchange
 import warnings
+import numpy as np
 
 import automo.util as util
 
@@ -62,9 +63,10 @@ def main(arg):
             print("Proj folder: ", proj_fname)        
 
             sino, flat, dark = dxchange.read_aps_32id(fname, sino=(slice_st, slice_end, slice_step))
-            print("Proj Preview: ", proj.shape)
+            print("Sino Preview: ", sino.shape)
 
             sino_fname = (folder + 'preview' + os.sep + 'sino')
+            sino = np.swapaxes(sino, 0, 1)
             print("Proj folder: ", proj_fname)
 
             dxchange.write_tiff_stack(proj, fname=proj_fname, axis=0, digit=5, start=0, overwrite=True)          
@@ -72,7 +74,7 @@ def main(arg):
             print("#################################")
 
     except:
-        warnings.warn('Booooooom')
+        warnings.warn('Runtime error at {:s}'.format(os.getcwd()))
 
 
 if __name__ == "__main__":
