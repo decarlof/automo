@@ -112,8 +112,22 @@ def init():
     exp.macro_list = [f for f in os.listdir(exp.proc_dir) if re.match(r'.+.py', f)]
     return exp
 
+#
+# def classify_kwargs(exp, **kwargs):
+#
+#     option_dict = {}
+#     if 'preview' in exp.proc_list:
+#         opt = {'slice_st':kwargs['slice_st'],
+#                'slice_end':kwargs['slice_end'],
+#                'slice_step':kwargs['slice_step'],
+#                'rot_center':kwargs['rot_center']}
+#         option_dict['preview'] = opt
+#
+#     return option_dict
 
-def process_folder(folder):
+
+
+def process_folder(folder, **kwargs):
     """
     Create process list for all files in a folder
 
@@ -121,26 +135,29 @@ def process_folder(folder):
     ----------
     folder : str
         Folder containing multiple h5 files.
+    kwargs : dictionaries containing input options. One dictionary per keyword.
+             E.g.: process_folder(folder, preview=preview_dict, recon=recon_dict)
+             where preview_dict = {'slice_st':0, 'slice_end':100, 'slice_step':1, 'rot_center':1000}, etc.
     """
 
     exp = init()
     # files are sorted alphabetically
     exp.folder = folder
 
-    exp.log = folder+exp.log_name
+    exp.log = folder + exp.log_name
 
     files = [f for f in sorted(os.listdir(exp.folder)) if re.match(r'.+.h5', f)]
 
     os.chdir(exp.folder)
 
-
+    # option_dict = classify_kwargs(exp, **kwargs)
 
     for kfile in files:
-        create_process(exp, kfile)
+        create_process(exp, kfile, **kwargs)
 
     return
 
-def create_process(exp, file):
+def create_process(exp, file, **kwargs):
     """
     Create a list of commands to run a set of default functions
     on .h5 files located in folder/user_selected_name/data.h5
@@ -153,17 +170,17 @@ def create_process(exp, file):
     robo_type = 'tomo'
     robo_att = get_robo_att(exp, robo_type)
     if robo_att:
-        exec_process(exp, file, robo_att)
+        exec_process(exp, file, robo_att, **kwargs)
     return
 
 
-def exec_process(exp, fname, robo_att):
+def exec_process(exp, fname, robo_att, **kwargs):
     new_folder = robo_move(exp, fname, robo_att.move)
     os.chdir(new_folder)
 
     new_fname = robo_rename(exp, fname, robo_att.rename)
 
-    robo_process(exp, new_fname, robo_att.proc_list)
+    robo_process(exp, new_fname, robo_att.proc_list, **kwargs)
 
     os.chdir(exp.folder)
     return
@@ -212,11 +229,12 @@ def robo_rename(exp, file, rename_type):
     else:
         return file
 
-def robo_process(exp, file, proc_list):
-    print proc_list
-    print os.getcwd()
+def robo_process(exp, file, proc_list, **kwargs):
+
     for proc in proc_list:
-        runtime_line = "python " + os.path.join(exp.proc_dir, proc)+ ".py " + file + " -1 -1 -1 -1"
+        opts = ' '.join(map(str, kwargs[proc].values()))
+        opts = ' ' + opts
+        runtime_line = "python " + os.path.join(exp.proc_dir, proc)+ ".py " + file + opts
         print runtime_line
         os.system(runtime_line)
 
