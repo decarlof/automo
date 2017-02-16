@@ -39,16 +39,18 @@ def main(arg):
     cf.read(tomo)
 
     fname = args.file_name
-    proj_st = args.proj_start
-    proj_end = args.proj_end
-    proj_step = args.proj_step
-    slice_st = args.slice_start
-    slice_end = args.slice_end
-    slice_step = args.slice_step
+    proj_st = int(args.proj_start)
+    proj_end = int(args.proj_end)
+    proj_step = int(args.proj_step)
+    slice_st = int(args.slice_start)
+    slice_end = int(args.slice_end)
+    slice_step = int(args.slice_step)
+
     # rot_center = args.rot_center
 
-    folder = os.path.dirname(fname) + os.sep
- 
+    #folder = os.path.dirname(fname) + os.sep
+    folder = './'
+
     try: 
         if os.path.isfile(fname):
 
