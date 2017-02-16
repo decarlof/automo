@@ -213,10 +213,12 @@ def robo_rename(exp, file, rename_type):
         return file
 
 def robo_process(exp, file, proc_list):
+    print proc_list
+    print os.getcwd()
     for proc in proc_list:
         runtime_line = "python " + os.path.join(exp.proc_dir, proc)+ ".py " + file + " -1 -1 -1 -1"
         print runtime_line
-        #os.system(runtime_line)
+        os.system(runtime_line)
 
 
 if __name__ == "__main__":
