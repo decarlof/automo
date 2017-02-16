@@ -182,7 +182,7 @@ def get_robo_att(exp, robo_type):
         if exp.cf.has_option('robos_move', robo_type):
             robo_att.move = exp.cf.get('robos_move', robo_type)
         else:
-            robo_att.move = new_folder
+            robo_att.move = exp.new_folder
         if exp.cf.has_option('robos_rename', robo_type):
             robo_att.rename = exp.cf.get('robos_rename', robo_type)
         else:
@@ -224,10 +224,10 @@ def robo_process(exp, file, proc_list, **kwargs):
                     kwargs['preview']['slice_st'], kwargs['preview']['slice_end'], kwargs['preview']['slice_step']]
         elif proc == 'center':
             opts = [kwargs['center']['rot_start'], kwargs['center']['rot_end'], kwargs['center']['rot_step'],
-                    kwargs['center']['slice']]
+                    kwargs['center']['slice'], kwargs['center']['medfilt_size'], kwargs['center']['level']]
         opts = ' '.join(map(str, opts))
         opts = ' ' + opts
-        runtime_line = "python " + os.path.join(exp.proc_dir, proc)+ ".py " + file + opts
+        runtime_line = 'python ' + os.path.join(exp.proc_dir, proc)+ '.py ' + file + opts
         print runtime_line
         os.system(runtime_line)
 
