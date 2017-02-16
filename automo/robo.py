@@ -233,7 +233,10 @@ def robo_rename(exp, file, rename_type):
 def robo_process(exp, file, proc_list, **kwargs):
 
     for proc in proc_list:
-        opts = ' '.join(map(str, kwargs[proc].values()))
+        if proc == 'preview':
+            opts = [kwargs['proj_st'], kwargs['proj_end'], kwargs['proj_step'],
+                    kwargs['slice_st'], kwargs['slice_end'], kwargs['slice_step']]
+        opts = ' '.join(map(str, opts))
         opts = ' ' + opts
         runtime_line = "python " + os.path.join(exp.proc_dir, proc)+ ".py " + file + opts
         print runtime_line
