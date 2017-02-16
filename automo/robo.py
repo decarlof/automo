@@ -137,7 +137,8 @@ def process_folder(folder, **kwargs):
         Folder containing multiple h5 files.
     kwargs : dictionaries containing input options. One dictionary per keyword.
              E.g.: process_folder(folder, preview=preview_dict, recon=recon_dict)
-             where preview_dict = {'slice_st':0, 'slice_end':100, 'slice_step':1, 'rot_center':1000}, etc.
+             where preview_dict = {'proj_st':0, 'proj_end':1, 'proj_step':1,
+                                   'slice_st':500, 'slice_end':501, 'slice_step':1}, etc.
     """
 
     exp = init()
