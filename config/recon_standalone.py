@@ -64,8 +64,6 @@ for (chunk_st, chunk_end) in chunks:
     prj = tomopy.normalize(prj, flat, dark)
     print('\n** Flat field correction done!')
 
-    print(prj)
-
     if debug:
         print('## Debug: after normalization:')
         print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
