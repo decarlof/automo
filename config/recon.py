@@ -13,6 +13,7 @@ import argparse
 import os
 import sys
 import re
+import shutil
 from os.path import expanduser
 
 import dxchange
@@ -47,6 +48,11 @@ def main(arg):
 
     chunk_size = int(args.chunk_size)
     medfilt_size = int(args.medfilt_size)
+    level = int(args.level)
+
+    # write_stand-alone recon script
+    if os.path.exists(os.path.join(home, '.automo', 'recon_standalone.py')):
+        shutil.copyfile(os.path.join(home, '.automo', 'recon_standalone.py'), 'recon.py')
 
     # find center if not given
     try:
@@ -62,99 +68,100 @@ def main(arg):
             center_pos = float(center_pos)
             f = open('center_pos.txt', 'w')
             f.write(str(center_pos))
+        print('Center: {:.2f}\n'.format(center_pos))
 
     except:
         print('An error occurred in center searching.\n')
 
 
     # perform reconstruction
-    try:
+    # try:
 
-        print("Data: ", array_dims)
-        # Select the sinogram range to reconstruct.
-        sino_start = int(args.sino_start)
-        sino_end = int(args.sino_end)
-        sino_step = int(args.sino_step)
+    print("Data: ", array_dims)
+    # Select the sinogram range to reconstruct.
+    sino_start = int(args.sino_start)
+    sino_end = int(args.sino_end)
+    sino_step = int(args.sino_step)
 
-        chunks = []
-        chunk_st = sino_start
-        chunk_end = chunk_st + chunk_size * sino_step
+    chunks = []
+    chunk_st = sino_start
+    chunk_end = chunk_st + chunk_size * sino_step
 
-        while chunk_end < sino_end:
-            chunks.append((chunk_st, chunk_end))
-            chunk_st = chunk_end
-            chunk_end += chunk_size * sino_step
-        chunks.append((chunk_st, sino_end))
+    while chunk_end < sino_end:
+        chunks.append((chunk_st, chunk_end))
+        chunk_st = chunk_end
+        chunk_end += chunk_size * sino_step
+    chunks.append((chunk_st, sino_end))
 
-        for (chunk_st, chunk_end) in chunks:
+    for (chunk_st, chunk_end) in chunks:
 
-            print('Chunk range: ({:d}, {:d})'.format(chunk_st, chunk_end))
+        print('Chunk range: ({:d}, {:d})'.format(chunk_st, chunk_end))
 
+        try:
+            prj, flat, dark, theta = dxchange.read_aps_32id(file_name, sino=(chunk_st, chunk_end, sino_step))
+            print(prj.shape, flat.shape, dark.shape)
+        except:
             try:
-                prj, flat, dark, theta = dxchange.read_aps_32id(file_name, sino=(chunk_st, chunk_end, sino_step))
+                prj, flat, dark = dxchange.read_aps_32id(file_name, sino=(chunk_st, chunk_end, sino_step))
                 print(prj.shape, flat.shape, dark.shape)
+                f = h5py.File(file_name, "r"); dset_theta = f["/exchange/theta"]; theta = dset_theta[...]; theta = theta*np.pi/180
             except:
-                try:
-                    prj, flat, dark = dxchange.read_aps_32id(file_name, sino=(chunk_st, chunk_end, sino_step))
-                    print(prj.shape, flat.shape, dark.shape)
-                    f = h5py.File(file_name, "r"); dset_theta = f["/exchange/theta"]; theta = dset_theta[...]; theta = theta*np.pi/180
-                except:
-                    f = h5py.File(file_name, "r")
-                    prj = f['exchange/data'][:, chunk_st:chunk_end, :].astype('float32')
-                    flat = f['exchange/data_white'][:, chunk_st:chunk_end, :].astype('float32')
-                    dark = f['exchange/data_dark'][:, chunk_st:chunk_end, :].astype('float32')
-                    theta = f['exchange/theta'].value.astype('float32')
-                    theta = theta*np.pi/180
+                f = h5py.File(file_name, "r")
+                prj = f['exchange/data'][:, chunk_st:chunk_end, :].astype('float32')
+                flat = f['exchange/data_white'][:, chunk_st:chunk_end, :].astype('float32')
+                dark = f['exchange/data_dark'][:, chunk_st:chunk_end, :].astype('float32')
+                theta = f['exchange/theta'].value.astype('float32')
+                theta = theta*np.pi/180
 
-            theta = tomopy.angles(prj.shape[0])
+        theta = tomopy.angles(prj.shape[0])
 
-            print('## Debug: after reading data:')
-            print('\n** Shape of the data:'+str(np.shape(prj)))
-            print('** Shape of theta:'+str(np.shape(theta)))
-            print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
+        print('## Debug: after reading data:')
+        print('\n** Shape of the data:'+str(np.shape(prj)))
+        print('** Shape of theta:'+str(np.shape(theta)))
+        print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
 
-            prj = tomopy.normalize(prj, flat, dark)
-            print('\n** Flat field correction done!')
+        prj = tomopy.normalize(prj, flat, dark)
+        print('\n** Flat field correction done!')
 
-            print('## Debug: after normalization:')
-            print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
+        print('## Debug: after normalization:')
+        print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
 
-            prj = tomopy.minus_log(prj)
-            print('\n** minus log applied!')
+        prj = tomopy.minus_log(prj)
+        print('\n** minus log applied!')
 
-            print('## Debug: after minus log:')
-            print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
+        print('## Debug: after minus log:')
+        print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
 
-            prj = tomopy.misc.corr.remove_neg(prj, val=0.001)
-            prj = tomopy.misc.corr.remove_nan(prj, val=0.001)
-            prj[np.where(prj == np.inf)] = 0.001
+        prj = tomopy.misc.corr.remove_neg(prj, val=0.001)
+        prj = tomopy.misc.corr.remove_nan(prj, val=0.001)
+        prj[np.where(prj == np.inf)] = 0.001
 
-            print('## Debug: after cleaning bad values:')
-            print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
+        print('## Debug: after cleaning bad values:')
+        print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
 
-            prj = tomopy.remove_stripe_ti(prj,4)
-            print('\n** Stripe removal done!')
-            print('## Debug: after remove_stripe:')
-            print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
+        prj = tomopy.remove_stripe_ti(prj,4)
+        print('\n** Stripe removal done!')
+        print('## Debug: after remove_stripe:')
+        print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
 
-            prj = tomopy.median_filter(prj,size=medfilt_size)
-            print('\n** Median filter done!')
-            print('## Debug: after nedian filter:')
-            print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
+        prj = tomopy.median_filter(prj,size=medfilt_size)
+        print('\n** Median filter done!')
+        print('## Debug: after nedian filter:')
+        print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
 
-            prj = tomopy.downsample(prj, level=level)
-            print('\n** Down sampling done!\n')
-            print('## Debug: after down sampling:')
-            print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
+        prj = tomopy.downsample(prj, level=level)
+        print('\n** Down sampling done!\n')
+        print('## Debug: after down sampling:')
+        print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
 
-            rec = tomopy.recon(prj, theta, center=center_pos, algorithm='gridrec', filter_name='parzen')
-            print('\nReconstruction done!\n')
+        rec = tomopy.recon(prj, theta, center=center_pos, algorithm='gridrec', filter_name='parzen')
+        print('\nReconstruction done!\n')
 
-            dxchange.write_tiff_stack(rec, fname=os.path.join('recon', 'recon'), start=chunk_st, dtype='float32')
+        dxchange.write_tiff_stack(rec, fname=os.path.join('recon', 'recon'), start=chunk_st, dtype='float32')
 
-    except:
+    # except:
 
-        print(folder, 'does not contain the expected file hdf5 file')
+        # print(folder, 'does not contain the expected file hdf5 file')
 
 
 if __name__ == "__main__":
