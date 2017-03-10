@@ -81,7 +81,7 @@ def main(arg):
         # Read theta from the dataset:
         File = h5py.File(fname, "r"); dset_theta = File["/exchange/theta"]; theta = dset_theta[...]; theta = theta*np.pi/180
 
-        theta = tomopy.angles(4001)
+        theta = tomopy.angles(prj.shape[0])
 
         print('## Debug: after reading data:')
         print('\n** Shape of the data:'+str(np.shape(prj)))

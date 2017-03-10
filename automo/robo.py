@@ -225,6 +225,10 @@ def robo_process(exp, file, proc_list, **kwargs):
         elif proc == 'center':
             opts = [kwargs['center']['rot_start'], kwargs['center']['rot_end'], kwargs['center']['rot_step'],
                     kwargs['center']['slice'], kwargs['center']['medfilt_size'], kwargs['center']['level']]
+        elif proc == 'recon':
+            opts = [kwargs['recon']['center_folder'], kwargs['recon']['sino_start'], kwargs['recon']['sino_end'],
+                    kwargs['recon']['sino_step'], kwargs['recon']['medfilt_size'], kwargs['recon']['level'],
+                    kwargs['recon']['chunk_size']]
         opts = ' '.join(map(str, opts))
         opts = ' ' + opts
         runtime_line = 'python ' + os.path.join(exp.proc_dir, proc)+ '.py ' + file + opts

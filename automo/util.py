@@ -50,12 +50,15 @@ Module to create basic tomography data analyis automation.
 
 """
 
-import os
+import os, glob
 import string
 import unicodedata
 from distutils.dir_util import mkpath
 
+import dxchange
 import h5py
+import numpy as np
+
 
 __author__ = "Francesco De Carlo"
 __copyright__ = "Copyright (c) 2016, UChicago Argonne, LLC."
@@ -230,3 +233,21 @@ def append(fname, process):
         pfile.write(process)
 
 
+def entropy(img, range=(-0.002, 0.002)):
+
+    hist, e = np.histogram(img, bins=1024, range=range)
+    hist = hist.astype('float32') / img.size + 1e-12
+    val = -np.dot(hist, np.log2(hist))
+    return val
+
+
+def minimum_entropy(folder='center', pattern='*.tiff', range=(-0.002, 0.002)):
+
+    flist = glob.glob(os.path.join(folder, pattern))
+    a = []
+    s = []
+    for fname in flist:
+        img = dxchange.read_tiff(fname)
+        s.append(entropy(img, range=range))
+        a.append(fname)
+    return a[np.argmin(s)]
