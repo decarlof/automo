@@ -10,4 +10,4 @@ center_dict = {'rot_start':930, 'rot_end':990, 'rot_step':1, 'slice':400, 'medfi
 recon_dict = {'center_folder':'center', 'sino_start':0, 'sino_end':1199, 'sino_step':1, 'medfilt_size':1, 'level':0,
               'chunk_size':50}
 
-automo.robo.process_folder(os.getcwd(), preview=preview_360_dict, center=center_dict, recon=recon_dict)
+automo.robo.process_folder(os.getcwd(), ini_name='automo.ini', preview=preview_360_dict, center=center_dict, recon=recon_dict)

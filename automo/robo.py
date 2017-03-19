@@ -91,13 +91,13 @@ class automo_robo:
     rename = ''
     proc_list = ''
 
-def init():
+def init(ini_name='automo.ini'):
     global exp
     exp = automo_exp()
     exp.user_home = expanduser("~")
     exp.proc_dir = os.path.join(exp.user_home, '.automo')
 
-    exp.cf_file = os.path.join(exp.proc_dir, 'automo.ini')
+    exp.cf_file = os.path.join(exp.proc_dir, ini_name)
     exp.cf = ConfigParser.ConfigParser()
     exp.cf.read(exp.cf_file)
 
@@ -113,7 +113,7 @@ def init():
     return exp
 
 
-def process_folder(folder, **kwargs):
+def process_folder(folder, ini_name='automo.ini', **kwargs):
     """
     Create process list for all files in a folder
 
@@ -127,7 +127,7 @@ def process_folder(folder, **kwargs):
                                    'slice_st':500, 'slice_end':501, 'slice_step':1}, etc.
     """
 
-    exp = init()
+    exp = init(ini_name=ini_name)
     # files are sorted alphabetically
     exp.folder = folder
 
