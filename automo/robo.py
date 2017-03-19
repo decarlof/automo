@@ -229,6 +229,8 @@ def robo_process(exp, file, proc_list, **kwargs):
             opts = [kwargs['recon']['center_folder'], kwargs['recon']['sino_start'], kwargs['recon']['sino_end'],
                     kwargs['recon']['sino_step'], kwargs['recon']['medfilt_size'], kwargs['recon']['level'],
                     kwargs['recon']['chunk_size']]
+        elif proc == 'preview_360':
+            opts = [kwargs['preview']['slice_st'], kwargs['preview']['slice_end'], kwargs['preview']['slice_step']]
         opts = ' '.join(map(str, opts))
         opts = ' ' + opts
         runtime_line = 'python ' + os.path.join(exp.proc_dir, proc)+ '.py ' + file + opts
