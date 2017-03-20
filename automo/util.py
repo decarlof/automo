@@ -235,8 +235,11 @@ def append(fname, process):
 
 def entropy(img, range=(-0.002, 0.002)):
 
-    hist, e = np.histogram(img, bins=1024, range=range)
-    hist = hist.astype('float32') / img.size + 1e-12
+    temp = np.copy(img)
+    temp[np.isnan(temp)] = 0
+    temp[True-np.isfinite(temp)] = 0
+    hist, e = np.histogram(temp, bins=1024, range=range)
+    hist = hist.astype('float32') / temp.size + 1e-12
     val = -np.dot(hist, np.log2(hist))
     return val
 
