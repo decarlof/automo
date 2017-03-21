@@ -58,6 +58,7 @@ from distutils.dir_util import mkpath
 import dxchange
 import h5py
 import numpy as np
+import tomopy.misc.corr
 
 
 __author__ = "Francesco De Carlo"
@@ -233,20 +234,20 @@ def append(fname, process):
         pfile.write(process)
 
 
-def entropy(img, range=(-0.002, 0.002)):
+def entropy(img, range=(-0.002, 0.002), mask_ratio=0.9):
 
     temp = np.copy(img)
-    temp = temp.flatten()
+    mask = tomopy.misc.corr._get_mask(temp.shape[0], temp.shape[1], mask_ratio)
+    temp = temp[mask].flatten()
     temp[np.isnan(temp)] = 0
-    temp[np.where(temp==np.inf)] = 0
-    temp[np.where(temp==-np.inf)] = 0
+    temp[True-np.isfinite(temp)] = 0
     hist, e = np.histogram(temp, bins=1024, range=range)
     hist = hist.astype('float32') / temp.size + 1e-12
     val = -np.dot(hist, np.log2(hist))
     return val
 
 
-def minimum_entropy(folder='center', pattern='*.tiff', range=(-0.002, 0.002)):
+def minimum_entropy(folder='center', pattern='*.tiff', range=(-0.002, 0.002), mask_ratio=0.9):
 
     flist = glob.glob(os.path.join(folder, pattern))
     a = []
@@ -254,7 +255,7 @@ def minimum_entropy(folder='center', pattern='*.tiff', range=(-0.002, 0.002)):
     for fname in flist:
         img = dxchange.read_tiff(fname)
         print(fname)
-        si = entropy(img, range=range)
+        si = entropy(img, range=range, mask_ratio=mask_ratio)
         s.append(si)
         a.append(fname)
     return a[np.argmin(s)]
