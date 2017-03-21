@@ -144,7 +144,7 @@ def process_folder(folder, ini_name='automo.ini', **kwargs):
 
     return
 
-def create_process(exp, file, **kwargs):
+def create_process(exp, file, robo_type = 'tomo', **kwargs):
     """
     Create a list of commands to run a set of default functions
     on .h5 files located in folder/user_selected_name/data.h5
@@ -154,7 +154,6 @@ def create_process(exp, file, **kwargs):
     folder : str
         Folder containing multiple h5 files.
     """
-    robo_type = 'tomo'
     robo_att = get_robo_att(exp, robo_type)
     if robo_att:
         exec_process(exp, file, robo_att, **kwargs)

@@ -236,8 +236,10 @@ def append(fname, process):
 def entropy(img, range=(-0.002, 0.002)):
 
     temp = np.copy(img)
+    temp = temp.flatten()
     temp[np.isnan(temp)] = 0
-    temp[True-np.isfinite(temp)] = 0
+    temp[np.where(temp==np.inf)] = 0
+    temp[np.where(temp==-np.inf)] = 0
     hist, e = np.histogram(temp, bins=1024, range=range)
     hist = hist.astype('float32') / temp.size + 1e-12
     val = -np.dot(hist, np.log2(hist))
@@ -251,6 +253,8 @@ def minimum_entropy(folder='center', pattern='*.tiff', range=(-0.002, 0.002)):
     s = []
     for fname in flist:
         img = dxchange.read_tiff(fname)
-        s.append(entropy(img, range=range))
+        print(fname)
+        si = entropy(img, range=range)
+        s.append(si)
         a.append(fname)
     return a[np.argmin(s)]
