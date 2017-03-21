@@ -60,7 +60,9 @@ def main(arg):
             print("Proj Preview: ", proj.shape)        
 
             proj_fname = (folder + 'preview' + os.sep + 'proj')
-            print("Proj folder: ", proj_fname)        
+            print("Proj folder: ", proj_fname)
+
+            dxchange.write_tiff(flat.mean(axis=0), fname=(folder + 'preview' + os.sep + 'flat'), overwrite=True)
 
             sino, flat, dark = dxchange.read_aps_32id(fname, sino=(slice_st, slice_end, slice_step))
             print("Sino Preview: ", sino.shape)

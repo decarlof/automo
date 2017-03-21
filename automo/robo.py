@@ -113,7 +113,7 @@ def init(ini_name='automo.ini'):
     return exp
 
 
-def process_folder(folder, ini_name='automo.ini', **kwargs):
+def process_folder(folder, ini_name='automo.ini', robo_type='tomo', **kwargs):
     """
     Create process list for all files in a folder
 
@@ -140,11 +140,11 @@ def process_folder(folder, ini_name='automo.ini', **kwargs):
     # option_dict = classify_kwargs(exp, **kwargs)
 
     for kfile in files:
-        create_process(exp, kfile, **kwargs)
+        create_process(exp, kfile, robo_type=robo_type, **kwargs)
 
     return
 
-def create_process(exp, file, robo_type = 'tomo', **kwargs):
+def create_process(exp, file, robo_type='tomo', **kwargs):
     """
     Create a list of commands to run a set of default functions
     on .h5 files located in folder/user_selected_name/data.h5
@@ -200,10 +200,15 @@ def get_file_name(file):
 def robo_move(exp, file, move_type):
     basename = get_file_name(file)
     if move_type=='new_folder':
-        os.mkdir(basename)
-        shutil.move (file, os.path.join(basename,file))
-    elif move_type=='same_folder':
-        print('not implemented')
+        regex = re.compile(r"(.+)_y(\d+)_x(\d+).+")
+        reg_dict = regex.search(file)
+        if reg_dict is not None:
+            basename = reg_dict.group(1)
+        else:
+            basename = get_file_name(file)
+        if ~os.path.exists(basename):
+            os.mkdir(basename)
+        shutil.move(file, os.path.join(basename,file))
     else:
         print('not implemented')
     return basename
@@ -237,6 +242,7 @@ def robo_process(exp, file, proc_list, **kwargs):
         print(runtime_line)
         log.write(runtime_line + '\n')
         os.system(runtime_line)
+    log.close()
 
 
 if __name__ == "__main__":
