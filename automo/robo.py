@@ -193,7 +193,7 @@ def get_robo_att(exp, robo_type):
     return robo_att
 
 def get_file_name(file):
-    print file
+    print(file)
     basename = os.path.splitext(file)[0]
     return basename
 
@@ -203,9 +203,9 @@ def robo_move(exp, file, move_type):
         os.mkdir(basename)
         shutil.move (file, os.path.join(basename,file))
     elif move_type=='same_folder':
-        print 'not implemented'
+        print('not implemented')
     else:
-        print 'not implemented'
+        print('not implemented')
     return basename
 
 def robo_rename(exp, file, rename_type):
@@ -217,6 +217,7 @@ def robo_rename(exp, file, rename_type):
 
 def robo_process(exp, file, proc_list, **kwargs):
 
+    log = open('process.sh', 'w')
     for proc in proc_list:
         if proc == 'preview':
             opts = [kwargs['preview']['proj_st'], kwargs['preview']['proj_end'], kwargs['preview']['proj_step'],
@@ -233,7 +234,8 @@ def robo_process(exp, file, proc_list, **kwargs):
         opts = ' '.join(map(str, opts))
         opts = ' ' + opts
         runtime_line = 'python ' + os.path.join(exp.proc_dir, proc)+ '.py ' + file + opts
-        print runtime_line
+        print(runtime_line)
+        log.write(runtime_line + '\n')
         os.system(runtime_line)
 
 
