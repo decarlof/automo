@@ -145,6 +145,7 @@ def process_folder(folder, ini_name='automo.ini', robo_type='tomo', **kwargs):
     return
 
 def create_process(exp, file, robo_type='tomo', **kwargs):
+
     """
     Create a list of commands to run a set of default functions
     on .h5 files located in folder/user_selected_name/data.h5
@@ -184,7 +185,7 @@ def get_robo_att(exp, robo_type):
         else:
             robo_att.move = exp.new_folder
         if exp.cf.has_option('robos_rename', robo_type):
-            robo_att.rename = exp.cf.get('robos_rename', robo_type)
+            robo_att.rename = True if (exp.cf.get('robos_rename', robo_type) == 'True') else False
         else:
             robo_att.rename = False
     else:
@@ -223,7 +224,7 @@ def robo_move(exp, file, move_type):
 
 def robo_rename(exp, file, rename_type):
     if rename_type:
-        os.rename(file,exp.def_h5_fname)
+        os.rename(file, exp.def_h5_fname)
         return exp.def_h5_fname
     else:
         return file
