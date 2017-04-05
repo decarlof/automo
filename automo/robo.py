@@ -212,8 +212,10 @@ def robo_move(exp, file, move_type):
             basename = reg_dict.group(1)
         else:
             basename = get_file_name(file)
-        if ~os.path.exists(basename):
+        try:
             os.mkdir(basename)
+        except:
+            pass
         shutil.move(file, os.path.join(basename,file))
     else:
         print('not implemented')
