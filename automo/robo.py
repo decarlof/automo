@@ -243,7 +243,9 @@ def robo_process(exp, file, proc_list, **kwargs):
         elif proc == 'preview_360':
             opts = [kwargs['preview']['slice_st'], kwargs['preview']['slice_end'], kwargs['preview']['slice_step']]
         elif proc == 'preview_tomosaic':
-            pass
+            opts = [kwargs['preview']['proj_st'], kwargs['preview']['proj_end'], kwargs['preview']['proj_step'],
+                    kwargs['preview']['slice_st'], kwargs['preview']['slice_end'], kwargs['preview']['slice_step'],
+                    kwargs['preview']['write_aux']]
         opts = ' '.join(map(str, opts))
         opts = ' ' + opts
         runtime_line = 'python ' + os.path.join(exp.proc_dir, proc)+ '.py ' + file + opts
