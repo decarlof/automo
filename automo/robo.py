@@ -172,6 +172,7 @@ def exec_process(exp, fname, robo_att, **kwargs):
     return
 
 def get_robo_att(exp, robo_type):
+
     global robo_att
     robo_att = automo_robo()
     if exp.cf.has_option('robos', robo_type):
@@ -200,6 +201,11 @@ def get_file_name(file):
 def robo_move(exp, file, move_type):
     basename = get_file_name(file)
     if move_type=='new_folder':
+        basename = get_file_name(file)
+        if ~os.path.exists(basename):
+            os.mkdir(basename)
+        shutil.move(file, os.path.join(basename,file))
+    elif move_type == 'existing_folder':
         regex = re.compile(r"(.+)_y(\d+)_x(\d+).+")
         reg_dict = regex.search(file)
         if reg_dict is not None:
@@ -236,6 +242,8 @@ def robo_process(exp, file, proc_list, **kwargs):
                     kwargs['recon']['chunk_size']]
         elif proc == 'preview_360':
             opts = [kwargs['preview']['slice_st'], kwargs['preview']['slice_end'], kwargs['preview']['slice_step']]
+        elif proc == 'preview_tomosaic':
+            pass
         opts = ' '.join(map(str, opts))
         opts = ' ' + opts
         runtime_line = 'python ' + os.path.join(exp.proc_dir, proc)+ '.py ' + file + opts
