@@ -141,7 +141,7 @@ def process_folder(folder, ini_name='automo.ini', robo_type='tomo', check_usage=
 
     for kfile in files:
         if check_usage:
-            ret = os.system('lsof | grep "' + kfile + '"')
+            ret = str(os.system('lsof | grep "' + kfile + '"'))
             if kfile not in ret:
                 create_process(exp, kfile, robo_type=robo_type, check_usage=check_usage, **kwargs)
         else:
