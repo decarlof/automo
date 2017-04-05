@@ -113,7 +113,7 @@ def init(ini_name='automo.ini'):
     return exp
 
 
-def process_folder(folder, ini_name='automo.ini', robo_type='tomo', **kwargs):
+def process_folder(folder, ini_name='automo.ini', robo_type='tomo', check_usage=True, **kwargs):
     """
     Create process list for all files in a folder
 
@@ -140,7 +140,12 @@ def process_folder(folder, ini_name='automo.ini', robo_type='tomo', **kwargs):
     # option_dict = classify_kwargs(exp, **kwargs)
 
     for kfile in files:
-        create_process(exp, kfile, robo_type=robo_type, **kwargs)
+        if check_usage:
+            ret = os.system('lsof | grep "' + kfile + '"')
+            if kfile not in ret:
+                create_process(exp, kfile, robo_type=robo_type, check_usage=check_usage, **kwargs)
+        else:
+            create_process(exp, kfile, robo_type=robo_type, check_usage=check_usage, **kwargs)
 
     return
 
