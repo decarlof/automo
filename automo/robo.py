@@ -63,6 +63,7 @@ import ConfigParser
 from os.path import expanduser
 import h5py
 import automo.util as util
+import subprocess
 
 from distutils.dir_util import mkpath
 import logging
@@ -141,9 +142,11 @@ def process_folder(folder, ini_name='automo.ini', robo_type='tomo', check_usage=
 
     for kfile in files:
         if check_usage:
-            ret = str(os.system('lsof | grep "' + kfile + '"'))
+            ret = str(subprocess.check_output('lsof'))
             if kfile not in ret:
                 create_process(exp, kfile, robo_type=robo_type, check_usage=check_usage, **kwargs)
+            else:
+                print('{:s} skipped because it is currently in use.'.format(kfile))
         else:
             create_process(exp, kfile, robo_type=robo_type, check_usage=check_usage, **kwargs)
 
@@ -199,11 +202,13 @@ def get_robo_att(exp, robo_type):
     return robo_att
 
 def get_file_name(file):
+
     print(file)
     basename = os.path.splitext(file)[0]
     return basename
 
 def robo_move(exp, file, move_type):
+
     basename = get_file_name(file)
     if move_type=='new_folder':
         basename = get_file_name(file)
