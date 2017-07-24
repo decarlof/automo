@@ -90,6 +90,8 @@ print('\n** Flat field correction done!')
 prj = sino_360_to_180(prj, overlap=overlap, rotation='right')
 print('\n** Sinogram converted!')
 
+theta = tomopy.angles(prj.shape[0])
+
 if debug:
     print('## Debug: after normalization:')
     print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
