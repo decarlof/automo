@@ -23,6 +23,45 @@ import numpy as np
 import automo.util as util
 
 
+def sino_360_to_180(data, overlap=0, rotation='left'):
+    """
+    Converts 0-360 degrees sinogram to a 0-180 sinogram.
+    If the number of projections in the input data is odd, the last projection
+    will be discarded.
+    Parameters
+    ----------
+    data : ndarray
+        Input 3D data.
+    overlap : scalar, optional
+        Overlapping number of pixels.
+    rotation : string, optional
+        Left if rotation center is close to the left of the
+        field-of-view, right otherwise.
+    Returns
+    -------
+    ndarray
+        Output 3D data.
+    """
+    dx, dy, dz = data.shape
+
+    overlap = int(np.round(overlap))
+
+    lo = overlap//2
+    ro = overlap - lo
+    n = dx//2
+
+    out = np.zeros((n, dy, 2*dz-overlap), dtype=data.dtype)
+
+    if rotation == 'left':
+        out[:, :, -(dz-lo):] = data[:n, :, lo:]
+        out[:, :, :-(dz-lo)] = data[n:2*n, :, ro:][:, :, ::-1]
+    elif rotation == 'right':
+        out[:, :, :dz-lo] = data[:n, :, :-lo]
+        out[:, :, dz-lo:] = data[n:2*n, :, :-ro][:, :, ::-1]
+
+    return out
+
+
 def main(arg):
 
     parser = argparse.ArgumentParser()
@@ -88,56 +127,66 @@ def main(arg):
         prj, flat, dark = util.read_data_adaptive(fname, sino=(sino_start, sino_end, sino_step))
 
         # Read theta from the dataset:
-        theta = tomopy.angles(prj.shape[0])
+        theta = tomopy.angles(int(prj.shape[0]//2))
 
         print('## Debug: after reading data:')
         print('\n** Shape of the data:'+str(np.shape(prj)))
-        print('** Shape of theta:'+str(np.shape(theta)))
         print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
 
         prj = tomopy.normalize(prj, flat, dark)
         print('\n** Flat field correction done!\n')
 
-        print('## Debug: after normalization:')
-        print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
+        for center in range(rot_start, rot_end, rot_step):
 
-        prj = tomopy.minus_log(prj)
-        print('\n** minus log applied!')
-
-        print('## Debug: after minus log:')
-        print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
-
-        prj = tomopy.misc.corr.remove_neg(prj, val=0.001)
-        prj = tomopy.misc.corr.remove_nan(prj, val=0.001)
-        prj[np.where(prj == np.inf)] = 0.001
-
-        print('## Debug: after cleaning bad values:')
-        print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
-
-        prj = tomopy.remove_stripe_ti(prj,4)
-        print('\n** Stripe removal done!')
-        print('## Debug: after remove_stripe:')
-        print('\n** Min and max val in prj before recon: %0.5f, %0.3f' % (np.min(prj), np.max(prj)))
-
-        prj = tomopy.median_filter(prj,size=medfilt_size)
-        print('\n** Median filter done!')
-        print('## Debug: after nedian filter:')
-        print('\n** Min and max val in prj before recon: %0.5f, %0.3f' % (np.min(prj), np.max(prj)))
+            overlap = (prj.shape[2] - center) * 2
+            prj = sino_360_to_180(prj, overlap=overlap, rotation='right')
+            print('\n** Sinogram converted!')
 
 
-        if level>0:
-            prj = tomopy.downsample(prj, level=level)
-            print('\n** Down sampling done!\n')
-            print('## Debug: after down sampling:')
+            print('## Debug: after normalization:')
+            print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
+
+            prj = tomopy.minus_log(prj)
+            print('\n** minus log applied!')
+
+            print('## Debug: after minus log:')
+            print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
+
+            prj = tomopy.misc.corr.remove_neg(prj, val=0.001)
+            prj = tomopy.misc.corr.remove_nan(prj, val=0.001)
+            prj[np.where(prj == np.inf)] = 0.001
+
+            print('## Debug: after cleaning bad values:')
+            print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
+
+            prj = tomopy.remove_stripe_ti(prj,4)
+            print('\n** Stripe removal done!')
+            print('## Debug: after remove_stripe:')
             print('\n** Min and max val in prj before recon: %0.5f, %0.3f' % (np.min(prj), np.max(prj)))
+
+            prj = tomopy.median_filter(prj,size=medfilt_size)
+            print('\n** Median filter done!')
+            print('## Debug: after nedian filter:')
+            print('\n** Min and max val in prj before recon: %0.5f, %0.3f' % (np.min(prj), np.max(prj)))
+
+
+            if level>0:
+                prj = tomopy.downsample(prj, level=level)
+                print('\n** Down sampling done!\n')
+                print('## Debug: after down sampling:')
+                print('\n** Min and max val in prj before recon: %0.5f, %0.3f' % (np.min(prj), np.max(prj)))
+
+            rec = tomopy.recon(prj, theta, center=center, algorithm='gridrec')
+
+            slice_ls = range(sino_start, sino_end, sino_step)
+            for i in range(rec.shape[0]):
+                outpath = os.path.join(os.getcwd(), 'center', str(slice_ls[i]))
+                dxchange.write_tiff(rec[i], os.path.join(outpath, '{:.2f}'.format(center)))
 
         slice_ls = range(sino_start, sino_end, sino_step)
         center_ls = []
         for i in slice_ls:
             outpath = os.path.join(os.getcwd(), 'center', str(i))
-            tomopy.write_center(prj, theta, dpath=outpath,
-                                cen_range=[rot_start/pow(2,level), rot_end/pow(2, level),
-                                           rot_step/pow(2, level)])
             min_entropy_fname = util.minimum_entropy(outpath, mask_ratio=0.7, ring_removal=True)
             center_ls.append(float(re.findall('\d+\.\d+', os.path.basename(min_entropy_fname))[0]))
         if len(center_ls) == 1:

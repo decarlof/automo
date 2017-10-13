@@ -84,7 +84,7 @@ class automo_exp:
     macro_list = ''
     proc_folder = ''
     log_file = ''
-    log_name = '    '
+    log_name = ''
 
 class automo_robo:
     type = ''
@@ -248,13 +248,22 @@ def robo_process(exp, file, proc_list, **kwargs):
                     kwargs['preview']['slice_st'], kwargs['preview']['slice_end'], kwargs['preview']['slice_step']]
         elif proc == 'center':
             opts = [kwargs['center']['rot_start'], kwargs['center']['rot_end'], kwargs['center']['rot_step'],
-                    kwargs['center']['slice'], kwargs['center']['medfilt_size'], kwargs['center']['level']]
+                    kwargs['center']['slice'], kwargs['center']['n_slice'],
+                    kwargs['center']['medfilt_size'], kwargs['center']['level']]
         elif proc == 'recon':
             opts = [kwargs['recon']['center_folder'], kwargs['recon']['sino_start'], kwargs['recon']['sino_end'],
                     kwargs['recon']['sino_step'], kwargs['recon']['medfilt_size'], kwargs['recon']['level'],
                     kwargs['recon']['chunk_size']]
         elif proc == 'preview_360':
             opts = [kwargs['preview']['slice_st'], kwargs['preview']['slice_end'], kwargs['preview']['slice_step']]
+        elif proc == 'center_360':
+            opts = [kwargs['center_360']['rot_start'], kwargs['center_360']['rot_end'], kwargs['center_360']['rot_step'],
+                    kwargs['center_360']['slice'], kwargs['center_360']['n_slice'],
+                    kwargs['center_360']['medfilt_size'], kwargs['center_360']['level']]
+        elif proc == 'recon_360':
+            opts = [kwargs['recon_360']['center_folder'], kwargs['recon_360']['sino_start'], kwargs['recon_360']['sino_end'],
+                    kwargs['recon_360']['sino_step'], kwargs['recon_360']['medfilt_size'], kwargs['recon_360']['level'],
+                    kwargs['recon_360']['chunk_size']]
         elif proc == 'preview_tomosaic':
             opts = [kwargs['preview']['proj_st'], kwargs['preview']['proj_end'], kwargs['preview']['proj_step'],
                     kwargs['preview']['slice_st'], kwargs['preview']['slice_end'], kwargs['preview']['slice_step'],
