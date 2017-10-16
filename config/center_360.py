@@ -116,10 +116,6 @@ def main(arg):
     if (sino_start < 0) or (sino_start > array_dims[1]):
         sino_start = array_dims[1]/2
 
-    sino_end = sino_start + 1
-    sino = [sino_start, sino_end]
-    print ("Sino: ", sino)
-
     folder = os.path.dirname(fname) + os.sep
     try:
         N_recon = rot_start - rot_end

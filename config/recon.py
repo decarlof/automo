@@ -57,7 +57,7 @@ def main(arg):
     # find center if not given
     try:
         if os.path.exists('center_pos.txt'):
-            f = open('center_pos')
+            f = open('center_pos.txt')
             center_pos = f.readline()
             center_pos = float(center_pos)
             f.close()
