@@ -114,7 +114,7 @@ def init(ini_name='automo.ini'):
     return exp
 
 
-def process_folder(folder, ini_name='automo.ini', robo_type='tomo', check_usage=True, **kwargs):
+def process_folder(folder, ini_name='automo.ini', check_usage=True, **kwargs):
     """
     Create process list for all files in a folder
 
@@ -138,9 +138,19 @@ def process_folder(folder, ini_name='automo.ini', robo_type='tomo', check_usage=
 
     os.chdir(exp.folder)
 
+    tomosaic_naming = '.+_[x,y]\d+\..+'
+
     # option_dict = classify_kwargs(exp, **kwargs)
 
     for kfile in files:
+        if '_180.' in kfile:
+            robo_type = 'tomo_180'
+        elif '_360.' in kfile:
+            robo_type = 'tomo_360'
+        elif re.match(tomosaic_naming, kfile):
+            robo_type = 'tomosaic'
+        else:
+            robo_type = 'std'
         if check_usage:
             ret = str(subprocess.check_output('lsof'))
             if kfile not in ret:
