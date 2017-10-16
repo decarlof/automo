@@ -143,9 +143,9 @@ def process_folder(folder, ini_name='automo.ini', check_usage=True, **kwargs):
     # option_dict = classify_kwargs(exp, **kwargs)
 
     for kfile in files:
-        if '_180.' in kfile:
+        if '_180_' in kfile:
             robo_type = 'tomo_180'
-        elif '_360.' in kfile:
+        elif '_360_' in kfile:
             robo_type = 'tomo_360'
         elif re.match(tomosaic_naming, kfile):
             robo_type = 'tomosaic'
