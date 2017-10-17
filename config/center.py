@@ -146,6 +146,7 @@ def main(arg):
             smax = (rot_end/pow(2,level) - mid) * 2
             center_pos = tomopy.find_center_vo(prj, smin=smin, smax=smax, step=rot_step)
         center_ls.append(center_pos)
+        print('Center for slice: {}'.format(center_pos))
     if len(center_ls) == 1:
         center_pos = center_ls[0]
     else:
