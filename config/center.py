@@ -132,10 +132,10 @@ def main(arg):
 
     slice_ls = range(sino_start, sino_end, sino_step)
     center_ls = []
-    for i in slice_ls:
+    for ind, i in enumerate(slice_ls):
         outpath = os.path.join(os.getcwd(), 'center', str(i))
         if search_method == 'entropy':
-            tomopy.write_center(prj, theta, dpath=outpath,
+            tomopy.write_center(prj[:, ind:ind+1, :], theta, dpath=outpath,
                                 cen_range=[rot_start/pow(2,level), rot_end/pow(2, level),
                                            rot_step/pow(2, level)])
             min_entropy_fname = util.minimum_entropy(outpath, mask_ratio=0.7, ring_removal=True)
