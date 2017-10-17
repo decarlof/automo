@@ -350,6 +350,7 @@ def read_data_adaptive(fname, proj=None, sino=None, data_format='aps_32id', shap
 
 def most_neighbor_clustering(data, radius):
 
+    data = np.array(data)
     counter = np.zeros(len(data))
     for i in data:
         for j in data:

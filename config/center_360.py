@@ -117,88 +117,82 @@ def main(arg):
         sino_start = array_dims[1]/2
 
     folder = os.path.dirname(fname) + os.sep
-    try:
-        N_recon = rot_start - rot_end
 
-        prj, flat, dark = util.read_data_adaptive(fname, sino=(sino_start, sino_end, sino_step))
+    N_recon = rot_start - rot_end
 
-        # Read theta from the dataset:
-        theta = tomopy.angles(int(prj.shape[0]//2))
+    prj, flat, dark = util.read_data_adaptive(fname, sino=(sino_start, sino_end, sino_step))
 
-        print('## Debug: after reading data:')
-        print('\n** Shape of the data:'+str(np.shape(prj)))
+    # Read theta from the dataset:
+    theta = tomopy.angles(int(prj.shape[0]//2))
+
+    print('## Debug: after reading data:')
+    print('\n** Shape of the data:'+str(np.shape(prj)))
+    print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
+
+    prj = tomopy.normalize(prj, flat, dark)
+    print('\n** Flat field correction done!\n')
+
+    for center in range(rot_start, rot_end, rot_step):
+
+        overlap = (prj.shape[2] - center) * 2
+        prj = sino_360_to_180(prj, overlap=overlap, rotation='right')
+        print('\n** Sinogram converted!')
+
+
+        print('## Debug: after normalization:')
         print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
 
-        prj = tomopy.normalize(prj, flat, dark)
-        print('\n** Flat field correction done!\n')
+        prj = tomopy.minus_log(prj)
+        print('\n** minus log applied!')
 
-        for center in range(rot_start, rot_end, rot_step):
+        print('## Debug: after minus log:')
+        print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
 
-            overlap = (prj.shape[2] - center) * 2
-            prj = sino_360_to_180(prj, overlap=overlap, rotation='right')
-            print('\n** Sinogram converted!')
+        prj = tomopy.misc.corr.remove_neg(prj, val=0.001)
+        prj = tomopy.misc.corr.remove_nan(prj, val=0.001)
+        prj[np.where(prj == np.inf)] = 0.001
+
+        print('## Debug: after cleaning bad values:')
+        print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
+
+        prj = tomopy.remove_stripe_ti(prj,4)
+        print('\n** Stripe removal done!')
+        print('## Debug: after remove_stripe:')
+        print('\n** Min and max val in prj before recon: %0.5f, %0.3f' % (np.min(prj), np.max(prj)))
+
+        prj = tomopy.median_filter(prj,size=medfilt_size)
+        print('\n** Median filter done!')
+        print('## Debug: after nedian filter:')
+        print('\n** Min and max val in prj before recon: %0.5f, %0.3f' % (np.min(prj), np.max(prj)))
 
 
-            print('## Debug: after normalization:')
-            print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
-
-            prj = tomopy.minus_log(prj)
-            print('\n** minus log applied!')
-
-            print('## Debug: after minus log:')
-            print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
-
-            prj = tomopy.misc.corr.remove_neg(prj, val=0.001)
-            prj = tomopy.misc.corr.remove_nan(prj, val=0.001)
-            prj[np.where(prj == np.inf)] = 0.001
-
-            print('## Debug: after cleaning bad values:')
-            print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
-
-            prj = tomopy.remove_stripe_ti(prj,4)
-            print('\n** Stripe removal done!')
-            print('## Debug: after remove_stripe:')
+        if level>0:
+            prj = tomopy.downsample(prj, level=level)
+            print('\n** Down sampling done!\n')
+            print('## Debug: after down sampling:')
             print('\n** Min and max val in prj before recon: %0.5f, %0.3f' % (np.min(prj), np.max(prj)))
 
-            prj = tomopy.median_filter(prj,size=medfilt_size)
-            print('\n** Median filter done!')
-            print('## Debug: after nedian filter:')
-            print('\n** Min and max val in prj before recon: %0.5f, %0.3f' % (np.min(prj), np.max(prj)))
-
-
-            if level>0:
-                prj = tomopy.downsample(prj, level=level)
-                print('\n** Down sampling done!\n')
-                print('## Debug: after down sampling:')
-                print('\n** Min and max val in prj before recon: %0.5f, %0.3f' % (np.min(prj), np.max(prj)))
-
-            rec = tomopy.recon(prj, theta, center=center, algorithm='gridrec')
-
-            slice_ls = range(sino_start, sino_end, sino_step)
-            for i in range(rec.shape[0]):
-                outpath = os.path.join(os.getcwd(), 'center', str(slice_ls[i]))
-                dxchange.write_tiff(rec[i], os.path.join(outpath, '{:.2f}'.format(center)))
+        rec = tomopy.recon(prj, theta, center=center, algorithm='gridrec')
 
         slice_ls = range(sino_start, sino_end, sino_step)
-        center_ls = []
-        for i in slice_ls:
-            outpath = os.path.join(os.getcwd(), 'center', str(i))
-            min_entropy_fname = util.minimum_entropy(outpath, mask_ratio=0.7, ring_removal=True)
-            center_ls.append(float(re.findall('\d+\.\d+', os.path.basename(min_entropy_fname))[0]))
-        if len(center_ls) == 1:
-            center_pos = center_ls[0]
-        else:
-            center_pos = np.mean(util.most_neighbor_clustering(center_ls, 5))
-        f = open('center_pos.txt', 'w')
-        f.write(str(center_pos))
-        f.close()
-        print("#################################")
+        for i in range(rec.shape[0]):
+            outpath = os.path.join(os.getcwd(), 'center', str(slice_ls[i]))
+            dxchange.write_tiff(rec[i], os.path.join(outpath, '{:.2f}'.format(center)))
 
-    except:
-        print(folder, 'does not contain the expected file hdf5 file')
-        pass
-
-
+    slice_ls = range(sino_start, sino_end, sino_step)
+    center_ls = []
+    for i in slice_ls:
+        outpath = os.path.join(os.getcwd(), 'center', str(i))
+        min_entropy_fname = util.minimum_entropy(outpath, mask_ratio=0.7, ring_removal=True)
+        center_ls.append(float(re.findall('\d+\.\d+', os.path.basename(min_entropy_fname))[0]))
+    if len(center_ls) == 1:
+        center_pos = center_ls[0]
+    else:
+        center_pos = np.mean(util.most_neighbor_clustering(center_ls, 5))
+    f = open('center_pos.txt', 'w')
+    f.write(str(center_pos))
+    f.close()
+    print("#################################")
 
 
 if __name__ == "__main__":

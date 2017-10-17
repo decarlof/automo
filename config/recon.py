@@ -55,32 +55,28 @@ def main(arg):
         shutil.copyfile(os.path.join(home, '.automo', 'recon_standalone.py'), 'recon.py')
 
     # find center if not given
-    try:
-        if os.path.exists('center_pos.txt'):
-            f = open('center_pos.txt')
-            center_pos = f.readline()
-            center_pos = float(center_pos)
-            f.close()
+    if os.path.exists('center_pos.txt'):
+        f = open('center_pos.txt')
+        center_pos = f.readline()
+        center_pos = float(center_pos)
+        f.close()
+    else:
+        slice_ls = os.listdir('center')
+        for ind, i in enumerate(slice_ls):
+            if not os.path.isfile(i):
+                slice_ls[ind] = int(i)
+        center_ls = []
+        for i in slice_ls:
+            outpath = os.path.join(os.getcwd(), 'center', str(i))
+            min_entropy_fname = util.minimum_entropy(outpath, mask_ratio=0.7, ring_removal=True)
+            center_ls.append(float(re.findall('\d+\.\d+', os.path.basename(min_entropy_fname))[0]))
+        if len(center_ls) == 1:
+            center_pos = center_ls[0]
         else:
-            slice_ls = os.listdir('center')
-            for ind, i in enumerate(slice_ls):
-                if not os.path.isfile(i):
-                    slice_ls[ind] = int(i)
-            center_ls = []
-            for i in slice_ls:
-                outpath = os.path.join(os.getcwd(), 'center', str(i))
-                min_entropy_fname = util.minimum_entropy(outpath, mask_ratio=0.7, ring_removal=True)
-                center_ls.append(float(re.findall('\d+\.\d+', os.path.basename(min_entropy_fname))[0]))
-            if len(center_ls) == 1:
-                center_pos = center_ls[0]
-            else:
-                center_pos = np.mean(util.most_neighbor_clustering(center_ls, 5))
-            f = open('center_pos.txt', 'w')
-            f.write(str(center_pos))
-            f.close()
-
-    except:
-        print('An error occurred in center searching.\n')
+            center_pos = np.mean(util.most_neighbor_clustering(center_ls, 5))
+        f = open('center_pos.txt', 'w')
+        f.write(str(center_pos))
+        f.close()
 
 
     # perform reconstruction
@@ -154,9 +150,6 @@ def main(arg):
 
         dxchange.write_tiff_stack(rec, fname=os.path.join('recon', 'recon'), start=chunk_st, dtype='float32')
 
-    # except:
-
-        # print(folder, 'does not contain the expected file hdf5 file')
 
 
 if __name__ == "__main__":
