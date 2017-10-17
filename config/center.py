@@ -36,6 +36,8 @@ def main(arg):
     parser.add_argument("level", help="level of downsampling")
     args = parser.parse_args()
 
+    search_method = 'entropy'
+
     home = expanduser("~")
     tomo = os.path.join(home, '.tomo/automo.ini')
     cf = ConfigParser.ConfigParser()
@@ -110,7 +112,7 @@ def main(arg):
     print('## Debug: after cleaning bad values:')
     print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
 
-    prj = tomopy.remove_stripe_ti(prj,4)
+    prj = tomopy.remove_stripe_fw(prj, 5, wname='sym16', sigma=1, pad=True)
     print('\n** Stripe removal done!')
     print('## Debug: after remove_stripe:')
     print('\n** Min and max val in prj before recon: %0.5f, %0.3f' % (np.min(prj), np.max(prj)))
@@ -131,11 +133,18 @@ def main(arg):
     center_ls = []
     for i in slice_ls:
         outpath = os.path.join(os.getcwd(), 'center', str(i))
-        tomopy.write_center(prj, theta, dpath=outpath,
-                            cen_range=[rot_start/pow(2,level), rot_end/pow(2, level),
-                                       rot_step/pow(2, level)])
-        min_entropy_fname = util.minimum_entropy(outpath, mask_ratio=0.7, ring_removal=True)
-        center_ls.append(float(re.findall('\d+\.\d+', os.path.basename(min_entropy_fname))[0]))
+        if search_method == 'entropy':
+            tomopy.write_center(prj, theta, dpath=outpath,
+                                cen_range=[rot_start/pow(2,level), rot_end/pow(2, level),
+                                           rot_step/pow(2, level)])
+            min_entropy_fname = util.minimum_entropy(outpath, mask_ratio=0.7, ring_removal=True)
+            center_pos = float(re.findall('\d+\.\d+', os.path.basename(min_entropy_fname))[0])
+        elif search_method == 'vo':
+            mid = prj.shape[2] / 2 / pow(2,level)
+            smin = (rot_start/pow(2,level) - mid) * 2
+            smax = (rot_end/pow(2,level) - mid) * 2
+            center_pos = tomopy.find_center_vo(prj, smin=smin, smax=smax, step=rot_step)
+        center_ls.append(center_pos)
     if len(center_ls) == 1:
         center_pos = center_ls[0]
     else:
