@@ -55,8 +55,8 @@ def main(arg):
     array_dims = util.read_data_adaptive(fname, shape_only=True)
 
     if slice == -1:
-        sino_start = 0
-        sino_end = array_dims[1]-1
+        sino_start = 200
+        sino_end = array_dims[1]-200
         sino_step = int((sino_end - sino_start)) / n_slice + 1
     else:
         sino_start = slice
