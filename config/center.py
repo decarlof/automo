@@ -138,7 +138,7 @@ def main(arg):
             tomopy.write_center(prj[:, ind:ind+1, :], theta, dpath=outpath,
                                 cen_range=[rot_start/pow(2,level), rot_end/pow(2, level),
                                            rot_step/pow(2, level)])
-            min_entropy_fname = util.minimum_entropy(outpath, mask_ratio=0.7, ring_removal=True)
+            min_entropy_fname = util.minimum_entropy(outpath, mask_ratio=0.7, ring_removal=False)
             center_pos = float(re.findall('\d+\.\d+', os.path.basename(min_entropy_fname))[0])
         elif search_method == 'vo':
             mid = prj.shape[2] / 2 / pow(2,level)
