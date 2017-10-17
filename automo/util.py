@@ -356,8 +356,8 @@ def most_neighbor_clustering(data, radius):
 
     data = np.array(data)
     counter = np.zeros(len(data))
-    for i in data:
+    for ind, i in enumerate(data):
         for j in data:
             if j != i and abs(j - i) < radius:
-                counter[i] += 1
+                counter[ind] += 1
     return data[np.where(counter == counter.max())]
