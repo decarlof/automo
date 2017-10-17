@@ -140,10 +140,11 @@ def main(arg):
         print('## Debug: after nedian filter:')
         print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
 
-        prj = tomopy.downsample(prj, level=level)
-        print('\n** Down sampling done!\n')
-        print('## Debug: after down sampling:')
-        print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
+        if not level == 0:
+            prj = tomopy.downsample(prj, level=level)
+            print('\n** Down sampling done!\n')
+            print('## Debug: after down sampling:')
+            print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
 
         rec = tomopy.recon(prj, theta, center=center_pos, algorithm='gridrec', filter_name='parzen')
         print('\nReconstruction done!\n')
