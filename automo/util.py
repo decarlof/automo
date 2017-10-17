@@ -278,10 +278,11 @@ def minimum_entropy(folder, pattern='*.tiff', range=(0, 0.002), mask_ratio=0.9, 
     return a[np.argmin(s)]
 
 
-def read_data_adaptive(fname, proj=None, sino=None, data_format='aps_32id', shape_only=False, **kwargs):
+def read_data_adaptive(fname, proj=None, sino=None, data_format='aps_32id', shape_only=False, return_theta=True, **kwargs):
     """
     Adaptive data reading function that works with dxchange both below and beyond version 0.0.11.
     """
+    theta = None
     dxver = dxchange.__version__
     m = re.search(r'(\d+)\.(\d+)\.(\d+)', dxver)
     ver = m.group(1, 2, 3)
@@ -297,7 +298,7 @@ def read_data_adaptive(fname, proj=None, sino=None, data_format='aps_32id', shap
             return d.shape
         try:
             if ver[0] > 0 or ver[1] > 1 or ver[2] > 1:
-                dat, flt, drk, _ = dxchange.read_aps_32id(fname, proj=proj, sino=sino)
+                dat, flt, drk, theta = dxchange.read_aps_32id(fname, proj=proj, sino=sino)
             else:
                 dat, flt, drk = dxchange.read_aps_32id(fname, proj=proj, sino=sino)
         except:
@@ -345,7 +346,10 @@ def read_data_adaptive(fname, proj=None, sino=None, data_format='aps_32id', shap
             drk = np.zeros([1, flt.shape[1], flt.shape[2]]).astype('uint16')
             drk[...] = 64
 
-    return dat, flt, drk
+    if return_theta:
+        return dat, flt, drk, theta
+    else:
+        return dat, flt, drk
 
 
 def most_neighbor_clustering(data, radius):

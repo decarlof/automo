@@ -83,10 +83,11 @@ def main(arg):
 
     N_recon = rot_start - rot_end
 
-    prj, flat, dark = util.read_data_adaptive(fname, sino=(sino_start, sino_end, sino_step))
+    prj, flat, dark, theta = util.read_data_adaptive(fname, sino=(sino_start, sino_end, sino_step),
+                                                     return_theta=True)
 
     # Read theta from the dataset:
-    theta = tomopy.angles(prj.shape[0])
+    # theta = tomopy.angles(prj.shape[0])
 
     print('## Debug: after reading data:')
     print('\n** Shape of the data:'+str(np.shape(prj)))
