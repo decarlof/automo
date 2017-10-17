@@ -301,9 +301,12 @@ def read_data_adaptive(fname, proj=None, sino=None, data_format='aps_32id', shap
                 dat, flt, drk, theta = dxchange.read_aps_32id(fname, proj=proj, sino=sino)
             else:
                 dat, flt, drk = dxchange.read_aps_32id(fname, proj=proj, sino=sino)
+                f = h5py.File(fname)
+                theta = f['exchange/theta'].value
         except:
             f = h5py.File(fname)
             d = f['exchange/data']
+            theta = f['exchange/theta'].value
             if proj is None:
                 dat = d[:, sino[0]:sino[1]:sino_step, :]
                 flt = f['exchange/data_white'][:, sino[0]:sino[1]:sino_step, :]
