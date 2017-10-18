@@ -35,7 +35,7 @@ def main(arg):
     parser.add_argument("medfilt_size", help="size of median filter")
     parser.add_argument("level", help="level of downsampling")
     parser.add_argument("chunk_size", help="chunk size")
-    parser.add_argument("padding", help="sinogram padding")
+    # parser.add_argument("padding", help="sinogram padding")
     args = parser.parse_args()
 
     home = expanduser("~")
@@ -50,7 +50,9 @@ def main(arg):
     chunk_size = int(args.chunk_size)
     medfilt_size = int(args.medfilt_size)
     level = int(args.level)
-    pad_length = int(args.padding)
+    # pad_length = int(args.padding)
+
+    pad_length = 1000
 
     # write_stand-alone recon script
     if os.path.exists(os.path.join(home, '.automo', 'recon_standalone.py')):

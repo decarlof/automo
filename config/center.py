@@ -34,11 +34,12 @@ def main(arg):
     parser.add_argument("n_slice", help="number of slices. Put -1 for slice_start if supplied")
     parser.add_argument("medfilt_size", help="size of median filter")
     parser.add_argument("level", help="level of downsampling")
-    parser.add_argument("padding", help="sinogram padding")
+    # parser.add_argument("padding", help="sinogram padding")
     args = parser.parse_args()
 
     search_method = 'entropy'
-    pad_length = int(args.padding)
+    # pad_length = int(args.padding)
+    pad_length = 1000
 
     home = expanduser("~")
     tomo = os.path.join(home, '.tomo/automo.ini')
