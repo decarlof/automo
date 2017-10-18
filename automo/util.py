@@ -248,6 +248,7 @@ def append(fname, process):
 def entropy(img, range=(0, 0.002), mask_ratio=0.9, window=None, ring_removal=True, center_x=None, center_y=None):
 
     temp = np.copy(img)
+    temp = np.squeeze(temp)
     if window is not None:
         window = np.array(window, dtype='int')
         temp = temp[window[0][0]:window[1][0], window[0][1]:window[1][1]]
@@ -537,4 +538,4 @@ def write_center(tomo, theta, dpath='tmp/center', cen_range=None, pad_length=0):
 
     for center in np.arange(*cen_range):
         rec = tomopy.recon(tomo[:, 0:1, :], theta, algorithm='gridrec', center=center)
-        dxchange.write_tiff(rec, os.path.join(dpath, '{:.2f}'.format(center-pad_length)), overwrite=True)
+        dxchange.write_tiff(np.squeeze(rec), os.path.join(dpath, '{:.2f}'.format(center-pad_length)), overwrite=True)
