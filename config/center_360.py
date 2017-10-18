@@ -91,6 +91,8 @@ def main(arg):
 
     array_dims = util.read_data_adaptive(fname, shape_only=True)
 
+    max_size = 2 * rot_end + 2
+
     if slice == -1:
         sino_start = 200
         sino_end = array_dims[1]-200
@@ -174,17 +176,21 @@ def main(arg):
 
         rec = tomopy.recon(prj, theta, center=center, algorithm='gridrec')
 
+        out = np.zeros([rec.shape[0], max_size, max_size])
+        out[:, :rec.shape[1], :rec.shape[2]] = rec
+
         slice_ls = range(sino_start, sino_end, sino_step)
-        for i in range(rec.shape[0]):
+        for i in range(out.shape[0]):
             outpath = os.path.join(os.getcwd(), 'center', str(slice_ls[i]))
-            dxchange.write_tiff(rec[i], os.path.join(outpath, '{:.2f}'.format(center)))
+            dxchange.write_tiff(out[i], os.path.join(outpath, '{:.2f}'.format(center)))
 
     slice_ls = range(sino_start, sino_end, sino_step)
     center_ls = []
     for i in slice_ls:
         outpath = os.path.join(os.getcwd(), 'center', str(i))
-        min_entropy_fname = util.minimum_entropy(outpath, mask_ratio=0.7, ring_removal=True)
-        center_ls.append(float(re.findall('\d+\.\d+', os.path.basename(min_entropy_fname))[0]))
+        # min_entropy_fname = util.minimum_entropy(outpath, mask_ratio=0.7, ring_removal=True)
+        # center_ls.append(float(re.findall('\d+\.\d+', os.path.basename(min_entropy_fname))[0]))
+        center_ls.append('0')
     if len(center_ls) == 1:
         center_pos = center_ls[0]
     else:

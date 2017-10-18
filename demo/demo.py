@@ -6,15 +6,15 @@ preview_dict = {'proj_st': 0, 'proj_end': 1, 'proj_step': 1, 'slice_st': 500, 's
 center_dict = {'rot_start': 850, 'rot_end': 1000, 'rot_step': 1, 'slice': 600, 'n_slice': -1, 'medfilt_size': 3,
                'level': 0}
 
-recon_dict = {'center_folder': 'center', 'sino_start': 0, 'sino_end': 1199, 'sino_step': 1, 'medfilt_size': 1,
+recon_dict = {'center_folder': 'center', 'sino_start': 0, 'sino_end': 1200, 'sino_step': 1, 'medfilt_size': 1,
               'level': 0, 'chunk_size': 50}
 
 preview_dict_360 = {'slice_st': 500, 'slice_end': 501, 'slice_step': 1}
 
-center_dict_360 = {'rot_start': 930, 'rot_end': 990, 'rot_step': 1, 'slice': -1, 'n_slice': 5, 'medfilt_size': 3,
+center_dict_360 = {'rot_start': 1500, 'rot_end': 1750, 'rot_step': 1, 'slice': 600, 'n_slice': -1, 'medfilt_size': 1,
                    'level': 0}
 
-recon_dict_360 = {'center_folder': 'center', 'sino_start': 0, 'sino_end': 1199, 'sino_step': 1, 'medfilt_size': 1,
+recon_dict_360 = {'center_folder': 'center', 'sino_start': 0, 'sino_end': 1200, 'sino_step': 1, 'medfilt_size': 1,
                   'level': 0, 'chunk_size': 50}
 
 preview_dict_tomosaic = {'proj_st': 0, 'proj_end': 1, 'proj_step': 1, 'slice_st': 500, 'slice_end': 501,
