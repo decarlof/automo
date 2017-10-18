@@ -34,10 +34,11 @@ def main(arg):
     parser.add_argument("n_slice", help="number of slices. Put -1 for slice_start if supplied")
     parser.add_argument("medfilt_size", help="size of median filter")
     parser.add_argument("level", help="level of downsampling")
+    parser.add_argument("padding", help="sinogram padding")
     args = parser.parse_args()
 
     search_method = 'entropy'
-    pad_length = 1024
+    pad_length = int(args.padding)
 
     home = expanduser("~")
     tomo = os.path.join(home, '.tomo/automo.ini')
@@ -133,7 +134,7 @@ def main(arg):
 
     slice_ls = range(sino_start, sino_end, sino_step)
     center_ls = []
-    if search_method == 'entropy':
+    if search_method == 'entropy' and pad_length > 0:
         prj = util.pad_sinogram(prj, pad_length)
         rot_start += pad_length
         rot_end += pad_length

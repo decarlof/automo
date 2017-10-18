@@ -259,11 +259,11 @@ def robo_process(exp, file, proc_list, **kwargs):
         elif proc == 'center':
             opts = [kwargs['center']['rot_start'], kwargs['center']['rot_end'], kwargs['center']['rot_step'],
                     kwargs['center']['slice'], kwargs['center']['n_slice'],
-                    kwargs['center']['medfilt_size'], kwargs['center']['level']]
+                    kwargs['center']['medfilt_size'], kwargs['center']['level'], kwargs['center']['padding']]
         elif proc == 'recon':
             opts = [kwargs['recon']['center_folder'], kwargs['recon']['sino_start'], kwargs['recon']['sino_end'],
                     kwargs['recon']['sino_step'], kwargs['recon']['medfilt_size'], kwargs['recon']['level'],
-                    kwargs['recon']['chunk_size']]
+                    kwargs['recon']['chunk_size'], kwargs['recon']['padding']]
         elif proc == 'preview_360':
             opts = [kwargs['preview']['slice_st'], kwargs['preview']['slice_end'], kwargs['preview']['slice_step']]
         elif proc == 'center_360':

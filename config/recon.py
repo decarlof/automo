@@ -35,6 +35,7 @@ def main(arg):
     parser.add_argument("medfilt_size", help="size of median filter")
     parser.add_argument("level", help="level of downsampling")
     parser.add_argument("chunk_size", help="chunk size")
+    parser.add_argument("padding", help="sinogram padding")
     args = parser.parse_args()
 
     home = expanduser("~")
@@ -49,6 +50,7 @@ def main(arg):
     chunk_size = int(args.chunk_size)
     medfilt_size = int(args.medfilt_size)
     level = int(args.level)
+    pad_length = int(args.padding)
 
     # write_stand-alone recon script
     if os.path.exists(os.path.join(home, '.automo', 'recon_standalone.py')):
@@ -103,6 +105,7 @@ def main(arg):
         print('Chunk range: ({:d}, {:d})'.format(chunk_st, chunk_end))
 
         prj, flat, dark, theta = util.read_data_adaptive(file_name, sino=(chunk_st, chunk_end, sino_step), return_theta=True)
+        raw_shape = prj.shape
 
         # theta = tomopy.angles(prj.shape[0])
 
@@ -146,8 +149,14 @@ def main(arg):
             print('## Debug: after down sampling:')
             print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
 
-        rec = tomopy.recon(prj, theta, center=center_pos, algorithm='gridrec', filter_name='parzen')
+        if not pad_length == 0:
+            prj = util.pad_sinogram(prj, pad_length)
+
+        rec = tomopy.recon(prj, theta, center=center_pos+pad_length, algorithm='gridrec', filter_name='parzen')
         print('\nReconstruction done!\n')
+
+        if not pad_length == 0:
+            rec = rec[pad_length:pad_length+raw_shape[2], pad_length:pad_length+raw_shape[2]]
 
         rec = tomopy.circ_mask(rec, 0, ratio=0.9)
 
