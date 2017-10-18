@@ -135,6 +135,8 @@ def main(arg):
     center_ls = []
     if search_method == 'entropy':
         prj = util.pad_sinogram(prj, pad_length)
+        rot_start += pad_length
+        rot_end += pad_length
     for ind, i in enumerate(slice_ls):
         outpath = os.path.join(os.getcwd(), 'center', str(i))
         if search_method == 'entropy':
