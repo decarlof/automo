@@ -251,7 +251,7 @@ def robo_rename(exp, file, rename_type):
 
 def robo_process(exp, file, proc_list, **kwargs):
 
-    log = open('process.sh', 'w')
+    log = open('recon.sh', 'w')
     for proc in proc_list:
         if proc == 'preview':
             opts = [kwargs['preview']['proj_st'], kwargs['preview']['proj_end'], kwargs['preview']['proj_step'],
@@ -282,7 +282,9 @@ def robo_process(exp, file, proc_list, **kwargs):
         opts = ' ' + opts
         runtime_line = 'python ' + os.path.join(exp.proc_dir, proc)+ '.py ' + file + opts
         print(runtime_line)
-        log.write(runtime_line + '\n')
+        # log.write(runtime_line + '\n')
+        if 'recon' in proc:
+            log.write('python /local/Software/rchard/automo/config/recon.py ' + file + opts + '\n')
         os.system(runtime_line)
     log.close()
 
