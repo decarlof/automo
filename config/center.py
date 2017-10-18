@@ -142,9 +142,10 @@ def main(arg):
     for ind, i in enumerate(slice_ls):
         outpath = os.path.join(os.getcwd(), 'center', str(i))
         if search_method == 'entropy':
-            tomopy.write_center(prj[:, ind:ind+1, :], theta, dpath=outpath,
-                                cen_range=[rot_start/pow(2,level), rot_end/pow(2, level),
-                                           rot_step/pow(2, level)])
+            util.write_center(prj[:, ind:ind+1, :], theta, dpath=outpath,
+                              cen_range=[rot_start/pow(2,level), rot_end/pow(2, level),
+                                           rot_step/pow(2, level)],
+                              pad_length=pad_length)
             min_entropy_fname = util.minimum_entropy(outpath, mask_ratio=0.4, ring_removal=False)
             center_pos = float(re.findall('\d+\.\d+', os.path.basename(min_entropy_fname))[0]) - pad_length
         elif search_method == 'vo':
