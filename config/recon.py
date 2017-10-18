@@ -156,7 +156,7 @@ def main(arg):
         print('\nReconstruction done!\n')
 
         if not pad_length == 0:
-            rec = rec[pad_length:pad_length+raw_shape[2], pad_length:pad_length+raw_shape[2]]
+            rec = rec[:, pad_length:pad_length+raw_shape[2], pad_length:pad_length+raw_shape[2]]
 
         rec = tomopy.circ_mask(rec, 0, ratio=0.9)
 
