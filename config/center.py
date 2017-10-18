@@ -37,6 +37,7 @@ def main(arg):
     args = parser.parse_args()
 
     search_method = 'entropy'
+    pad_length = 1024
 
     home = expanduser("~")
     tomo = os.path.join(home, '.tomo/automo.ini')
@@ -132,19 +133,21 @@ def main(arg):
 
     slice_ls = range(sino_start, sino_end, sino_step)
     center_ls = []
+    if search_method == 'entropy':
+        prj = util.pad_sinogram(prj, pad_length)
     for ind, i in enumerate(slice_ls):
         outpath = os.path.join(os.getcwd(), 'center', str(i))
         if search_method == 'entropy':
             tomopy.write_center(prj[:, ind:ind+1, :], theta, dpath=outpath,
                                 cen_range=[rot_start/pow(2,level), rot_end/pow(2, level),
                                            rot_step/pow(2, level)])
-            min_entropy_fname = util.minimum_entropy(outpath, mask_ratio=0.7, ring_removal=False)
-            center_pos = float(re.findall('\d+\.\d+', os.path.basename(min_entropy_fname))[0])
+            min_entropy_fname = util.minimum_entropy(outpath, mask_ratio=0.4, ring_removal=False)
+            center_pos = float(re.findall('\d+\.\d+', os.path.basename(min_entropy_fname))[0]) - pad_length
         elif search_method == 'vo':
             mid = prj.shape[2] / 2 / pow(2,level)
             smin = (rot_start/pow(2,level) - mid) * 2
             smax = (rot_end/pow(2,level) - mid) * 2
-            center_pos = tomopy.find_center_vo(prj, smin=smin, smax=smax, step=rot_step)
+            center_pos = util.find_center_vo(prj, smin=smin, smax=smax, step=rot_step)
         center_ls.append(center_pos)
         print('Center for slice: {}'.format(center_pos))
     if len(center_ls) == 1:

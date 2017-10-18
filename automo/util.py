@@ -449,7 +449,7 @@ def _search_coarse(sino, smin, smax, ratio, drop):
     listmetric = np.zeros(len(listshift), dtype='float32')
     mask = _create_mask(2 * Nrow - 1, Ncol, 0.5 * ratio * Ncol, drop)
     for i in listshift:
-        _sino = np.roll(_copy_sino, i, axis=1)
+        _sino = np.roll(_copy_sino, int(i), axis=1)
         if i >= 0:
             _sino[:, 0:i] = temp_img[:, 0:i]
         else:
@@ -515,3 +515,19 @@ def _create_mask(nrow, ncol, radius, drop):
              :] = np.zeros((2 * drop + 1, ncol), dtype='float32')
     mask[:,centercol-1:centercol+2] = np.zeros((nrow, 3), dtype='float32')
     return mask
+
+
+def pad_sinogram(sino, length, mean_length=40, mode='edge'):
+
+    assert sino.ndim == 3
+    length = int(length)
+    res = np.zeros([sino.shape[0], sino.shape[1], sino.shape[2] + length * 2])
+    res[:, :, length:length+sino.shape[1]] = sino
+    if mode == 'edge':
+        for i in range(sino.shape[1]):
+            mean_left = np.mean(sino[:, i, :mean_length], axis=1).reshape([sino.shape[0], 1])
+            mean_right = np.mean(sino[:, i, -mean_length:], axis=1).reshape([sino.shape[0], 1])
+            res[:, i, :length] = mean_left
+            res[:, i, -length:] = mean_right
+
+    return res
