@@ -147,7 +147,7 @@ def main(arg):
                                            rot_step/pow(2, level)],
                               pad_length=pad_length)
             min_entropy_fname = util.minimum_entropy(outpath, mask_ratio=0.4, ring_removal=False)
-            center_pos = float(re.findall('\d+\.\d+', os.path.basename(min_entropy_fname))[0]) - pad_length
+            center_pos = float(re.findall('\d+\.\d+', os.path.basename(min_entropy_fname))[0])
         elif search_method == 'vo':
             mid = prj.shape[2] / 2 / pow(2,level)
             smin = (rot_start/pow(2,level) - mid) * 2

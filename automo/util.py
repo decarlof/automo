@@ -536,5 +536,5 @@ def pad_sinogram(sino, length, mean_length=40, mode='edge'):
 def write_center(tomo, theta, dpath='tmp/center', cen_range=None, pad_length=0):
 
     for center in np.arange(*cen_range):
-        rec = tomopy.recon(tomo[0:1, :, :], theta, algorithm='gridrec', center=center)
+        rec = tomopy.recon(tomo[:, 0:1, :], theta, algorithm='gridrec', center=center)
         dxchange.write_tiff(rec, os.path.join(dpath, '{:.2f}'.format(center-pad_length)), overwrite=True)
