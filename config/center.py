@@ -157,7 +157,7 @@ def main(arg):
     if len(center_ls) == 1:
         center_pos = center_ls[0]
     else:
-        center_pos = np.mean(util.most_neighbor_clustering(center_ls, 5))
+        center_pos = np.mean(util.most_neighbor_clustering(center_ls, 5), dtype='float')
     f = open('center_pos.txt', 'w')
     f.write(str(center_pos))
     f.close()
