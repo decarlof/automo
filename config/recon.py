@@ -149,6 +149,8 @@ def main(arg):
         rec = tomopy.recon(prj, theta, center=center_pos, algorithm='gridrec', filter_name='parzen')
         print('\nReconstruction done!\n')
 
+        rec = tomopy.circ_mask(rec, 0, ratio=0.9)
+
         dxchange.write_tiff_stack(rec, fname=os.path.join('recon', 'recon'), start=chunk_st, dtype='float32')
 
 

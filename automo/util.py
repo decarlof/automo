@@ -522,7 +522,7 @@ def pad_sinogram(sino, length, mean_length=40, mode='edge'):
     assert sino.ndim == 3
     length = int(length)
     res = np.zeros([sino.shape[0], sino.shape[1], sino.shape[2] + length * 2])
-    res[:, :, length:length+sino.shape[1]] = sino
+    res[:, :, length:length+sino.shape[2]] = sino
     if mode == 'edge':
         for i in range(sino.shape[1]):
             mean_left = np.mean(sino[:, i, :mean_length], axis=1).reshape([sino.shape[0], 1])
