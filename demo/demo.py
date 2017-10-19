@@ -11,7 +11,7 @@ recon_dict = {'center_folder': 'center', 'sino_start': 0, 'sino_end': 1200, 'sin
 
 preview_dict_360 = {'slice_st': 500, 'slice_end': 501, 'slice_step': 1}
 
-center_dict_360 = {'rot_start': 1500, 'rot_end': 1750, 'rot_step': 1, 'slice': 600, 'n_slice': -1, 'medfilt_size': 1,
+center_dict_360 = {'rot_start': 1400, 'rot_end': 1650, 'rot_step': 1, 'slice': 600, 'n_slice': -1, 'medfilt_size': 1,
                    'level': 0}
 
 recon_dict_360 = {'center_folder': 'center', 'sino_start': 0, 'sino_end': 1200, 'sino_step': 1, 'medfilt_size': 1,

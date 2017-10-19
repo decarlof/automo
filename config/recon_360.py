@@ -89,13 +89,15 @@ def main(arg):
     medfilt_size = int(args.medfilt_size)
     level = int(args.level)
 
+    pad_length = 1000
+
     # write_stand-alone recon script
     if os.path.exists(os.path.join(home, '.automo', 'recon_standalone.py')):
         shutil.copyfile(os.path.join(home, '.automo', 'recon_standalone.py'), 'recon.py')
 
     # find center if not given
     if os.path.exists('center_pos.txt'):
-        f = open('center_pos')
+        f = open('center_pos.txt')
         center_pos = f.readline()
         center_pos = float(center_pos)
         f.close()
@@ -183,13 +185,21 @@ def main(arg):
         print('## Debug: after nedian filter:')
         print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
 
-        prj = tomopy.downsample(prj, level=level)
-        print('\n** Down sampling done!\n')
-        print('## Debug: after down sampling:')
-        print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
+        if level > 0:
+            prj = tomopy.downsample(prj, level=level)
+            print('\n** Down sampling done!\n')
+            print('## Debug: after down sampling:')
+            print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
+
+        raw_shape = prj.shape
+        if not pad_length == 0:
+            prj = util.pad_sinogram(prj, pad_length)
 
         rec = tomopy.recon(prj, theta, center=center_pos, algorithm='gridrec', filter_name='parzen')
         print('\nReconstruction done!\n')
+
+        if not pad_length == 0:
+            rec = rec[:, pad_length:pad_length+raw_shape[2], pad_length:pad_length+raw_shape[2]]
 
         dxchange.write_tiff_stack(rec, fname=os.path.join('recon', 'recon'), start=chunk_st, dtype='float32')
 
