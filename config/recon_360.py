@@ -143,7 +143,7 @@ def main(arg):
 
         print('Chunk range: ({:d}, {:d})'.format(chunk_st, chunk_end))
 
-        prj, flat, dark, theta = util.read_data_adaptive(file_name, sino=(sino_start, sino_end, sino_step), return_theta=True)
+        prj, flat, dark, theta = util.read_data_adaptive(file_name, sino=(chunk_st, chunk_end, sino_step), return_theta=True)
 
         # theta = tomopy.angles(prj.shape[0])
 
