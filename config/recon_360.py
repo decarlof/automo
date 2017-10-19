@@ -196,7 +196,7 @@ def main(arg):
         if not pad_length == 0:
             prj = util.pad_sinogram(prj, pad_length)
 
-        rec = tomopy.recon(prj, theta, center=center_pos, algorithm='gridrec', filter_name='parzen')
+        rec = tomopy.recon(prj, theta, center=center_pos+pad_length, algorithm='gridrec', filter_name='parzen')
         print('\nReconstruction done!\n')
 
         if not pad_length == 0:
