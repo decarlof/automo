@@ -157,6 +157,7 @@ def main(arg):
 
         overlap = (prj.shape[2] - center_pos) * 2
         prj = sino_360_to_180(prj, overlap=overlap, rotation='right')
+        theta = theta[:prj.shape[0]]
         print('\n** Sinogram converted!')
 
         print('## Debug: after normalization:')

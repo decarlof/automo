@@ -164,6 +164,7 @@ def main(arg):
 
         overlap = (prj.shape[2] - center) * 2
         prj0 = sino_360_to_180(prj, overlap=overlap, rotation='right')
+        theta0 = theta[:prj0.shape[0]]
         print('\n** Sinogram converted!')
 
         if level>0:
@@ -172,7 +173,7 @@ def main(arg):
             print('## Debug: after down sampling:')
             print('\n** Min and max val in prj before recon: %0.5f, %0.3f' % (np.min(prj), np.max(prj)))
 
-        rec = tomopy.recon(prj0, theta, center=center, algorithm='gridrec')
+        rec = tomopy.recon(prj0, theta0, center=center, algorithm='gridrec')
 
         out = np.zeros([rec.shape[0], max_size, max_size])
         out[:, :rec.shape[1], :rec.shape[2]] = rec
