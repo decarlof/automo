@@ -134,39 +134,37 @@ def main(arg):
     prj = tomopy.normalize(prj, flat, dark)
     print('\n** Flat field correction done!\n')
 
+    print('## Debug: after normalization:')
+    print('\n** Min and max val in prj before recon: %0.5f, %0.3f' % (np.min(prj), np.max(prj)))
+
+    prj = tomopy.minus_log(prj)
+    print('\n** minus log applied!')
+
+    print('## Debug: after minus log:')
+    print('\n** Min and max val in prj before recon: %0.5f, %0.3f' % (np.min(prj), np.max(prj)))
+
+    prj = tomopy.misc.corr.remove_neg(prj, val=0.001)
+    prj = tomopy.misc.corr.remove_nan(prj, val=0.001)
+    prj[np.where(prj == np.inf)] = 0.001
+
+    print('## Debug: after cleaning bad values:')
+    print('\n** Min and max val in prj before recon: %0.5f, %0.3f' % (np.min(prj), np.max(prj)))
+
+    prj = tomopy.remove_stripe_ti(prj, 4)
+    print('\n** Stripe removal done!')
+    print('## Debug: after remove_stripe:')
+    print('\n** Min and max val in prj before recon: %0.5f, %0.3f' % (np.min(prj), np.max(prj)))
+
+    prj = tomopy.median_filter(prj, size=medfilt_size)
+    print('\n** Median filter done!')
+    print('## Debug: after nedian filter:')
+    print('\n** Min and max val in prj before recon: %0.5f, %0.3f' % (np.min(prj), np.max(prj)))
+
     for center in range(rot_start, rot_end, rot_step):
 
         overlap = (prj.shape[2] - center) * 2
-        prj = sino_360_to_180(prj, overlap=overlap, rotation='right')
+        prj0 = sino_360_to_180(prj, overlap=overlap, rotation='right')
         print('\n** Sinogram converted!')
-
-
-        print('## Debug: after normalization:')
-        print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
-
-        prj = tomopy.minus_log(prj)
-        print('\n** minus log applied!')
-
-        print('## Debug: after minus log:')
-        print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
-
-        prj = tomopy.misc.corr.remove_neg(prj, val=0.001)
-        prj = tomopy.misc.corr.remove_nan(prj, val=0.001)
-        prj[np.where(prj == np.inf)] = 0.001
-
-        print('## Debug: after cleaning bad values:')
-        print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
-
-        prj = tomopy.remove_stripe_ti(prj,4)
-        print('\n** Stripe removal done!')
-        print('## Debug: after remove_stripe:')
-        print('\n** Min and max val in prj before recon: %0.5f, %0.3f' % (np.min(prj), np.max(prj)))
-
-        prj = tomopy.median_filter(prj,size=medfilt_size)
-        print('\n** Median filter done!')
-        print('## Debug: after nedian filter:')
-        print('\n** Min and max val in prj before recon: %0.5f, %0.3f' % (np.min(prj), np.max(prj)))
-
 
         if level>0:
             prj = tomopy.downsample(prj, level=level)
@@ -174,7 +172,7 @@ def main(arg):
             print('## Debug: after down sampling:')
             print('\n** Min and max val in prj before recon: %0.5f, %0.3f' % (np.min(prj), np.max(prj)))
 
-        rec = tomopy.recon(prj, theta, center=center, algorithm='gridrec')
+        rec = tomopy.recon(prj0, theta, center=center, algorithm='gridrec')
 
         out = np.zeros([rec.shape[0], max_size, max_size])
         out[:, :rec.shape[1], :rec.shape[2]] = rec
