@@ -182,7 +182,7 @@ def main(arg):
         slice_ls = range(sino_start, sino_end, sino_step)
         for i in range(out.shape[0]):
             outpath = os.path.join(os.getcwd(), 'center', str(slice_ls[i]))
-            dxchange.write_tiff(out[i], os.path.join(outpath, '{:.2f}'.format(center)))
+            dxchange.write_tiff(out[i], os.path.join(outpath, '{:.2f}'.format(center)), dtype='float32')
 
     slice_ls = range(sino_start, sino_end, sino_step)
     center_ls = []
