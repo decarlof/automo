@@ -194,11 +194,11 @@ def main(arg):
             print('## Debug: after down sampling:')
             print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
 
+        recon_center = center_pos if axis_side == 'right' else (prj.shape[2] - center_pos)
         raw_shape = prj.shape
         if not pad_length == 0:
             prj = util.pad_sinogram(prj, pad_length)
-
-        rec = tomopy.recon(prj, theta, center=center_pos+pad_length, algorithm='gridrec', filter_name='parzen')
+        rec = tomopy.recon(prj, theta, center=recon_center+pad_length, algorithm='gridrec', filter_name='parzen')
         print('\nReconstruction done!\n')
 
         if not pad_length == 0:

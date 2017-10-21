@@ -178,7 +178,8 @@ def main(arg):
             print('## Debug: after down sampling:')
             print('\n** Min and max val in prj before recon: %0.5f, %0.3f' % (np.min(prj), np.max(prj)))
 
-        rec = tomopy.recon(prj0, theta0, center=center, algorithm='gridrec')
+        recon_center = center if axis_side == 'right' else (prj.shape[2] - center)
+        rec = tomopy.recon(prj0, theta0, center=recon_center, algorithm='gridrec')
 
         out = np.zeros([rec.shape[0], max_size, max_size])
         out[:, :rec.shape[1], :rec.shape[2]] = rec
