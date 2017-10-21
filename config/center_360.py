@@ -91,7 +91,6 @@ def main(arg):
 
     array_dims = util.read_data_adaptive(fname, shape_only=True)
 
-    max_size = 2 * rot_end + 2
 
     if slice == -1:
         sino_start = 200
@@ -123,6 +122,9 @@ def main(arg):
     N_recon = rot_start - rot_end
 
     prj, flat, dark, theta = util.read_data_adaptive(fname, sino=(sino_start, sino_end, sino_step), return_theta=True)
+
+    max_size = max([2 * rot_end + 2, (prj.shape[2] - rot_start) * 2 + 2])
+
 
     # Read theta from the dataset:
     # theta = tomopy.angles(int(prj.shape[0]//2))
