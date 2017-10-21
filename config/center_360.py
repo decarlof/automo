@@ -160,10 +160,13 @@ def main(arg):
     print('## Debug: after nedian filter:')
     print('\n** Min and max val in prj before recon: %0.5f, %0.3f' % (np.min(prj), np.max(prj)))
 
+    fov2 = int(prj.shape[2] / 2)
+
     for center in range(rot_start, rot_end, rot_step):
 
-        overlap = (prj.shape[2] - center) * 2
-        prj0 = sino_360_to_180(prj, overlap=overlap, rotation='right')
+        axis_side = 'left' if center < fov2 else 'right'
+        overlap = (prj.shape[2] - center) * 2 if axis_side == 'right' else center * 2
+        prj0 = sino_360_to_180(prj, overlap=overlap, rotation=axis_side)
         theta0 = theta[:prj0.shape[0]]
         print('\n** Sinogram converted!')
 

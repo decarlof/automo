@@ -155,8 +155,10 @@ def main(arg):
         prj = tomopy.normalize(prj, flat, dark)
         print('\n** Flat field correction done!')
 
-        overlap = (prj.shape[2] - center_pos) * 2
-        prj = sino_360_to_180(prj, overlap=overlap, rotation='right')
+        fov2 = int(prj.shape[2] / 2)
+        axis_side = 'left' if center_pos < fov2 else 'right'
+        overlap = (prj.shape[2] - center_pos) * 2 if axis_side == 'right' else center_pos * 2
+        prj = sino_360_to_180(prj, overlap=overlap, rotation=axis_side)
         theta = theta[:prj.shape[0]]
         print('\n** Sinogram converted!')
 
