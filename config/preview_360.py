@@ -67,15 +67,15 @@ def main(arg):
         proj_fname = (folder + 'preview' + os.sep + 'proj')
         print("Proj folder: ", proj_fname)
 
-        sino, flat, dark, _ = util.read_data_adaptive(fname, sino=(slice_st, slice_end, slice_step))
-        print("Sino Preview: ", sino.shape)
-
-        sino_fname = (folder + 'preview' + os.sep + 'sino')
-        sino = np.swapaxes(sino, 0, 1)
-        print("Proj folder: ", proj_fname)
+        # sino, flat, dark, _ = util.read_data_adaptive(fname, sino=(slice_st, slice_end, slice_step))
+        # print("Sino Preview: ", sino.shape)
+        #
+        # sino_fname = (folder + 'preview' + os.sep + 'sino')
+        # sino = np.swapaxes(sino, 0, 1)
+        # print("Proj folder: ", proj_fname)
 
         dxchange.write_tiff_stack(proj, fname=proj_fname, axis=0, digit=5, start=0, overwrite=True)
-        dxchange.write_tiff_stack(sino, fname=sino_fname, axis=0, digit=5, start=0, overwrite=True)
+        # dxchange.write_tiff_stack(sino, fname=sino_fname, axis=0, digit=5, start=0, overwrite=True)
         print("#################################")
 
 
