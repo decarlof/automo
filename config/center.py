@@ -14,11 +14,16 @@ import os
 import sys
 import re
 from os.path import expanduser
+import warnings
 
 import h5py
 import dxchange
 import tomopy
 import numpy as np
+try:
+    import xlearn
+except:
+    warnings.warn('Cannot import package xlearn.')
 
 import automo.util as util
 
@@ -37,7 +42,7 @@ def main(arg):
     # parser.add_argument("padding", help="sinogram padding")
     args = parser.parse_args()
 
-    search_method = 'entropy'
+    search_method = 'dnn'
     # pad_length = int(args.padding)
     pad_length = 1000
 
@@ -153,6 +158,12 @@ def main(arg):
             smin = (rot_start/pow(2,level) - mid) * 2
             smax = (rot_end/pow(2,level) - mid) * 2
             center_pos = util.find_center_vo(prj, smin=smin, smax=smax, step=rot_step)
+        elif search_method == 'dnn':
+            center_pos = util.find_cenrer_dnn(prj[:, ind:ind+1, :], theta,
+                                              search_range=[rot_start/pow(2,level), rot_end/pow(2, level)],
+                                              search_step=rot_step/pow(2, level),
+                                              outpath=outpath,
+                                              pad_length=pad_length)
         center_ls.append(center_pos)
         print('Center for slice: {}'.format(center_pos))
     if len(center_ls) == 1:

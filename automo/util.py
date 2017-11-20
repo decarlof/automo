@@ -51,6 +51,7 @@ Module to create basic tomography data analyis automation.
 """
 
 import os, glob
+import time
 import string
 import unicodedata
 from distutils.dir_util import mkpath
@@ -62,17 +63,24 @@ import tomopy.util.dtype as dtype
 import scipy.ndimage as ndimage
 import dxchange
 import h5py
+import six.moves
+import warnings
 try:
     import netCDF4 as cdf
 except:
     pass
 import numpy as np
 import tomopy.misc.corr
+try:
+    import xlearn
+    from xlearn.classify import model
+except:
+    warnings.warn('Cannot import package xlearn.')
 
 logger = logging.getLogger(__name__)
 PI = 3.1415927
 
-__author__ = "Francesco De Carlo"
+__author__ = ['Francesco De Carlo', 'Ming Du']
 __copyright__ = "Copyright (c) 2016, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
 __all__ = ['append',
@@ -220,8 +228,8 @@ def try_folder(directory):
         if os.path.isdir(directory):
             return True
         else:
-            print directory + " does not exist"
-            a = raw_input('Would you like to create ' + directory + ' ? ').lower()
+            print(directory + " does not exist")
+            a = six.moves.input('Would you like to create ' + directory + ' ? ').lower()
             if a.startswith('y'): 
                 mkpath(directory)
                 print("Great!")
@@ -516,6 +524,66 @@ def _create_mask(nrow, ncol, radius, drop):
              :] = np.zeros((2 * drop + 1, ncol), dtype='float32')
     mask[:,centercol-1:centercol+2] = np.zeros((nrow, 3), dtype='float32')
     return mask
+
+
+def find_cenrer_dnn(tomo, theta, search_range, search_step=1, level=0, outpath='center', pad_length=0, **kwargs):
+
+    rot_start, rot_end = search_range
+    write_center(tomo[:, 0:1, :], theta, dpath=outpath,
+                 cen_range=[rot_start / pow(2, level), rot_end / pow(2, level),
+                            search_step / pow(2, level)],
+                 pad_length=pad_length)
+    return _search_in_folder_dnn(outpath, **kwargs)
+
+
+def _search_in_folder_dnn(dest_folder, window=((600, 600), (1300, 1300)), dim_img=128, seed=1337, batch_size=50):
+
+    patch_size = (dim_img, dim_img)
+    nb_classes = 2
+    save_intermediate = False
+    # number of convolutional filters to use
+    nb_filters = 32
+    # size of pooling area for max pooling
+    nb_pool = 2
+    # convolution kernel size
+    nb_conv = 3
+    nb_evl = 100
+
+    fnames = glob.glob(os.path.join(dest_folder, '*.tiff'))
+    fnames = np.sort(fnames)
+
+    mdl = model(dim_img, nb_filters, nb_conv, nb_classes)
+
+    mdl.load_weights('weight_center.h5')
+    start_time = time.time()
+    Y_score = np.zeros((len(fnames)))
+
+    for i in range(len(fnames)):
+        print(fnames[i])
+        img = dxchange.read_tiff(fnames[i])
+        X_evl = np.zeros((nb_evl, dim_img, dim_img))
+
+        for j in range(nb_evl):
+            X_evl[j] = xlearn.img_window(img[window[0][0]:window[1][0], window[0][1]:window[1][1]], dim_img, reject_bg=True,
+                                         threshold=1.2e-4, reset_random_seed=True, random_seed=j)
+        X_evl = xlearn.convolve_stack(X_evl, xlearn.get_gradient_kernel())
+        X_evl = xlearn.nor_data(X_evl)
+        if save_intermediate:
+            dxchange.write_tiff(X_evl, os.path.join('debug', 'x_evl', 'x_evl_{}'.format(i)), dtype='float32',
+                                overwrite=True)
+        X_evl = X_evl.reshape(X_evl.shape[0], 1, dim_img, dim_img)
+
+        Y_evl = mdl.predict(X_evl, batch_size=batch_size)
+        Y_score[i] = sum(np.dot(Y_evl, [0, 1]))
+        # print('The evaluate score is:', Y_score[i])
+        # Y_score = sum(np.round(Y_score))/len(Y_score)
+
+    ind_max = np.argmax(Y_score)
+    best_center = float(os.path.splitext(fnames[ind_max])[0])
+    print('Center search done in {} s. Optimal center is {}.'.format(time.time() - start_time, best_center))
+
+    return best_center
+
 
 
 def pad_sinogram(sino, length, mean_length=40, mode='edge'):
