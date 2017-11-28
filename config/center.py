@@ -8,7 +8,7 @@ TomoPy example script to reconstruct tomography data with different center.
 
 from __future__ import print_function
 
-import ConfigParser
+import six.moves.configparser as ConfigParser
 import argparse
 import os
 import sys
@@ -159,7 +159,7 @@ def main(arg):
             smax = (rot_end/pow(2,level) - mid) * 2
             center_pos = util.find_center_vo(prj, smin=smin, smax=smax, step=rot_step)
         elif search_method == 'dnn':
-            center_pos = util.find_cenrer_dnn(prj[:, ind:ind+1, :], theta,
+            center_pos = util.find_center_dnn(prj[:, ind:ind+1, :], theta,
                                               search_range=[rot_start/pow(2,level), rot_end/pow(2, level)],
                                               search_step=rot_step/pow(2, level),
                                               outpath=outpath,

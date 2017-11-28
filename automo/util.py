@@ -526,7 +526,7 @@ def _create_mask(nrow, ncol, radius, drop):
     return mask
 
 
-def find_cenrer_dnn(tomo, theta, search_range, search_step=1, level=0, outpath='center', pad_length=0, **kwargs):
+def find_center_dnn(tomo, theta, search_range, search_step=1, level=0, outpath='center', pad_length=0, **kwargs):
 
     rot_start, rot_end = search_range
     write_center(tomo[:, 0:1, :], theta, dpath=outpath,
@@ -583,7 +583,6 @@ def _search_in_folder_dnn(dest_folder, window=((600, 600), (1300, 1300)), dim_im
     print('Center search done in {} s. Optimal center is {}.'.format(time.time() - start_time, best_center))
 
     return best_center
-
 
 
 def pad_sinogram(sino, length, mean_length=40, mode='edge'):

@@ -8,7 +8,7 @@ TomoPy example script to generate a series of preview projections.
 
 from __future__ import print_function
 
-import ConfigParser
+import six.moves.configparser as ConfigParser
 import argparse
 import os, shutil
 import sys

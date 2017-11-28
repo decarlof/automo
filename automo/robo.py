@@ -59,7 +59,7 @@ import re
 import string
 import argparse
 import unicodedata
-import ConfigParser
+import six.moves.configparser as ConfigParser
 from os.path import expanduser
 import h5py
 import automo.util as util

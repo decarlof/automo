@@ -8,7 +8,7 @@ TomoPy example script to reconstruct tomography data with different center.
 
 from __future__ import print_function
 
-import ConfigParser
+import six.moves.configparser as ConfigParser
 import argparse
 import os
 import sys
