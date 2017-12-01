@@ -299,9 +299,9 @@ def minimum_entropy(folder, pattern='*.tiff', range=(-0.002, 0.003), mask_ratio=
         elif abs(np.min(s) - np.mean(s)) < 0.5 * np.std(s):
             return None
         else:
-            return float(os.path.splitext(a[np.argmin(s)])[0])
+            return float(os.path.splitext(os.path.basename(a[np.argmin(s)]))[0])
     else:
-        return float(os.path.splitext(a[np.argmin(s)])[0])
+        return float(os.path.splitext(os.path.basename(a[np.argmin(s)]))[0])
 
 
 def read_data_adaptive(fname, proj=None, sino=None, data_format='aps_32id', shape_only=False, return_theta=True, **kwargs):
