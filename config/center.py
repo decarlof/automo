@@ -42,7 +42,7 @@ def main(arg):
     # parser.add_argument("padding", help="sinogram padding")
     args = parser.parse_args()
 
-    search_method = 'dnn'
+    search_method = 'entropy-cnn'
     # pad_length = int(args.padding)
     pad_length = 1000
 
@@ -147,24 +147,29 @@ def main(arg):
         rot_end += pad_length
     for ind, i in enumerate(slice_ls):
         outpath = os.path.join(os.getcwd(), 'center', str(i))
-        if search_method == 'entropy':
+
+        # output center images
+        if search_method == 'entropy-cnn':
             util.write_center(prj[:, ind:ind+1, :], theta, dpath=outpath,
                               cen_range=[rot_start/pow(2,level), rot_end/pow(2, level),
                                          rot_step/pow(2, level)],
                               pad_length=pad_length)
-            min_entropy_fname = util.minimum_entropy(outpath, mask_ratio=0.4, ring_removal=False)
-            center_pos = float(re.findall('\d+\.\d+', os.path.basename(min_entropy_fname))[0])
+            try:
+                center_pos = util.minimum_entropy(outpath,
+                                                  mask_ratio=0.7,
+                                                  ring_removal=False,
+                                                  range=(-0.002, 0.003),
+                                                  reliability_screening=True)
+            except:
+                center_pos = util.search_in_folder_dnn(outpath)
+            if center_pos is None:
+                center_pos = util.search_in_folder_dnn(outpath)
         elif search_method == 'vo':
             mid = prj.shape[2] / 2 / pow(2,level)
             smin = (rot_start/pow(2,level) - mid) * 2
             smax = (rot_end/pow(2,level) - mid) * 2
             center_pos = util.find_center_vo(prj, smin=smin, smax=smax, step=rot_step)
-        elif search_method == 'dnn':
-            center_pos = util.find_center_dnn(prj[:, ind:ind+1, :], theta,
-                                              search_range=[rot_start/pow(2,level), rot_end/pow(2, level)],
-                                              search_step=rot_step/pow(2, level),
-                                              outpath=outpath,
-                                              pad_length=pad_length)
+
         center_ls.append(center_pos)
         print('Center for slice: {}'.format(center_pos))
     if len(center_ls) == 1:

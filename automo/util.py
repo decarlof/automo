@@ -90,7 +90,8 @@ __all__ = ['append',
            'dataset_info',
            'try_folder',
            'h5group_dims',
-           'touch']
+           'touch',
+           'search_in_folder_dnn']
 
 
 def h5group_dims(fname, dataset='exchange/data'):
@@ -276,10 +277,11 @@ def entropy(img, range=(0, 0.002), mask_ratio=0.9, window=None, ring_removal=Tru
     return val
 
 
-def minimum_entropy(folder, pattern='*.tiff', range=(0, 0.002), mask_ratio=0.9, window=None, ring_removal=True,
-                    center_x=None, center_y=None):
+def minimum_entropy(folder, pattern='*.tiff', range=(-0.002, 0.003), mask_ratio=0.9, window=None, ring_removal=True,
+                    center_x=None, center_y=None, reliability_screening=False):
 
     flist = glob.glob(os.path.join(folder, pattern))
+    flist.sort()
     a = []
     s = []
     for fname in flist:
@@ -291,7 +293,15 @@ def minimum_entropy(folder, pattern='*.tiff', range=(0, 0.002), mask_ratio=0.9, 
         s.append(entropy(img, range=range, mask_ratio=mask_ratio, window=window, ring_removal=ring_removal,
                          center_x=center_x, center_y=center_y))
         a.append(fname)
-    return a[np.argmin(s)]
+    if reliability_screening:
+        if a[np.argmin(s)] in [flist[0], flist[-1]]:
+            return None
+        elif abs(np.min(s) - np.mean(s)) < 0.5 * np.std(s):
+            return None
+        else:
+            return float(os.path.splitext(a[np.argmin(s)])[0])
+    else:
+        return float(os.path.splitext(a[np.argmin(s)])[0])
 
 
 def read_data_adaptive(fname, proj=None, sino=None, data_format='aps_32id', shape_only=False, return_theta=True, **kwargs):
@@ -534,10 +544,10 @@ def find_center_dnn(tomo, theta, search_range, search_step=1, level=0, outpath='
                  cen_range=[rot_start / pow(2, level), rot_end / pow(2, level),
                             search_step / pow(2, level)],
                  pad_length=pad_length)
-    return _search_in_folder_dnn(outpath, **kwargs)
+    return search_in_folder_dnn(outpath, **kwargs)
 
 
-def _search_in_folder_dnn(dest_folder, window=((600, 600), (1300, 1300)), dim_img=128, seed=1337, batch_size=50):
+def search_in_folder_dnn(dest_folder, window=((600, 600), (1300, 1300)), dim_img=128, seed=1337, batch_size=50):
 
     patch_size = (dim_img, dim_img)
     nb_classes = 2
