@@ -141,7 +141,7 @@ def main(arg):
 
     slice_ls = range(sino_start, sino_end, sino_step)
     center_ls = []
-    if search_method == 'entropy' and pad_length > 0:
+    if search_method in ['entropy', 'dnn'] and pad_length > 0:
         prj = util.pad_sinogram(prj, pad_length)
         rot_start += pad_length
         rot_end += pad_length
