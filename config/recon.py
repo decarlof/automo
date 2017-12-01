@@ -135,7 +135,7 @@ def main(arg):
         print('## Debug: after cleaning bad values:')
         print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
 
-        prj = tomopy.remove_stripe_ti(prj,4)
+        prj = tomopy.remove_stripe_ti(prj, 4)
         print('\n** Stripe removal done!')
         print('## Debug: after remove_stripe:')
         print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))

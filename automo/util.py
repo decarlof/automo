@@ -565,18 +565,17 @@ def _search_in_folder_dnn(dest_folder, window=((600, 600), (1300, 1300)), dim_im
 
         for j in range(nb_evl):
             X_evl[j] = xlearn.img_window(img[window[0][0]:window[1][0], window[0][1]:window[1][1]], dim_img, reject_bg=True,
-                                         threshold=1.2e-4, reset_random_seed=True, random_seed=j)
-        X_evl = xlearn.convolve_stack(X_evl, xlearn.get_gradient_kernel())
+                                  threshold=1.5e-4, reset_random_seed=True, random_seed=j)
+        # X_evl = convolve_stack(X_evl, get_gradient_kernel())
+        X_evl = xlearn.nor_data(X_evl)
+        X_evl = xlearn.variance_filter_stack(X_evl, size=5, scaler=1)
         X_evl = xlearn.nor_data(X_evl)
         if save_intermediate:
             dxchange.write_tiff(X_evl, os.path.join('debug', 'x_evl', 'x_evl_{}'.format(i)), dtype='float32',
                                 overwrite=True)
         X_evl = X_evl.reshape(X_evl.shape[0], 1, dim_img, dim_img)
-
         Y_evl = mdl.predict(X_evl, batch_size=batch_size)
         Y_score[i] = sum(np.dot(Y_evl, [0, 1]))
-        # print('The evaluate score is:', Y_score[i])
-        # Y_score = sum(np.round(Y_score))/len(Y_score)
 
     ind_max = np.argmax(Y_score)
     best_center = float(os.path.splitext(fnames[ind_max])[0])

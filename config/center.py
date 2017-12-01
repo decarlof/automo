@@ -121,7 +121,8 @@ def main(arg):
     print('## Debug: after cleaning bad values:')
     print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
 
-    prj = tomopy.remove_stripe_fw(prj, 5, wname='sym16', sigma=1, pad=True)
+    # prj = tomopy.remove_stripe_fw(prj, 5, wname='sym16', sigma=1, pad=True)
+    prj = tomopy.remove_stripe_ti(prj, 4)
     print('\n** Stripe removal done!')
     print('## Debug: after remove_stripe:')
     print('\n** Min and max val in prj before recon: %0.5f, %0.3f' % (np.min(prj), np.max(prj)))
@@ -149,7 +150,7 @@ def main(arg):
         if search_method == 'entropy':
             util.write_center(prj[:, ind:ind+1, :], theta, dpath=outpath,
                               cen_range=[rot_start/pow(2,level), rot_end/pow(2, level),
-                                           rot_step/pow(2, level)],
+                                         rot_step/pow(2, level)],
                               pad_length=pad_length)
             min_entropy_fname = util.minimum_entropy(outpath, mask_ratio=0.4, ring_removal=False)
             center_pos = float(re.findall('\d+\.\d+', os.path.basename(min_entropy_fname))[0])
