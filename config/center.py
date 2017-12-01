@@ -160,9 +160,12 @@ def main(arg):
                                                   ring_removal=False,
                                                   range=(-0.002, 0.003),
                                                   reliability_screening=True)
+                print('Entropy finds center {}.'.format(center_pos))
             except:
+                print('Switching to CNN...')
                 center_pos = util.search_in_folder_dnn(outpath)
             if center_pos is None:
+                print('Switching to CNN...')
                 center_pos = util.search_in_folder_dnn(outpath)
         elif search_method == 'vo':
             mid = prj.shape[2] / 2 / pow(2,level)
