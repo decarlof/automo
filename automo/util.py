@@ -582,7 +582,7 @@ def _search_in_folder_dnn(dest_folder, window=((600, 600), (1300, 1300)), dim_im
         Y_score[i] = sum(np.dot(Y_evl, [0, 1]))
 
     ind_max = np.argmax(Y_score)
-    best_center = float(os.path.splitext(fnames[ind_max])[0])
+    best_center = float(os.path.splitext(os.path.basename(fnames[ind_max]))[0])
     print('Center search done in {} s. Optimal center is {}.'.format(time.time() - start_time, best_center))
 
     return best_center
