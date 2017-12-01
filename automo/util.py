@@ -547,7 +547,7 @@ def _search_in_folder_dnn(dest_folder, window=((600, 600), (1300, 1300)), dim_im
     # size of pooling area for max pooling
     nb_pool = 2
     # convolution kernel size
-    nb_conv = 3
+    nb_conv = 5
     nb_evl = 100
 
     fnames = glob.glob(os.path.join(dest_folder, '*.tiff'))
