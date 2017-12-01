@@ -58,7 +58,7 @@ def main(arg):
     slice = int(args.slice_start)
     n_slice = int(args.n_slice)
     medfilt_size = int(args.medfilt_size)
-    level = float(args.level)
+    level = int(args.level)
 
     array_dims = util.read_data_adaptive(fname, shape_only=True)
 
