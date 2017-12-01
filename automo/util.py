@@ -65,6 +65,7 @@ import dxchange
 import h5py
 import six.moves
 import warnings
+import inspect
 try:
     import netCDF4 as cdf
 except:
@@ -554,7 +555,10 @@ def _search_in_folder_dnn(dest_folder, window=((600, 600), (1300, 1300)), dim_im
 
     mdl = model(dim_img, nb_filters, nb_conv, nb_classes)
 
-    mdl.load_weights('weight_center.h5')
+    weight_path = os.path.dirname(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))
+    weight_path = os.path.join(weight_path, 'config', 'weight_center.h5')
+    print(weight_path)
+    mdl.load_weights(weight_path)
     start_time = time.time()
     Y_score = np.zeros((len(fnames)))
 
