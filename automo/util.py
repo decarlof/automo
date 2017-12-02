@@ -557,7 +557,7 @@ def search_in_folder_dnn(dest_folder, window=((600, 600), (1300, 1300)), dim_img
     # size of pooling area for max pooling
     nb_pool = 2
     # convolution kernel size
-    nb_conv = 5
+    nb_conv = 3
     nb_evl = 100
 
     fnames = glob.glob(os.path.join(dest_folder, '*.tiff'))
@@ -581,8 +581,7 @@ def search_in_folder_dnn(dest_folder, window=((600, 600), (1300, 1300)), dim_img
             X_evl[j] = xlearn.img_window(img[window[0][0]:window[1][0], window[0][1]:window[1][1]], dim_img, reject_bg=True,
                                   threshold=1.5e-4, reset_random_seed=True, random_seed=j)
         # X_evl = convolve_stack(X_evl, get_gradient_kernel())
-        X_evl = xlearn.nor_data(X_evl)
-        X_evl = xlearn.variance_filter_stack(X_evl, size=5, scaler=1)
+        X_evl = xlearn.convolve_stack(X_evl, xlearn.get_gradient_kernel())
         X_evl = xlearn.nor_data(X_evl)
         if save_intermediate:
             dxchange.write_tiff(X_evl, os.path.join('debug', 'x_evl', 'x_evl_{}'.format(i)), dtype='float32',
