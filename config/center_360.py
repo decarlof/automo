@@ -194,7 +194,7 @@ def main(arg):
     for i in slice_ls:
         outpath = os.path.join(os.getcwd(), 'center', str(i))
         center_pos = util.minimum_entropy(outpath,
-                                          mask_ratio=0.7,
+                                          mask_ratio=0.95,
                                           ring_removal=False,
                                           range=(-0.002, 0.003),
                                           window=(1000, 1000),
