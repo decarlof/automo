@@ -193,13 +193,17 @@ def main(arg):
     center_ls = []
     for i in slice_ls:
         outpath = os.path.join(os.getcwd(), 'center', str(i))
-        # min_entropy_fname = util.minimum_entropy(outpath, mask_ratio=0.7, ring_removal=True)
-        # center_ls.append(float(re.findall('\d+\.\d+', os.path.basename(min_entropy_fname))[0]))
-        center_ls.append('0')
+        center_pos = util.minimum_entropy(outpath,
+                                          mask_ratio=0.7,
+                                          ring_removal=False,
+                                          range=(-0.002, 0.003),
+                                          window=(1000, 1000),
+                                          reliability_screening=False)
+        center_ls.append(center_pos)
     if len(center_ls) == 1:
         center_pos = center_ls[0]
     else:
-        center_pos = np.mean(util.most_neighbor_clustering(center_ls, 5))
+        center_pos = np.mean(util.most_neighbor_clustering(center_ls, 2))
     f = open('center_pos.txt', 'w')
     f.write(str(center_pos))
     f.close()

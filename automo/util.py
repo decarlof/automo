@@ -261,8 +261,12 @@ def entropy(img, range=(0, 0.002), mask_ratio=0.9, window=None, ring_removal=Tru
     temp = np.squeeze(temp)
     if window is not None:
         window = np.array(window, dtype='int')
-        temp = temp[window[0][0]:window[1][0], window[0][1]:window[1][1]]
-        dxchange.write_tiff(temp, 'tmp/data', dtype='float32', overwrite=False)
+        if window.ndim == 2:
+            temp = temp[window[0][0]:window[1][0], window[0][1]:window[1][1]]
+        elif window.ndim == 1:
+            mid_y, mid_x = (np.array(temp.shape) / 2).astype(int)
+            temp = temp[mid_y-window[0]:mid_y+window[0], mid_x-window[1]:mid_x+window[1]]
+        # dxchange.write_tiff(temp, 'tmp/data', dtype='float32', overwrite=False)
     if ring_removal:
         temp = np.squeeze(tomopy.remove_ring(temp[np.newaxis, :, :], center_x=center_x, center_y=center_y))
     if mask_ratio is not None:
