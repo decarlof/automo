@@ -265,7 +265,7 @@ def robo_process(exp, file, proc_list, **kwargs):
                     kwargs['recon']['sino_step'], kwargs['recon']['medfilt_size'], kwargs['recon']['level'],
                     kwargs['recon']['chunk_size']]
         elif proc == 'preview_360':
-            opts = [kwargs['preview']['slice_st'], kwargs['preview']['slice_end'], kwargs['preview']['slice_step']]
+            opts = [kwargs['preview_360']['slice_st'], kwargs['preview_360']['slice_end'], kwargs['preview_360']['slice_step']]
         elif proc == 'center_360':
             opts = [kwargs['center_360']['rot_start'], kwargs['center_360']['rot_end'], kwargs['center_360']['rot_step'],
                     kwargs['center_360']['slice'], kwargs['center_360']['n_slice'],

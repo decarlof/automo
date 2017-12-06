@@ -198,7 +198,10 @@ def main(arg):
                                           ring_removal=False,
                                           range=(-0.002, 0.003),
                                           window=(1000, 1000),
-                                          reliability_screening=False)
+                                          reliability_screening=True)
+        if center_pos is None:
+            print('Switching to CNN...')
+            center_pos = util.search_in_folder_dnn(outpath)
         center_ls.append(center_pos)
     if len(center_ls) == 1:
         center_pos = center_ls[0]

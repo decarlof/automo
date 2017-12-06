@@ -255,7 +255,7 @@ def append(fname, process):
         pfile.write(process)
 
 
-def entropy(img, range=(0, 0.002), mask_ratio=0.9, window=None, ring_removal=True, center_x=None, center_y=None):
+def entropy(img, range=(-0.002, 0.003), mask_ratio=0.9, window=None, ring_removal=True, center_x=None, center_y=None):
 
     temp = np.copy(img)
     temp = np.squeeze(temp)
@@ -275,20 +275,34 @@ def entropy(img, range=(0, 0.002), mask_ratio=0.9, window=None, ring_removal=Tru
     temp = temp.flatten()
     # temp[np.isnan(temp)] = 0
     temp[np.invert(np.isfinite(temp))] = 0
-    hist, e = np.histogram(temp, bins=1024, range=range)
+    hist, e = np.histogram(temp, bins=10000, range=range)
     hist = hist.astype('float32') / temp.size + 1e-12
     val = -np.dot(hist, np.log2(hist))
     return val
 
 
-def minimum_entropy(folder, pattern='*.tiff', range=(-0.002, 0.003), mask_ratio=0.9, window=None, ring_removal=True,
-                    center_x=None, center_y=None, reliability_screening=False):
+def minimum_entropy(folder, pattern='*.tiff', range=None, mask_ratio=0.9, window=None, ring_removal=True,
+                    center_x=None, center_y=None, reliability_screening=False, verbose=False):
 
     flist = glob.glob(os.path.join(folder, pattern))
     flist.sort()
     a = []
     s = []
+    if range is None:
+        temp = dxchange.read_tiff(flist[int(len(flist) / 2)])
+        temp_std = np.std(temp)
+        temp_mean = np.mean(temp)
+        temp[np.where(temp > (temp_mean + temp_std * 10))] = temp_mean
+        temp[np.where(temp < (temp_mean - temp_std * 10))] = temp_mean
+        hist_min = temp.min()
+        hist_min = hist_min * 2 if hist_min < 0 else hist_min * 0.5
+        hist_max = temp.max()
+        hist_max = hist_max * 2 if hist_max > 0 else hist_min * 0.5
+        range = (hist_min, hist_max)
+        print('Auto-determined histogram range is ({}, {}).'.format(hist_min, hist_max))
     for fname in flist:
+        if verbose:
+            print(fname)
         img = dxchange.read_tiff(fname)
         # if max(img.shape) > 1000:
         #     img = scipy.misc.imresize(img, 1000. / max(img.shape), mode='F')
@@ -297,6 +311,7 @@ def minimum_entropy(folder, pattern='*.tiff', range=(-0.002, 0.003), mask_ratio=
         s.append(entropy(img, range=range, mask_ratio=mask_ratio, window=window, ring_removal=ring_removal,
                          center_x=center_x, center_y=center_y))
         a.append(fname)
+        gc.collect()
     if reliability_screening:
         if a[np.argmin(s)] in [flist[0], flist[-1]]:
             return None
