@@ -158,7 +158,6 @@ def main(arg):
                 center_pos = util.minimum_entropy(outpath,
                                                   mask_ratio=0.7,
                                                   ring_removal=False,
-                                                  range=(-0.002, 0.003),
                                                   reliability_screening=True)
                 print('Entropy finds center {}.'.format(center_pos))
             except:
