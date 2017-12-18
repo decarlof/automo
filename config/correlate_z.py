@@ -305,11 +305,12 @@ def main(arg):
             this_shift = register_translation(slice0, slice1, down=True, upsample_factor=1)
             shift_ls.append(this_shift[0])
             slice0 = np.copy(slice1)
-        shift_ls = util.most_neighbor_clustering(shift_ls, 5)
-        shift = int(np.mean(shift_ls))
+        # shift_ls = util.most_neighbor_clustering(shift_ls, 5)
+        # shift = int(np.mean(shift_ls))
 
     else:
-        shift = int(shift) #number of slices to keep 
+        shift = int(shift) #number of slices to keep
+        shift_ls = [shift] * (len(folder_list) - 1)
     
     if new_folder == 'auto':
         new_folder = prefix + '_restack'
@@ -318,7 +319,8 @@ def main(arg):
     except:
         pass
     f = open(os.path.join(new_folder, 'shift.txt'), 'w')
-    f.write(str(shift))
+    for shift in shift_ls:
+        f.write(str(shift) + '\n')
     f.close()
 
 
