@@ -300,8 +300,8 @@ def main(arg):
         shift_ls = []
         for i in range(folder_grid.shape[0] - 1):
             if slice0 is None:
-                slice0 = dxchange.read_tiff(os.path.join(folder_grid[i, 0],'preview_recon', 'yz_cs.tiff'))
-            slice1 = dxchange.read_tiff(os.path.join(folder_grid[i+1, 0], 'preview_recon', 'yz_cs.tiff'))
+                slice0 = dxchange.read_tiff(os.path.join(folder_grid[i, 0],'recon_preview', 'yz_cs.tiff'))
+            slice1 = dxchange.read_tiff(os.path.join(folder_grid[i+1, 0], 'recon_preview', 'yz_cs.tiff'))
             this_shift = register_translation(slice0, slice1, down=True, upsample_factor=1)
             shift_ls.append(this_shift[0])
             slice0 = np.copy(slice1)
