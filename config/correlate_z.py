@@ -1,8 +1,29 @@
-import numpy as np
-import dxchange
-from scipy import ndimage
-import glob, os, re
 
+
+
+
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+AuTomo example to generage sample previews.
+"""
+
+from __future__ import print_function
+
+import six.moves.configparser as ConfigParser
+import argparse
+import os
+import sys
+from os.path import expanduser
+import dxchange
+import warnings
+import numpy as np
+from glob import glob
+import re, shutil
+from scipy import ndimage
+
+import automo.util as util
 
 # pad zeros to the right of 1 as binary (e.g.: 1 << x, x = 3, 1 -> 1000(bin) -> 8) equv: return 2 ** x
 def shift_bit_length(x):
@@ -259,59 +280,40 @@ def register_translation(src_image, target_image, rangeX=(None, None), rangeY=(N
 
     return shifts
 
-def get_yz_slice(recon_folder, chunk_size=50, slice_y=1000):
 
-    filelist = glob.glob(os.path.join(recon_folder, 'recon*.tiff'))
-    inds = []
-    digit = None
-    for i in filelist:
-        i = os.path.split(i)[-1]
-        regex = re.compile(r'\d+')
-        a = regex.findall(i)[0]
-        if digit is None:
-            digit = len(a)
-        inds.append(int(a))
-    chunks = []
-    chunk_st = np.min(inds)
-    chunk_end = chunk_st + chunk_size
-    sino_end = np.max(inds)
 
-    while chunk_end < sino_end:
-        chunks.append((chunk_st, chunk_end))
-        chunk_st = chunk_end
-        chunk_end += chunk_size
-    chunks.append((chunk_st, sino_end))
+def main(arg):
 
-    a = dxchange.read_tiff_stack(filelist[0], range(chunks[0][0], chunks[0][1]), digit)
-    slice = a[:, slice_y, :]
-    for (chunk_st, chunk_end) in chunks[1:]:
-        a = dxchange.read_tiff_stack(filelist[0], range(chunk_st, chunk_end), digit)
-        slice = np.append(slice, a[:, slice_y, :], axis=0)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("prefix", help="existing recon foldername")
+    parser.add_argument("shift", help="shift between datasets",default='auto')
+    parser.add_argument("new_folder",help="target folder",default='auto')
+    args = parser.parse_args()
 
-    return slice
+    home = expanduser("~")
+    tomo = os.path.join(home, '.tomo/automo.ini')
+    cf = ConfigParser.ConfigParser()
+    cf.read(tomo)
 
-#recon_folder_1 = path to recon folder 1
-def correlate_z(recon_folder_1, recon_folder_2, chunk_size=50, slice_y=1000):
+    prefix = args.prefix
 
-    print('Building slice for ' + recon_folder_1)
-    if os.path.exists(os.path.join(recon_folder_1, 'yz_cs.tiff')):
-        slice1 = dxchange.read_tiff(os.path.join(recon_folder_1, 'yz_cs.tiff'))
+    if shift == 'auto':
+        print (find_shit)
     else:
-        slice1 = get_yz_slice(recon_folder_1, chunk_size=chunk_size, slice_y=slice_y)
-        dxchange.write_tiff(slice1, os.path.join(recon_folder_1, 'yz_cs.tiff'), dtype='float32')
+        shift = int(shift) #number of slices to keep 
+    
+    if new_folder == 'auto':
+        new_folder = prefix + '_restack'
 
-    print('Building slice for ' + recon_folder_2)
-    if os.path.exists(os.path.join(recon_folder_2, 'yz_cs.tiff')):
-        slice2 = dxchange.read_tiff(os.path.join(recon_folder_2, 'yz_cs.tiff'))
-    else:
-        slice2 = get_yz_slice(recon_folder_2, chunk_size=chunk_size, slice_y=slice_y)
-        dxchange.write_tiff(slice2, os.path.join(recon_folder_2, 'yz_cs.tiff'), dtype='float32')
-    print('Registering')
-    shift = register_translation(slice1, slice2, down=True)
+    folder_list = sorted(glob(prefix)
 
-    return shift
 
-folder_list = glob.glob('Mari*')
-for i, folder in enumerate(folder_list):
-    if i < len(folder_list) - 1:
-        print(correlate_z(folder+'/recon', folder_list[i+1]+'/recon', slice_y=650))
+    for i, folder in enumerate(folder_list):
+        if i < len(folder_list) - 1:
+            slice1 = dxchange.read_tiff(os.path.join(folder_list[i],'preview_recon', 'yz_cs.tiff')
+            slice2 = dxchange.read_tiff(os.path.join(folder_list[i+1],'preview_recon', 'yz_cs.tiff')
+            shift = register_translation(slice1, slice2, down=True)
+            print(shift)
+            
+if __name__ == "__main__":
+    main(sys.argv[1:])
