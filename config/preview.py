@@ -15,6 +15,7 @@ from os.path import expanduser
 import dxchange
 import warnings
 import numpy as np
+import h5py
 from glob import glob
 
 import automo.util as util
@@ -33,18 +34,16 @@ def main(arg):
 
     fname = args.file_name
 
-    if fname = 'auto':
-        h5file = glob.glob('*.h5')
+    if fname == 'auto':
+        h5file = glob('*.h5')
         fname = h5file[0] 
         print ('Autofilename =' + h5file)
-
-
         
     folder = './'
 
     if os.path.isfile(fname):
 
-        h5 = File(fname)
+        h5 = h5py.File(fname)
         dset = h5['exchange/data'] #this should be adaptative
         proj_st = 0
         proj_end = proj_st + 1

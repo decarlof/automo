@@ -20,6 +20,7 @@ import dxchange
 import tomopy
 import numpy as np
 import h5py
+from glob import glob
 from tqdm import tqdm
 
 import automo.util as util
@@ -44,13 +45,15 @@ def main(arg):
     cf = ConfigParser.ConfigParser()
     cf.read(tomo)
 
-    if fname = 'auto':
-        h5file = glob.glob('*.h5')
+    fname = args.file_name
+
+    if fname == 'auto':
+        h5file = glob('*.h5')
         fname = h5file[0] 
         print ('Autofilename =' + h5file)
 
-    array_dims = util.h5group_dims(file_name)
-    folder = os.path.dirname(file_name) + os.sep
+    array_dims = util.h5group_dims(fname)
+    folder = os.path.dirname(fname) + os.sep
 
     chunk_size = int(args.chunk_size)
     medfilt_size = int(args.medfilt_size)
@@ -108,7 +111,7 @@ def main(arg):
 
         print('Chunk range: ({:d}, {:d})'.format(chunk_st, chunk_end))
 
-        prj, flat, dark, theta = util.read_data_adaptive(file_name, sino=(chunk_st, chunk_end, sino_step), return_theta=True)
+        prj, flat, dark, theta = util.read_data_adaptive(fname, sino=(chunk_st, chunk_end, sino_step), return_theta=True)
         raw_shape = prj.shape
 
         # theta = tomopy.angles(prj.shape[0])

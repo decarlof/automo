@@ -18,6 +18,7 @@ from os.path import expanduser
 import h5py
 import dxchange
 import tomopy
+from glob import glob
 import numpy as np
 from tqdm import tqdm
 
@@ -81,8 +82,10 @@ def main(arg):
     cf = ConfigParser.ConfigParser()
     cf.read(tomo)
 
-    if fname = 'auto':
-        h5file = glob.glob('*.h5')
+    fname = args.file_name
+
+    if fname == 'auto':
+        h5file = glob('*.h5')
         fname = h5file[0] 
         print ('Autofilename =' + h5file)
 
