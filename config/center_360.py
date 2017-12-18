@@ -81,7 +81,7 @@ def main(arg):
     cf = ConfigParser.ConfigParser()
     cf.read(tomo)
 
-    if fname = 'auto':
+    if fname == 'auto':
         h5file = glob.glob('*.h5')
         fname = h5file[0] 
         print ('Autofilename =' + h5file)
