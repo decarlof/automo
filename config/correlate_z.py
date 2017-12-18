@@ -296,19 +296,15 @@ def main(arg):
         print ('Attempting to find shift automatically.')
         folder_grid = util.start_file_grid(folder_list, pattern=1)
         print (folder_grid)
-        prj0 = None
+        slice0 = None
         shift_ls = []
         for i in range(folder_grid.shape[0] - 1):
-            if prj0 is None:
-                prj0, flt, drk = util.read_data_adaptive(glob(os.path.join(folder_grid[i, 0], '*.h5'))[0], proj=(0, 1))
-                prj0 = (prj0 - drk) / (flt - drk)
-                prj0[np.isnan(prj0)] = 0
-            prj1, flt, drk = util.read_data_adaptive(glob(os.path.join(folder_grid[i+1, 0], '*.h5'))[0], proj=(0, 1))
-            prj1 = (prj1 - drk) / (flt - drk)
-            prj1[np.isnan(prj1)] = 0
-            this_shift = register_translation(prj0, prj1, down=True, upsample_factor=1)
+            if slice0 is None:
+                slice0 = dxchange.read_tiff(os.path.join(folder_grid[i, 0],'preview_recon', 'yz_cs.tiff'))
+            slice1 = dxchange.read_tiff(os.path.join(folder_grid[i+1, 0], 'preview_recon', 'yz_cs.tiff'))
+            this_shift = register_translation(slice0, slice1, down=True, upsample_factor=1)
             shift_ls.append(this_shift[0])
-            prj0 = np.copy(prj1)
+            slice0 = np.copy(slice1)
         shift_ls = util.most_neighbor_clustering(shift_ls, 5)
         shift = int(np.mean(shift_ls))
 
