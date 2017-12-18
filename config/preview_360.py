@@ -24,32 +24,41 @@ def main(arg):
 
     parser = argparse.ArgumentParser()
     parser.add_argument("file_name", help="existing hdf5 file name",default='auto')
+    parser.add_argument("proj_start", help="preview projection start; for full rec enter -1", default='auto')
+    parser.add_argument("proj_end", help="preview projection end; for full rec enter -1", default='auto')
+    parser.add_argument("proj_step", help="preview projection step; for full rec enter -1", default='auto')
+    parser.add_argument("slice_start", help="preview slice start; for full rec enter -1", default='auto')
+    parser.add_argument("slice_end", help="preview slice end; for full rec enter -1", default='auto')
+    parser.add_argument("slice_step", help="preview slice step; for full rec enter -1", default='auto')
     args = parser.parse_args()
 
-
     fname = args.file_name
-
 
     if fname == 'auto':
         h5file = glob('*.h5')
         fname = h5file[0] 
         print ('Autofilename =' + fname)
 
-
     folder = './'
-
 
     if os.path.isfile(fname):
 
         h5 = h5py.File(fname)
         dset = h5['exchange/data']
-        proj_st = 0
-        proj_end = int(dset.shape[0]/2) + 1
-        proj_step = int(dset.shape[0]/2)
-        slice_st = int(dset.shape[1]/2)
-        slice_end = slice_st+1
-        slice_step = 1
-
+        try:
+            proj_st = int(args.proj_start)
+            proj_end = int(args.proj_end)
+            proj_step = int(args.proj_step)
+            slice_st = int(args.slice_start)
+            slice_end = int(args.slice_end)
+            slice_step = int(args.slice_step)
+        except:
+            proj_st = 0
+            proj_end = int(dset.shape[0]/2) + 1
+            proj_step = int(dset.shape[0]/2)
+            slice_st = int(dset.shape[1]/2)
+            slice_end = slice_st+1
+            slice_step = 1
 
         # Read the APS raw data projections.
         proj, flat, dark, _ = util.read_data_adaptive(fname, proj=(proj_st, proj_end, proj_step))
