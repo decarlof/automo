@@ -287,7 +287,7 @@ def main(arg):
     parser = argparse.ArgumentParser()
     parser.add_argument("prefix", help="existing recon foldername")
     parser.add_argument("shift", help="shift between datasets",default='auto')
-    parser.add_argument("new_folder",help="target folder",default='auto')
+    parser.add_argument("shift_file",help="target folder",default='auto')
     args = parser.parse_args()
 
     home = expanduser("~")
@@ -302,11 +302,10 @@ def main(arg):
     else:
         shift = int(shift) #number of slices to keep 
     
-    if new_folder == 'auto':
+    if shift_file == 'auto':
         new_folder = prefix + '_restack'
 
     folder_list = sorted(glob(prefix)
-
 
     for i, folder in enumerate(folder_list):
         if i < len(folder_list) - 1:
@@ -314,6 +313,6 @@ def main(arg):
             slice2 = dxchange.read_tiff(os.path.join(folder_list[i+1],'preview_recon', 'yz_cs.tiff')
             shift = register_translation(slice1, slice2, down=True)
             print(shift)
-            
+
 if __name__ == "__main__":
     main(sys.argv[1:])
