@@ -8,7 +8,6 @@ TomoPy example script to reconstruct tomography data with different center.
 
 from __future__ import print_function
 
-import six.moves.configparser as ConfigParser
 import argparse
 import os
 import sys
@@ -44,10 +43,6 @@ def main(arg):
     # pad_length = int(args.padding)
     pad_length = 1000
 
-    home = expanduser("~")
-    tomo = os.path.join(home, '.tomo/automo.ini')
-    cf = ConfigParser.ConfigParser()
-    cf.read(tomo)
 
     fname = args.file_name
 

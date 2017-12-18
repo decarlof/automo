@@ -6,7 +6,6 @@ AuTomo example to generage sample previews.
 
 from __future__ import print_function
 
-import six.moves.configparser as ConfigParser
 import argparse
 import os
 import sys
@@ -284,11 +283,6 @@ def main(arg):
     parser.add_argument("shift", help="shift between datasets",default='auto')
     parser.add_argument("shift_file",help="target folder",default='auto')
     args = parser.parse_args()
-
-    home = expanduser("~")
-    tomo = os.path.join(home, '.tomo/automo.ini')
-    cf = ConfigParser.ConfigParser()
-    cf.read(tomo)
 
     prefix = args.prefix
     shift = args.shift
