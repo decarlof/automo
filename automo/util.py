@@ -652,10 +652,10 @@ def get_index(file_list, pattern=1):
     :return:
     '''
     if pattern == 0:
-        regex = re.compile(r".+_x(\d+)_y(\d+).+")
+        regex = re.compile(r".+_x(\d+)_y(\d+)(.*)")
         ind_buff = [m.group(1, 2) for l in file_list for m in [regex.search(l)] if m]
     elif pattern == 1:
-        regex = re.compile(r".+_y(\d+)_x(\d+).+")
+        regex = re.compile(r".+_y(\d+)_x(\d+)(.*)")
         ind_buff = [m.group(2, 1) for l in file_list for m in [regex.search(l)] if m]
     return np.asarray(ind_buff).astype('int')
 
@@ -679,3 +679,4 @@ def start_file_grid(file_list, ver_dir=0, hor_dir=0, pattern=1):
     if hor_dir:
         grid = np.fliplr(grid)
     return grid
+
