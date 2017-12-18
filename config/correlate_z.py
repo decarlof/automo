@@ -15,6 +15,7 @@ import warnings
 import numpy as np
 from glob import glob
 import re, shutil
+import h5py
 from scipy import ndimage
 
 import automo.util as util
@@ -288,22 +289,41 @@ def main(arg):
     shift = args.shift
     shift_file = args.shift_file
 
+    folder_list = glob(prefix)
+    folder_list.sort()
+
     if shift == 'auto':
-        print (find_shit)
+        print ('Attempting to find shift automatically.')
+        folder_grid = util.start_file_grid(folder_list, pattern=1)
+        prj0 = None
+        shift_ls = []
+        for i in range(folder_grid.shape[0] - 1):
+            if prj0 is None:
+                prj0, flt, drk = util.read_data_adaptive(glob(os.path.join(folder_grid[i, 0], '*.h5'))[0], proj=(0, 1))
+                prj0 = (prj0 - drk) / (flt - drk)
+                prj0[np.isnan(prj0)] = 0
+            prj1, flt, drk = util.read_data_adaptive(glob(os.path.join(folder_grid[i+1, 0], '*.h5'))[0], proj=(0, 1))
+            prj1 = (prj1 - drk) / (flt - drk)
+            prj1[np.isnan(prj1)] = 0
+            this_shift = register_translation(prj0, prj1, down=True, upsample_factor=1)
+            shift_ls.append(this_shift[0])
+            prj0 = np.copy(prj1)
+        shift_ls = util.most_neighbor_clustering(shift_ls, 5)
+        shift = int(np.mean(shift_ls))
+
     else:
         shift = int(shift) #number of slices to keep 
     
     if shift_file == 'auto':
         new_folder = prefix + '_restack'
+        try:
+            os.makedirs(new_folder)
+        except:
+            pass
+        f = open('shift.txt', 'w')
+        f.write(str(shift))
+        f.close()
 
-    folder_list = sorted(glob(prefix)
-
-    for i, folder in enumerate(folder_list):
-        if i < len(folder_list) - 1:
-            slice1 = dxchange.read_tiff(os.path.join(folder_list[i],'preview_recon', 'yz_cs.tiff')
-            slice2 = dxchange.read_tiff(os.path.join(folder_list[i+1],'preview_recon', 'yz_cs.tiff')
-            shift = register_translation(slice1, slice2, down=True)
-            print(shift)
 
 if __name__ == "__main__":
     main(sys.argv[1:])

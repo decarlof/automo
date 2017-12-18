@@ -640,3 +640,41 @@ def write_center(tomo, theta, dpath='tmp/center', cen_range=None, pad_length=0):
         if not pad_length == 0:
             rec = rec[:, pad_length:-pad_length, pad_length:-pad_length]
         dxchange.write_tiff(np.squeeze(rec), os.path.join(dpath, '{:.2f}'.format(center-pad_length)), overwrite=True)
+
+
+def get_index(file_list, pattern=1):
+    '''
+    Get tile indices.
+    :param file_list: list of files.
+    :param pattern: pattern of naming. For files named with x_*_y_*, use
+                    pattern=0. For files named with y_*_x_*, use pattern=1.
+    :return:
+    '''
+    if pattern == 0:
+        regex = re.compile(r".+_x(\d+)_y(\d+).+")
+        ind_buff = [m.group(1, 2) for l in file_list for m in [regex.search(l)] if m]
+    elif pattern == 1:
+        regex = re.compile(r".+_y(\d+)_x(\d+).+")
+        ind_buff = [m.group(2, 1) for l in file_list for m in [regex.search(l)] if m]
+    return np.asarray(ind_buff).astype('int')
+
+
+def start_file_grid(file_list, ver_dir=0, hor_dir=0, pattern=1):
+    ind_list = get_index(file_list, pattern)
+    if pattern == 0:
+        x_max, y_max = ind_list.max(0)
+        x_min, y_min = ind_list.min(0)
+    elif pattern == 1:
+        x_max, y_max = ind_list.max(0) + 1
+        x_min, y_min = ind_list.min(0) + 1
+    grid = np.empty((y_max, x_max), dtype=object)
+    for k_file in range(len(file_list)):
+        if pattern == 0:
+            grid[ind_list[k_file, 1] - 1, ind_list[k_file, 0] - 1] = file_list[k_file]
+        elif pattern == 1:
+            grid[ind_list[k_file, 1], ind_list[k_file, 0]] = file_list[k_file]
+    if ver_dir:
+        grid = np.flipud(grid)
+    if hor_dir:
+        grid = np.fliplr(grid)
+    return grid
