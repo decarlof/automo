@@ -54,7 +54,7 @@ def get_yz_slice(recon_folder, chunk_size=50, slice_y=1000):
 def main(arg):
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("rec_folder", help="existing recon foldername",default='auto')
+    parser.add_argument("--rec_folder", help="existing recon foldername",default='auto')
     args = parser.parse_args()
 
     fname = args.rec_folder

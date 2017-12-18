@@ -24,38 +24,43 @@ from tqdm import tqdm
 
 import automo.util as util
 
+def debug_print(debug, text):
+    if debug:
+        print(text)
 
 def main(arg):
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("file_name", help="existing hdf5 file name",default='auto')
-    parser.add_argument("center_folder", help="folder containing center testing images")
-    parser.add_argument("sino_start", help="slice start")
-    parser.add_argument("sino_end", help="slice end")
-    parser.add_argument("sino_step", help="slice step")
-    parser.add_argument("medfilt_size", help="size of median filter")
-    parser.add_argument("level", help="level of downsampling")
-    parser.add_argument("chunk_size", help="chunk size")
+    parser.add_argument("--file_name", help="existing hdf5 file name",default='auto')
+    parser.add_argument("--center_folder", help="folder containing center testing images",default='center')
+    parser.add_argument("--sino_start", help="slice start",default=0,type=int)
+    parser.add_argument("--sino_end", help="slice end,",default=1200,type=int)
+    parser.add_argument("--sino_step", help="slice step",default=1)
+    parser.add_argument("--medfilt_size", help="size of median filter",default=0,type=int)
+    parser.add_argument("--level", help="level of downsampling",default=0,type=int)
+    parser.add_argument("--pad_lenght", help="sinogram padding",default=1000,type=int)
+    parser.add_argument("--chunk_size", help="chunk size",default=50,type=int)
+    parser.add_argument("--debug", help="debug messages",default=0,type=int)
     # parser.add_argument("padding", help="sinogram padding")
     args = parser.parse_args()
 
-
+    debug = args.debug
     fname = args.file_name
 
     if fname == 'auto':
         h5file = glob('*.h5')
+        print (h5file)
         fname = h5file[0] 
         print ('Autofilename =' + fname)
 
     array_dims = util.h5group_dims(fname)
     folder = os.path.dirname(fname) + os.sep
 
-    chunk_size = int(args.chunk_size)
-    medfilt_size = int(args.medfilt_size)
-    level = int(args.level)
-    # pad_length = int(args.padding)
+    chunk_size = args.chunk_size
+    medfilt_size = args.medfilt_size
+    level = args.level
+    pad_length = args.pad_lenght
 
-    pad_length = 1000
 
     # find center if not given
     if os.path.exists('center_pos.txt'):
@@ -82,7 +87,7 @@ def main(arg):
         f.close()
 
 
-    print("Data: ", array_dims)
+    debug_print(debug,"Data: "+str(array_dims))
     # Select the sinogram range to reconstruct.
     sino_start = int(args.sino_start)
     sino_end = int(args.sino_end)
@@ -107,46 +112,46 @@ def main(arg):
 
         # theta = tomopy.angles(prj.shape[0])
 
-        print('## Debug: after reading data:')
-        print('\n** Shape of the data:'+str(np.shape(prj)))
-        print('** Shape of theta:'+str(np.shape(theta)))
-        print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
+        debug_print(debug,'## Debug: after reading data:')
+        debug_print(debug,'\n** Shape of the data:'+str(np.shape(prj)))
+        debug_print(debug,'** Shape of theta:'+str(np.shape(theta)))
+        debug_print(debug,'\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
 
         prj = tomopy.normalize(prj, flat, dark)
-        print('\n** Flat field correction done!')
+        debug_print(debug,'\n** Flat field correction done!')
 
-        print('## Debug: after normalization:')
-        print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
+        debug_print(debug,'## Debug: after normalization:')
+        debug_print(debug,'\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
 
         prj = tomopy.minus_log(prj)
-        print('\n** minus log applied!')
+        debug_print(debug,'\n** minus log applied!')
 
-        print('## Debug: after minus log:')
-        print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
+        debug_print(debug,'## Debug: after minus log:')
+        debug_print(debug,'\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
 
         prj = tomopy.misc.corr.remove_neg(prj, val=0.001)
         prj = tomopy.misc.corr.remove_nan(prj, val=0.001)
         prj[np.where(prj == np.inf)] = 0.001
 
-        print('## Debug: after cleaning bad values:')
-        print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
+        debug_print(debug,'## Debug: after cleaning bad values:')
+        debug_print(debug,'\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
 
         prj = tomopy.remove_stripe_ti(prj, 4)
-        print('\n** Stripe removal done!')
-        print('## Debug: after remove_stripe:')
-        print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
+        debug_print(debug,'\n** Stripe removal done!')
+        debug_print(debug,'## Debug: after remove_stripe:')
+        debug_print(debug,'\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
 
         if medfilt_size not in (0, None):
             prj = tomopy.median_filter(prj, size=medfilt_size)
-            print('\n** Median filter done!')
-            print('## Debug: after nedian filter:')
-            print('\n** Min and max val in prj before recon: %0.5f, %0.3f' % (np.min(prj), np.max(prj)))
+            debug_print(debug,'\n** Median filter done!')
+            debug_print(debug,'## Debug: after nedian filter:')
+            debug_print(debug,'\n** Min and max val in prj before recon: %0.5f, %0.3f' % (np.min(prj), np.max(prj)))
 
         if not level == 0:
             prj = tomopy.downsample(prj, level=level)
-            print('\n** Down sampling done!\n')
-            print('## Debug: after down sampling:')
-            print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
+            debug_print(debug,'\n** Down sampling done!\n')
+            debug_print(debug,'## Debug: after down sampling:')
+            debug_print(debug,'\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
 
         if not pad_length == 0:
             prj = util.pad_sinogram(prj, pad_length)
