@@ -32,7 +32,7 @@ def main(arg):
     if fname == 'auto':
         h5file = glob('*.h5')
         fname = h5file[0] 
-        print ('Autofilename =' + h5file)
+        print ('Autofilename =' + fname)
         
     folder = './'
 

@@ -29,18 +29,15 @@ def main(arg):
 
     fname = args.file_name
 
+
     if fname == 'auto':
         h5file = glob('*.h5')
         fname = h5file[0] 
-        print ('Autofilename =' + h5file)
+        print ('Autofilename =' + fname)
 
 
     folder = './'
 
-#    # write_stand-alone scripts
-#    for script in ['hdf5_frame_writer_360_standalone.py', 'center_360_standalone.py', 'recon_360_standalone.py']:
-#        if os.path.exists(os.path.join(home, '.automo', script)):
-#            shutil.copyfile(os.path.join(home, '.automo', script), script)
 
     if os.path.isfile(fname):
 
