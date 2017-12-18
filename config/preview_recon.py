@@ -15,13 +15,14 @@ import dxchange
 import warnings
 import numpy as np
 from glob import glob
+import re
 
 import automo.util as util
 
 ##PROBABLY SHOULD GO TO A STANDARD OPERATIONS FILE.
 def get_yz_slice(recon_folder, chunk_size=50, slice_y=1000):
 
-    filelist = glob.glob(os.path.join(recon_folder, 'recon*.tiff'))
+    filelist = glob(os.path.join(recon_folder, 'recon*.tiff'))
     inds = []
     digit = None
     for i in filelist:
@@ -55,16 +56,15 @@ def main(arg):
     parser = argparse.ArgumentParser()
     parser.add_argument("rec_folder", help="existing recon foldername",default='auto')
     args = parser.parse_args()
-    
-    fname = args.file_name
+
+    fname = args.rec_folder
 
     if fname == 'auto':
-        rec_folders = sorted(glob('/recon*'))
-        fname = rec_folders[-1] 
+        rec_folders = sorted(glob('recon*'))
+        fname = rec_folders[0] 
         print ('Autofilename =' + fname)
 
     if os.path.isdir(fname):
-
         slice1 = get_yz_slice(fname, chunk_size=50, slice_y=1000)
         dxchange.write_tiff(slice1, os.path.join(fname+'_preview', 'yz_cs.tiff'), dtype='float32')
 
