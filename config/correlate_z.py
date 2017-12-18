@@ -1,8 +1,3 @@
-
-
-
-
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 """
@@ -296,6 +291,8 @@ def main(arg):
     cf.read(tomo)
 
     prefix = args.prefix
+    shift = args.shift
+    shift_file = args.shift_file
 
     if shift == 'auto':
         print (find_shit)
