@@ -23,7 +23,7 @@ import automo.util as util
 def main(arg):
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("file_name", help="existing hdf5 file name",default='auto')
+    parser.add_argument("--file_name", help="existing hdf5 file name",default='auto')
     args = parser.parse_args()
 
 
