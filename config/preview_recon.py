@@ -7,7 +7,6 @@ AuTomo example to generage sample previews.
 
 from __future__ import print_function
 
-import six.moves.configparser as ConfigParser
 import argparse
 import os
 import sys
@@ -56,12 +55,7 @@ def main(arg):
     parser = argparse.ArgumentParser()
     parser.add_argument("rec_folder", help="existing recon foldername",default='auto')
     args = parser.parse_args()
-
-    home = expanduser("~")
-    tomo = os.path.join(home, '.tomo/automo.ini')
-    cf = ConfigParser.ConfigParser()
-    cf.read(tomo)
-
+    
     fname = args.file_name
 
     if fname == 'auto':

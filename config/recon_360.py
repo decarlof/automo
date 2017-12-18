@@ -8,7 +8,6 @@ TomoPy example script to reconstruct tomography data with different center.
 
 from __future__ import print_function
 
-import six.moves.configparser as ConfigParser
 import argparse
 import os
 import sys
@@ -84,11 +83,6 @@ def main(arg):
     cf.read(tomo)
 
     fname = args.file_name
-
-    if fname == 'auto':
-        h5file = glob('*.h5')
-        fname = h5file[0] 
-        print ('Autofilename =' + h5file)
 
     array_dims = util.h5group_dims(fname)
     folder = os.path.dirname(fname) + os.sep
