@@ -127,10 +127,11 @@ def main(arg):
     print('## Debug: after remove_stripe:')
     print('\n** Min and max val in prj before recon: %0.5f, %0.3f' % (np.min(prj), np.max(prj)))
 
-    prj = tomopy.median_filter(prj,size=medfilt_size)
-    print('\n** Median filter done!')
-    print('## Debug: after nedian filter:')
-    print('\n** Min and max val in prj before recon: %0.5f, %0.3f' % (np.min(prj), np.max(prj)))
+    if medfilt_size not in (0, None):
+        prj = tomopy.median_filter(prj,size=medfilt_size)
+        print('\n** Median filter done!')
+        print('## Debug: after nedian filter:')
+        print('\n** Min and max val in prj before recon: %0.5f, %0.3f' % (np.min(prj), np.max(prj)))
 
 
     if level>0:
