@@ -106,7 +106,7 @@ def main(arg):
     pbar = tqdm(chunks)
     for (chunk_st, chunk_end) in pbar:
 
-        print('Chunk range: ({:d}, {:d})'.format(chunk_st, chunk_end))
+        pbar.set_description('Chunk range: ({:d}, {:d})'.format(chunk_st, chunk_end))
 
         prj, flat, dark, theta = util.read_data_adaptive(fname, sino=(chunk_st, chunk_end, sino_step), return_theta=True)
         raw_shape = prj.shape
@@ -158,7 +158,7 @@ def main(arg):
             prj = util.pad_sinogram(prj, pad_length)
 
         rec = tomopy.recon(prj, theta, center=center_pos+pad_length, algorithm='gridrec', filter_name='parzen')
-        print('\nReconstruction done!\n')
+        debug_print(debug,'\nReconstruction done!\n')
 
         if not pad_length == 0:
             rec = rec[:, pad_length:pad_length+raw_shape[2], pad_length:pad_length+raw_shape[2]]
