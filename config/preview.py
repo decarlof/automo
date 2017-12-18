@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-TomoPy example script to generate a series of preview projections.
-
+AuTomo example to generage sample previews.
 """
 
 from __future__ import print_function
@@ -16,6 +15,7 @@ from os.path import expanduser
 import dxchange
 import warnings
 import numpy as np
+from glob import glob
 
 import automo.util as util
 
@@ -23,15 +23,7 @@ import automo.util as util
 def main(arg):
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("file_name", help="existing hdf5 file name")
-    parser.add_argument("proj_start", help="preview projection start; for full rec enter -1")
-    parser.add_argument("proj_end", help="preview projection end; for full rec enter -1")
-    parser.add_argument("proj_step", help="preview projection step; for full rec enter -1")
-    parser.add_argument("slice_start", help="preview slice start; for full rec enter -1")
-    parser.add_argument("slice_end", help="preview slice end; for full rec enter -1")
-    parser.add_argument("slice_step", help="preview slice step; for full rec enter -1")
-    # parser.add_argument("rot_center", help="rotation center; for auto center enter -1")
-    #parser.add_argument("save_dir", help="relative save directory")
+    parser.add_argument("file_name", help="existing hdf5 file name",default='auto')
     args = parser.parse_args()
 
     home = expanduser("~")
@@ -40,19 +32,27 @@ def main(arg):
     cf.read(tomo)
 
     fname = args.file_name
-    proj_st = int(args.proj_start)
-    proj_end = int(args.proj_end)
-    proj_step = int(args.proj_step)
-    slice_st = int(args.slice_start)
-    slice_end = int(args.slice_end)
-    slice_step = int(args.slice_step)
 
-    # rot_center = args.rot_center
+    if fname = 'auto':
+        h5file = glob.glob('*.h5')
+        fname = h5file[0] 
+        print ('Autofilename =' + h5file)
 
-    #folder = os.path.dirname(fname) + os.sep
+
+        
     folder = './'
 
     if os.path.isfile(fname):
+
+        h5 = File(fname)
+        dset = h5['exchange/data'] #this should be adaptative
+        proj_st = 0
+        proj_end = proj_st + 1
+        proj_step = 1
+        slice_st = 600
+        slice_end = slice_st+1
+        slice_step = 1
+
 
         # Read the APS raw data projections.
         proj, flat, dark, _ = util.read_data_adaptive(fname, proj=(proj_st, proj_end, proj_step))
@@ -71,7 +71,7 @@ def main(arg):
         print("Proj folder: ", proj_fname)
 
         dxchange.write_tiff_stack(proj, fname=proj_fname, axis=0, digit=5, start=0, overwrite=True)
-        dxchange.write_tiff_stack(sino, fname=sino_fname, axis=0, digit=5, start=0, overwrite=True)
+        dxchange.write_tiff_stack(sino, fname=sino_fname, axis=0, digit=5, start=slice_st, overwrite=True)
         print("#################################")
 
 

@@ -20,6 +20,7 @@ import dxchange
 import tomopy
 import numpy as np
 import h5py
+from tqdm import tqdm
 
 import automo.util as util
 
@@ -27,7 +28,7 @@ import automo.util as util
 def main(arg):
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("file_name", help="existing hdf5 file name")
+    parser.add_argument("file_name", help="existing hdf5 file name",default='auto')
     parser.add_argument("center_folder", help="folder containing center testing images")
     parser.add_argument("sino_start", help="slice start")
     parser.add_argument("sino_end", help="slice end")
@@ -43,7 +44,11 @@ def main(arg):
     cf = ConfigParser.ConfigParser()
     cf.read(tomo)
 
-    file_name = args.file_name
+    if fname = 'auto':
+        h5file = glob.glob('*.h5')
+        fname = h5file[0] 
+        print ('Autofilename =' + h5file)
+
     array_dims = util.h5group_dims(file_name)
     folder = os.path.dirname(file_name) + os.sep
 
@@ -83,9 +88,6 @@ def main(arg):
         f.close()
 
 
-    # perform reconstruction
-    # try:
-
     print("Data: ", array_dims)
     # Select the sinogram range to reconstruct.
     sino_start = int(args.sino_start)
@@ -102,7 +104,7 @@ def main(arg):
         chunk_end += chunk_size * sino_step
     chunks.append((chunk_st, sino_end))
 
-    for (chunk_st, chunk_end) in chunks:
+    for (chunk_st, chunk_end) in tqdm(chunks):
 
         print('Chunk range: ({:d}, {:d})'.format(chunk_st, chunk_end))
 

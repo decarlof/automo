@@ -20,10 +20,7 @@ import h5py
 import dxchange
 import tomopy
 import numpy as np
-try:
-    import xlearn
-except:
-    warnings.warn('Cannot import package xlearn.')
+from tqdm import tqdm
 
 import automo.util as util
 
@@ -31,7 +28,7 @@ import automo.util as util
 def main(arg):
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("file_name", help="existing hdf5 file name")
+    parser.add_argument("file_name", help="existing hdf5 file name",default='auto')
     parser.add_argument("rot_start", help="rotation axis start location")
     parser.add_argument("rot_end", help="rotation axis end location")
     parser.add_argument("rot_step", help="rotation axis end location")
@@ -51,7 +48,11 @@ def main(arg):
     cf = ConfigParser.ConfigParser()
     cf.read(tomo)
 
-    fname = args.file_name
+    if fname = 'auto':
+        h5file = glob.glob('*.h5')
+        fname = h5file[0] 
+        print ('Autofilename =' + h5file)
+
     rot_start = int(args.rot_start)
     rot_end = int(args.rot_end)
     rot_step = int(args.rot_step)

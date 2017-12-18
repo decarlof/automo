@@ -20,6 +20,7 @@ import dxchange
 import tomopy
 import numpy as np
 import h5py
+from tqdm import tqdm
 
 import automo.util as util
 
@@ -66,7 +67,7 @@ def sino_360_to_180(data, overlap=0, rotation='left'):
 def main(arg):
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("file_name", help="existing hdf5 file name")
+    parser.add_argument("file_name", help="existing hdf5 file name",default='auto')
     parser.add_argument("center_folder", help="folder containing center testing images")
     parser.add_argument("sino_start", help="slice start")
     parser.add_argument("sino_end", help="slice end")
@@ -81,7 +82,11 @@ def main(arg):
     cf = ConfigParser.ConfigParser()
     cf.read(tomo)
 
-    file_name = args.file_name
+    if fname = 'auto':
+        h5file = glob.glob('*.h5')
+        fname = h5file[0] 
+        print ('Autofilename =' + h5file)
+
     array_dims = util.h5group_dims(file_name)
     folder = os.path.dirname(file_name) + os.sep
 
