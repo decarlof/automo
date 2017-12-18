@@ -282,12 +282,12 @@ def main(arg):
     parser = argparse.ArgumentParser()
     parser.add_argument("prefix", help="existing recon foldername")
     parser.add_argument("shift", help="shift between datasets",default='auto')
-    parser.add_argument("shift_file",help="target folder",default='auto')
+    parser.add_argument("new_folder",help="target folder",default='auto')
     args = parser.parse_args()
 
     prefix = args.prefix
     shift = args.shift
-    shift_file = args.shift_file
+    new_folder = args.new_folder
 
     folder_list = glob(prefix)
     folder_list.sort()
@@ -314,15 +314,16 @@ def main(arg):
     else:
         shift = int(shift) #number of slices to keep 
     
-    if shift_file == 'auto':
+    if new_folder == 'auto':
         new_folder = prefix + '_restack'
-        try:
-            os.makedirs(new_folder)
-        except:
-            pass
-        f = open('shift.txt', 'w')
-        f.write(str(shift))
-        f.close()
+
+    try:
+        os.makedirs(new_folder)
+    except:
+        pass
+    f = open(os.path.join(new_folder, 'shift.txt'), 'w')
+    f.write(str(shift))
+    f.close()
 
 
 if __name__ == "__main__":

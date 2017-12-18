@@ -31,14 +31,24 @@ def main(arg):
 
 
     prefix = args.prefix
+    shift = args.shift
+    new_folder = args.new_folder
+
+    folder_list = glob(prefix)
+    folder_list.sort()
+
+    if new_folder == 'auto':
+        new_folder = prefix + '_restack'
+
+
 
     if shift == 'auto':
-        print (find_shit)
+        try:
+
     else:
         shift = int(shift) #number of slices to keep 
     
-    if new_folder == 'auto':
-        new_folder = prefix + '_restack'
+
 
     folder_list = sorted(glob(prefix)
 
