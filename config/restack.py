@@ -37,22 +37,29 @@ def main(arg):
     folder_list = glob(prefix)
     folder_list.sort()
 
+    folder_grid = util.start_file_grid(folder_list, pattern=1)
+
     if new_folder == 'auto':
         new_folder = prefix + '_restack'
 
-
+    try:
+        os.makedirs(new_folder)
+    except:
+        pass
 
     if shift == 'auto':
         try:
-
+            f = open(os.path.join(new_folder, 'shift.txt'), 'w')
+            shift = f.readlines()
+            shift = int(shift[0])
+            f.close()
+        except:
+            raise IOError('I could not find shift.txt in the target folder.')
     else:
         shift = int(shift) #number of slices to keep 
     
 
-
-    folder_list = sorted(glob(prefix)
-
-    for i, folder in enumerate(folder_list):
+    for i, folder in enumerate(folder_grid[:, 0]):
         file_list = glob(os.path.join(os.path.join(folder, 'recon', 'recon*.tiff')))
         file_list.sort()
         if i < len(folder_list) - 1:
