@@ -50,24 +50,26 @@ def main(arg):
     if shift == 'auto':
         try:
             f = open(os.path.join(new_folder, 'shift.txt'), 'w')
-            shift = f.readlines()
-            shift = int(shift[0])
+            shift_ls = f.readlines()
+            shift_ls = map(int, shift_ls)
             f.close()
         except:
             raise IOError('I could not find shift.txt in the target folder.')
     else:
-        shift = int(shift) #number of slices to keep 
+        shift_ls = [int(shift)] * (len(folder_list) - 1) #number of slices to keep
     
-
+    accum = 0
     for i, folder in enumerate(folder_grid[:, 0]):
+        shift = shift_ls[i]
         file_list = glob(os.path.join(os.path.join(folder, 'recon', 'recon*.tiff')))
         file_list.sort()
         if i < len(folder_list) - 1:
             for j, f in enumerate(file_list[:shift]):
-                shutil.copyfile(f, os.path.join('full_stack', 'recon_{:05d}.tiff'.format(j + shift * i)))
+                shutil.copyfile(f, os.path.join('full_stack', 'recon_{:05d}.tiff'.format(j + accum)))
         else:
             for j, f in enumerate(file_list):
-                shutil.copyfile(f, os.path.join('full_stack', 'recon_{:05d}.tiff'.format(j + shift * i)))
+                shutil.copyfile(f, os.path.join('full_stack', 'recon_{:05d}.tiff'.format(j + accum)))
+        accum += shift
 
 if __name__ == "__main__":
     main(sys.argv[1:])
