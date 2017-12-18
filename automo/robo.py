@@ -68,7 +68,7 @@ import subprocess
 from distutils.dir_util import mkpath
 import logging
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
 __author__ = "Francesco De Carlo"
 __copyright__ = "Copyright (c) 2016, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'

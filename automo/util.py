@@ -66,6 +66,7 @@ import h5py
 import six.moves
 import warnings
 import inspect
+import gc
 try:
     import netCDF4 as cdf
 except:
@@ -78,7 +79,7 @@ try:
 except:
     warnings.warn('Cannot import package xlearn.')
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
 PI = 3.1415927
 
 __author__ = ['Francesco De Carlo', 'Ming Du']
@@ -463,7 +464,7 @@ def find_center_vo(tomo, ind=None, smin=-50, smax=50, srad=6, step=0.5,
         init_cen = _search_coarse(_tomo_cs, smin, smax, ratio, drop)
         fine_cen = _search_fine(_tomo_fs, srad, step, init_cen, ratio, drop)
 
-    logger.debug('Rotation center search finished: %i', fine_cen)
+    # logger.debug('Rotation center search finished: %i', fine_cen)
     return fine_cen
 
 
