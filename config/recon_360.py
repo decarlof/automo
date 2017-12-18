@@ -77,12 +77,12 @@ def main(arg):
     parser.add_argument("chunk_size", help="chunk size")
     args = parser.parse_args()
 
-    home = expanduser("~")
-    tomo = os.path.join(home, '.tomo/automo.ini')
-    cf = ConfigParser.ConfigParser()
-    cf.read(tomo)
-
     fname = args.file_name
+
+    if fname == 'auto':
+        h5file = glob('*.h5')
+        fname = h5file[0] 
+        print ('Autofilename =' + 
 
     array_dims = util.h5group_dims(fname)
     folder = os.path.dirname(fname) + os.sep
@@ -92,10 +92,6 @@ def main(arg):
     level = int(args.level)
 
     pad_length = 1000
-
-    # write_stand-alone recon script
-    if os.path.exists(os.path.join(home, '.automo', 'recon_standalone.py')):
-        shutil.copyfile(os.path.join(home, '.automo', 'recon_standalone.py'), 'recon.py')
 
     # find center if not given
     if os.path.exists('center_pos.txt'):

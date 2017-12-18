@@ -45,7 +45,7 @@ def main(arg):
     if fname == 'auto':
         h5file = glob('*.h5')
         fname = h5file[0] 
-        print ('Autofilename =' + h5file)
+        print ('Autofilename =' + fname)
 
     array_dims = util.h5group_dims(fname)
     folder = os.path.dirname(fname) + os.sep
@@ -56,10 +56,6 @@ def main(arg):
     # pad_length = int(args.padding)
 
     pad_length = 1000
-
-    # write_stand-alone recon script
-    if os.path.exists(os.path.join(home, '.automo', 'recon_standalone.py')):
-        shutil.copyfile(os.path.join(home, '.automo', 'recon_standalone.py'), 'recon.py')
 
     # find center if not given
     if os.path.exists('center_pos.txt'):
