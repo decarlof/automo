@@ -280,9 +280,9 @@ def register_translation(src_image, target_image, rangeX=(None, None), rangeY=(N
 def main(arg):
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("prefix", help="existing recon foldername")
-    parser.add_argument("shift", help="shift between datasets",default='auto')
-    parser.add_argument("new_folder",help="target folder",default='auto')
+    parser.add_argument("prefix", help="Folder Prefixes")
+    parser.add_argument("--shift", help="shift between datasets",default='auto')
+    parser.add_argument("--new_folder",help="target folder",default='auto')
     args = parser.parse_args()
 
     prefix = args.prefix

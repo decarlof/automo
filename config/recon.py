@@ -103,7 +103,8 @@ def main(arg):
         chunk_end += chunk_size * sino_step
     chunks.append((chunk_st, sino_end))
 
-    for (chunk_st, chunk_end) in tqdm(chunks):
+    pbar = tqdm(chunks)
+    for (chunk_st, chunk_end) in pbar:
 
         print('Chunk range: ({:d}, {:d})'.format(chunk_st, chunk_end))
 
