@@ -60,7 +60,8 @@ def main(arg):
     
     accum = 0
     for i, folder in enumerate(folder_grid[:, 0]):
-        shift = shift_ls[i]
+        if i < folder_grid.shape[0] - 1:
+            shift = shift_ls[i]
         file_list = glob(os.path.join(os.path.join(folder, 'recon', 'recon*.tiff')))
         file_list.sort()
         if i < len(folder_list) - 1:
