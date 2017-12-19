@@ -61,7 +61,11 @@ import pyfftw
 from tomopy import downsample
 import tomopy.util.dtype as dtype
 import scipy.ndimage as ndimage
+from scipy.ndimage import fourier_shift
+from scipy.ndimage.filters import gaussian_filter
+from scipy.signal import convolve2d
 import dxchange
+import operator
 import h5py
 import six.moves
 import warnings
@@ -704,3 +708,318 @@ def equalize_histogram(img, bin_min, bin_max, n_bin=256):
     for (y, x), i in np.ndenumerate(ind):
         res[y, x] = e_table[i]
     return res
+
+
+def sino_360_to_180(data, overlap=0, rotation='left'):
+    """
+    Converts 0-360 degrees sinogram to a 0-180 sinogram.
+    If the number of projections in the input data is odd, the last projection
+    will be discarded.
+    Parameters
+    ----------
+    data : ndarray
+        Input 3D data.
+    overlap : scalar, optional
+        Overlapping number of pixels.
+    rotation : string, optional
+        Left if rotation center is close to the left of the
+        field-of-view, right otherwise.
+    Returns
+    -------
+    ndarray
+        Output 3D data.
+    """
+    dx, dy, dz = data.shape
+
+    overlap = int(np.round(overlap))
+
+    lo = overlap//2
+    ro = overlap - lo
+    n = dx//2
+
+    out = np.zeros((n, dy, 2*dz-overlap), dtype=data.dtype)
+
+    if rotation == 'left':
+        out[:, :, -(dz-lo):] = data[:n, :, lo:]
+        out[:, :, :-(dz-lo)] = data[n:2*n, :, ro:][:, :, ::-1]
+    elif rotation == 'right':
+        out[:, :, :dz-lo] = data[:n, :, :-lo]
+        out[:, :, dz-lo:] = data[n:2*n, :, :-ro][:, :, ::-1]
+
+    return out
+
+
+def img_merge_pyramid(img1, img2, shift, margin=100, blur=0.4, depth=5):
+    """
+    Perform pyramid blending. Codes are adapted from Computer Vision Lab, Image blending using pyramid,
+    https://compvisionlab.wordpress.com/2013/05/13/image-blending-using-pyramid/.
+    Users are strongly suggested to run tests before beginning the actual stitching job using this function to determine
+    the biggest depth value that does not give seams due to over-blurring.
+    """
+
+    t00 = time.time()
+    t0 = time.time()
+    # print(    'Starting pyramid blend...')
+    newimg, img2 = arrange_image(img1, img2, shift)
+    if abs(shift[0]) < margin and abs(shift[1]) < margin:
+        return newimg
+    # print('    Blend: Image aligned and built in', str(time.time() - t0))
+
+    t0 = time.time()
+    case, rough_shift, corner, buffer1, buffer2, wid_hor, wid_ver = find_overlap(img1, img2, shift, margin=margin)
+    if case == 'skip':
+        return newimg
+    mask2 = np.ones(buffer1.shape)
+    if abs(rough_shift[1]) > margin:
+        mask2[:, :int(wid_hor / 2)] = 0
+    if abs(rough_shift[0]) > margin:
+        mask2[:int(wid_ver / 2), :] = 0
+    ##
+    buffer1[np.isnan(buffer1)] = 0
+    mask2[np.isnan(mask2)] = 1
+    t0 = time.time()
+    gauss_mask = _gauss_pyramid(mask2.astype('float'), depth, blur, mask=True)
+    gauss1 = _gauss_pyramid(buffer1, depth, blur)
+    gauss2 = _gauss_pyramid(buffer2, depth, blur)
+    lapl1 = _lapl_pyramid(gauss1, blur)
+    lapl2 = _lapl_pyramid(gauss2, blur)
+    ovlp_blended = _collapse(_blend(lapl2, lapl1, gauss_mask), blur)
+    # print('    Blend: Blending done in', str(time.time() - t0), 'sec.')
+
+    if abs(rough_shift[1]) > margin and abs(rough_shift[0]) > margin:
+        newimg[corner[0, 0]:corner[0, 0] + wid_ver, corner[0, 1]:corner[0, 1] + mask2.shape[1]] = \
+            ovlp_blended[:wid_ver, :]
+        newimg[corner[0, 0] + wid_ver:corner[0, 0] + mask2.shape[0], corner[0, 1]:corner[0, 1] + wid_hor] = \
+            ovlp_blended[wid_ver:, :wid_hor]
+    else:
+        newimg[corner[0, 0]:corner[0, 0] + wid_ver, corner[0, 1]:corner[0, 1] + wid_hor] = ovlp_blended
+    # print('    Blend: Done with this tile in', str(time.time() - t00), 'sec.')
+    gc.collect()
+
+    return newimg
+
+
+def _generating_kernel(a):
+    w_1d = np.array([0.25 - a / 2.0, 0.25, a, 0.25, 0.25 - a / 2.0])
+    return np.outer(w_1d, w_1d)
+
+
+def _ireduce(image, blur):
+    kernel = _generating_kernel(blur)
+    outimage = convolve2d(image, kernel, mode='same', boundary='symmetric')
+    out = outimage[::2, ::2]
+    return out
+
+
+def _iexpand(image, blur):
+    kernel = _generating_kernel(blur)
+    outimage = np.zeros((image.shape[0] * 2, image.shape[1] * 2), dtype=np.float64)
+    outimage[::2, ::2] = image[:, :]
+    out = 4 * convolve2d(outimage, kernel, mode='same', boundary='symmetric')
+    return out
+
+
+def _gauss_pyramid(image, levels, blur, mask=False):
+    output = []
+    if mask:
+        image = gaussian_filter(image, 20)
+    output.append(image)
+    tmp = np.copy(image)
+    for i in range(0, levels):
+        tmp = _ireduce(tmp, blur)
+        output.append(tmp)
+    return output
+
+
+def _lapl_pyramid(gauss_pyr, blur):
+    output = []
+    k = len(gauss_pyr)
+    for i in range(0, k - 1):
+        gu = gauss_pyr[i]
+        egu = _iexpand(gauss_pyr[i + 1], blur)
+        if egu.shape[0] > gu.shape[0]:
+            egu = np.delete(egu, (-1), axis=0)
+        if egu.shape[1] > gu.shape[1]:
+            egu = np.delete(egu, (-1), axis=1)
+        output.append(gu - egu)
+    output.append(gauss_pyr.pop())
+    return output
+
+
+def _blend(lapl_pyr_white, lapl_pyr_black, gauss_pyr_mask):
+    blended_pyr = []
+    k = len(gauss_pyr_mask)
+    for i in range(0, k):
+        p1 = gauss_pyr_mask[i] * lapl_pyr_white[i]
+        p2 = (1 - gauss_pyr_mask[i]) * lapl_pyr_black[i]
+        blended_pyr.append(p1 + p2)
+    return blended_pyr
+
+
+def _collapse(lapl_pyr, blur):
+    output = np.zeros((lapl_pyr[0].shape[0], lapl_pyr[0].shape[1]), dtype=np.float64)
+    for i in range(len(lapl_pyr) - 1, 0, -1):
+        lap = _iexpand(lapl_pyr[i], blur)
+        lapb = lapl_pyr[i - 1]
+        if lap.shape[0] > lapb.shape[0]:
+            lap = np.delete(lap, (-1), axis=0)
+        if lap.shape[1] > lapb.shape[1]:
+            lap = np.delete(lap, (-1), axis=1)
+        tmp = lap + lapb
+        lapl_pyr.pop()
+        lapl_pyr.pop()
+        lapl_pyr.append(tmp)
+        output = tmp
+    return output
+
+
+def arrange_image(img1, img2, shift, order=1, trim=True):
+    """
+    Place properly aligned image in buff
+
+    Parameters
+    ----------
+    img1 : ndarray
+        Substrate image array.
+
+    img2 : ndarray
+        Image being added on.
+
+    shift : float
+        Subpixel shift.
+    order : int
+        Order that images are arranged. If order is 1, img1 is written first and img2 is placed on the top. If order is
+        2, img2 is written first and img1 is placed on the top.
+    trim : bool
+        In the case that shifts involve negative or float numbers where Fourier shift is needed, remove the circular
+        shift stripe.
+
+    Returns
+    -------
+    newimg : ndarray
+        Output array.
+    """
+    rough_shift = get_roughshift(shift).astype('int')
+    adj_shift = shift - rough_shift.astype('float')
+    if np.count_nonzero(np.isnan(img2)) > 0:
+        int_shift = np.round(adj_shift).astype('int')
+        img2 = np.roll(np.roll(img2, int_shift[0], axis=0), int_shift[1], axis=1)
+    else:
+        img2 = realign_image(img2, adj_shift)
+    if trim:
+        temp = np.zeros(img2.shape-np.ceil(np.abs(adj_shift)).astype('int'))
+        temp[:, :] = img2[:temp.shape[0], :temp.shape[1]]
+        img2 = np.copy(temp)
+        temp = 0
+    new_shape = map(int, map(max, map(operator.add, img2.shape, rough_shift), img1.shape))
+    newimg = np.empty(new_shape)
+    newimg[:, :] = np.NaN
+    if order == 1:
+        newimg[0:img1.shape[0], 0:img1.shape[1]] = img1
+        notnan = np.isfinite(img2)
+        newimg[rough_shift[0]:rough_shift[0] + img2.shape[0], rough_shift[1]:rough_shift[1] + img2.shape[1]][notnan] \
+            = img2[notnan]
+    elif order == 2:
+        newimg[rough_shift[0]:rough_shift[0] + img2.shape[0], rough_shift[1]:rough_shift[1] + img2.shape[1]] = img2
+        notnan = np.isfinite(img1)
+        newimg[0:img1.shape[0], 0:img1.shape[1]][notnan] = img1[notnan]
+    else:
+        print('Warning: images are not arranged due to misspecified order.')
+    gc.collect()
+    if trim:
+        return newimg, img2
+    else:
+        return newimg
+
+
+def get_roughshift(shift):
+
+    rough_shift = np.ceil(shift)
+    rough_shift[rough_shift < 0] = 0
+    return rough_shift
+
+
+def realign_image(arr, shift, angle=0):
+    """
+    Translate and rotate image via Fourier
+
+    Parameters
+    ----------
+    arr : ndarray
+        Image array.
+
+    shift: float
+        Mininum and maximum values to rescale data.
+
+    angle: float, optional
+        Mininum and maximum values to rescale data.
+
+    Returns
+    -------
+    ndarray
+        Output array.
+    """
+    # if both shifts are integers, do circular shift; otherwise perform Fourier shift.
+    if np.count_nonzero(np.abs(np.array(shift) - np.round(shift)) < 0.01) == 2:
+        temp = np.roll(arr, int(shift[0]), axis=0)
+        temp = np.roll(temp, int(shift[1]), axis=1)
+        temp = temp.astype('float32')
+    else:
+        temp = fourier_shift(np.fft.fftn(arr), shift)
+        temp = np.fft.ifftn(temp)
+        temp = np.abs(temp).astype('float32')
+    return temp
+
+
+def find_overlap(img1, img2, shift, margin=50):
+
+    rough_shift = get_roughshift(shift)
+    corner = _get_corner(rough_shift, img2.shape)
+    if min(img1.shape) < margin or min(img2.shape) < margin:
+        return 'skip', rough_shift, corner, None, None, None, None
+    if abs(rough_shift[1]) > margin and abs(rough_shift[0]) > margin:
+        abs_width = np.count_nonzero(np.isfinite(img1[-margin, :]))
+        abs_height = np.count_nonzero(np.isfinite(img1[:, abs_width - margin]))
+        temp0 = img2.shape[0] if corner[1, 0] <= abs_height - 1 else abs_height - corner[0, 0]
+        temp1 = img2.shape[1] if corner[1, 1] <= img1.shape[1] - 1 else img1.shape[1] - corner[0, 1]
+        mask = np.zeros([temp0, temp1], dtype='bool')
+        temp = img1[corner[0, 0]:corner[0, 0] + temp0, corner[0, 1]:corner[0, 1] + temp1]
+        temp = np.isfinite(temp)
+        wid_ver = np.count_nonzero(temp[:, -1])
+        wid_hor = np.count_nonzero(temp[-1, :])
+        mask[:wid_ver, :] = True
+        mask[:, :wid_hor] = True
+        buffer1 = img1[corner[0, 0]:corner[0, 0] + mask.shape[0], corner[0, 1]:corner[0, 1] + mask.shape[1]]
+        buffer2 = img2[:mask.shape[0], :mask.shape[1]]
+        #buffer1[np.invert(mask)] = np.nan
+        #buffer2[np.invert(mask)] = np.nan
+        case = 'tl'
+        if abs_width < corner[0, 1]:
+            case = 'skip'
+    # for new image with overlap at top only
+    elif abs(rough_shift[1]) < margin and abs(rough_shift[0]) > margin:
+        abs_height = np.count_nonzero(np.isfinite(img1[:, margin]))
+        wid_ver = abs_height - corner[0, 0]
+        wid_hor = img2.shape[1] if img1.shape[1] > img2.shape[1] else img2.shape[1] - corner[0, 1]
+        buffer1 = img1[corner[0, 0]:corner[0, 0] + wid_ver, corner[0, 1]:corner[0, 1] + wid_hor]
+        buffer2 = img2[:wid_ver, :wid_hor]
+        case = 't'
+    # for new image with overlap at left only
+    else:
+        abs_width = np.count_nonzero(np.isfinite(img1[margin, :]))
+        wid_ver = img2.shape[0] - corner[0, 0]
+        wid_hor = abs_width - corner[0, 1]
+        buffer1 = img1[corner[0, 0]:corner[0, 0] + wid_ver, corner[0, 1]:corner[0, 1] + wid_hor]
+        buffer2 = img2[:wid_ver, :wid_hor]
+        case = 'l'
+        if abs_width < corner[0, 1]:
+            case = 'skip'
+    res1 = np.copy(buffer1)
+    res2 = np.copy(buffer2)
+    return case, rough_shift, corner, res1, res2, wid_hor, wid_ver
+
+
+def _get_corner(shift, img2_shape):
+    corner_uly, corner_ulx, corner_bry, corner_brx = (shift[0], shift[1], shift[0] + img2_shape[0] - 1,
+                                                      shift[1] + img2_shape[1] - 1)
+    return np.squeeze([[corner_uly, corner_ulx], [corner_bry, corner_brx]]).astype('int')
