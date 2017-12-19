@@ -74,6 +74,7 @@ def main(arg):
     parser.add_argument("n_slice", help="number of slices. Put -1 for slice_start if supplied")
     parser.add_argument("medfilt_size", help="size of median filter")
     parser.add_argument("level", help="level of downsampling")
+
     args = parser.parse_args()
 
 
@@ -174,7 +175,6 @@ def main(arg):
         overlap = (prj.shape[2] - center) * 2 if axis_side == 'right' else center * 2
         prj0 = sino_360_to_180(prj, overlap=overlap, rotation=axis_side)
         theta0 = theta[:prj0.shape[0]]
-        print('\n** Sinogram converted!')
 
         if level>0:
             prj = tomopy.downsample(prj, level=level)
@@ -193,26 +193,6 @@ def main(arg):
             outpath = os.path.join(os.getcwd(), 'center', str(slice_ls[i]))
             dxchange.write_tiff(out[i], os.path.join(outpath, '{:.2f}'.format(center)), dtype='float32')
 
-    slice_ls = range(sino_start, sino_end, sino_step)
-    center_ls = []
-    for i in slice_ls:
-        outpath = os.path.join(os.getcwd(), 'center', str(i))
-        center_pos = util.minimum_entropy(outpath,
-                                          mask_ratio=0.95,
-                                          ring_removal=False,
-                                          window=(1000, 1000),
-                                          reliability_screening=True)
-        if center_pos is None:
-            print('Switching to CNN...')
-            center_pos = util.search_in_folder_dnn(outpath)
-        center_ls.append(center_pos)
-    if len(center_ls) == 1:
-        center_pos = center_ls[0]
-    else:
-        center_pos = np.mean(util.most_neighbor_clustering(center_ls, 2))
-    f = open('center_pos.txt', 'w')
-    f.write(str(center_pos))
-    f.close()
     print("#################################")
 
 

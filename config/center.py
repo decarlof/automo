@@ -36,13 +36,8 @@ def main(arg):
     parser.add_argument("n_slice", help="number of slices. Put -1 for slice_start if supplied")
     parser.add_argument("medfilt_size", help="size of median filter")
     parser.add_argument("level", help="level of downsampling")
-    # parser.add_argument("padding", help="sinogram padding")
+    parser.add_argument("padding", help="sinogram padding", default=1000)
     args = parser.parse_args()
-
-    search_method = 'entropy-cnn'
-    # pad_length = int(args.padding)
-    pad_length = 1000
-
 
     fname = args.file_name
 
@@ -58,6 +53,7 @@ def main(arg):
     n_slice = int(args.n_slice)
     medfilt_size = int(args.medfilt_size)
     level = int(args.level)
+    pad_length = int(args.padding)
 
     array_dims = util.read_data_adaptive(fname, shape_only=True)
 
@@ -140,47 +136,14 @@ def main(arg):
         print('\n** Min and max val in prj before recon: %0.5f, %0.3f' % (np.min(prj), np.max(prj)))
 
     slice_ls = range(sino_start, sino_end, sino_step)
-    center_ls = []
-    if search_method in ['entropy-cnn'] and pad_length > 0:
-        prj = util.pad_sinogram(prj, pad_length)
-        rot_start += pad_length
-        rot_end += pad_length
+    prj = util.pad_sinogram(prj, pad_length)
     for ind, i in enumerate(slice_ls):
+        print('Writing center {}'.format(i))
         outpath = os.path.join(os.getcwd(), 'center', str(i))
-
-        # output center images
-        if search_method == 'entropy-cnn':
-            util.write_center(prj[:, ind:ind+1, :], theta, dpath=outpath,
-                              cen_range=[rot_start/pow(2,level), rot_end/pow(2, level),
-                                         rot_step/pow(2, level)],
-                              pad_length=pad_length)
-            try:
-                center_pos = util.minimum_entropy(outpath,
-                                                  mask_ratio=0.7,
-                                                  ring_removal=False,
-                                                  reliability_screening=True)
-                print('Entropy finds center {}.'.format(center_pos))
-            except:
-                print('Switching to CNN...')
-                center_pos = util.search_in_folder_dnn(outpath)
-            if center_pos is None:
-                print('Switching to CNN...')
-                center_pos = util.search_in_folder_dnn(outpath)
-        elif search_method == 'vo':
-            mid = prj.shape[2] / 2 / pow(2,level)
-            smin = (rot_start/pow(2,level) - mid) * 2
-            smax = (rot_end/pow(2,level) - mid) * 2
-            center_pos = util.find_center_vo(prj, smin=smin, smax=smax, step=rot_step)
-
-        center_ls.append(center_pos)
-        print('Center for slice: {}'.format(center_pos))
-    if len(center_ls) == 1:
-        center_pos = center_ls[0]
-    else:
-        center_pos = np.mean(util.most_neighbor_clustering(center_ls, 5), dtype='float')
-    f = open('center_pos.txt', 'w')
-    f.write(str(center_pos))
-    f.close()
+        util.write_center(prj[:, ind:ind + 1, :], theta, dpath=outpath,
+                          cen_range=[rot_start / pow(2, level), rot_end / pow(2, level),
+                                     rot_step / pow(2, level)],
+                          pad_length=pad_length)
     print("#################################")
 
 

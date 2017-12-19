@@ -278,7 +278,6 @@ def register_translation(src_image, target_image, rangeX=(None, None), rangeY=(N
     return shifts
 
 
-
 def main(arg):
 
     parser = argparse.ArgumentParser()
