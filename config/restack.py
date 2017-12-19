@@ -34,14 +34,16 @@ def main(arg):
     shift = args.shift
     new_folder = args.new_folder
 
-    folder_list = glob(prefix)
-    folder_list.sort()
+
+    folder_list = sorted(glob(prefix+'*[!restack]'))
 
     folder_grid = util.start_file_grid(folder_list, pattern=1)
 
     if new_folder == 'auto':
         new_folder = prefix + '_restack'
 
+
+    print (new_folder)
     try:
         os.makedirs(new_folder)
     except:
@@ -49,7 +51,7 @@ def main(arg):
 
     if shift == 'auto':
         try:
-            f = open(os.path.join(new_folder, 'shift.txt'), 'w')
+            f = open(os.path.join(new_folder, 'shift.txt'), 'w+')
             shift_ls = f.readlines()
             shift_ls = [int(i) for i in shift_ls]
             f.close()
