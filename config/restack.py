@@ -51,7 +51,7 @@ def main(arg):
         try:
             f = open(os.path.join(new_folder, 'shift.txt'), 'w')
             shift_ls = f.readlines()
-            shift_ls = map(int, shift_ls)
+            shift_ls = [int(i) for i in shift_ls]
             f.close()
         except:
             raise IOError('I could not find shift.txt in the target folder.')
