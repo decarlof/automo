@@ -51,22 +51,24 @@ def main(arg):
 
     if shift == 'auto':
         try:
-            f = open(os.path.join(new_folder, 'shift.txt'), 'w+')
+            f = open(os.path.join(new_folder, 'shift.txt'), 'r')
             shift_ls = f.readlines()
-            shift_ls = [int(i) for i in shift_ls]
+            shift_ls = [int(float(i)) for i in shift_ls]
             f.close()
         except:
             raise IOError('I could not find shift.txt in the target folder.')
     else:
         shift_ls = [int(shift)] * (len(folder_list) - 1) #number of slices to keep
     
+    print(shift_ls)
+
     accum = 0
     for i, folder in enumerate(folder_grid[:, 0]):
         if i < folder_grid.shape[0] - 1:
             shift = shift_ls[i]
         file_list = glob(os.path.join(os.path.join(folder, 'recon', 'recon*.tiff')))
         file_list.sort()
-        if i < len(folder_list) - 1:
+        if i < folder_grid.shape[0] - 1:
             for j, f in enumerate(file_list[:shift]):
                 shutil.copyfile(f, os.path.join('full_stack', 'recon_{:05d}.tiff'.format(j + accum)))
         else:
