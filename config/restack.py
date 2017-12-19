@@ -25,8 +25,8 @@ def main(arg):
 
     parser = argparse.ArgumentParser()
     parser.add_argument("prefix", help="existing recon foldername")
-    parser.add_argument("shift", help="shift between datasets",default='auto')
-    parser.add_argument("new_folder",help="target folder",default='auto')
+    parser.add_argument("--shift", help="shift between datasets",default='auto')
+    parser.add_argument("--new_folder",help="target folder",default='auto')
     args = parser.parse_args()
 
 

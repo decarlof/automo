@@ -24,6 +24,9 @@ from tqdm import tqdm
 
 import automo.util as util
 
+def debug_print(debug, text):
+    if debug:
+        print(text)
 
 def sino_360_to_180(data, overlap=0, rotation='left'):
     """
@@ -67,31 +70,38 @@ def sino_360_to_180(data, overlap=0, rotation='left'):
 def main(arg):
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("file_name", help="existing hdf5 file name",default='auto')
-    parser.add_argument("center_folder", help="folder containing center testing images")
-    parser.add_argument("sino_start", help="slice start")
-    parser.add_argument("sino_end", help="slice end")
-    parser.add_argument("sino_step", help="slice step")
-    parser.add_argument("medfilt_size", help="size of median filter")
-    parser.add_argument("level", help="level of downsampling")
-    parser.add_argument("chunk_size", help="chunk size")
+    parser.add_argument("--file_name", help="existing hdf5 file name",default='auto')
+    parser.add_argument("--center_folder", help="folder containing center testing images",default='center')
+    parser.add_argument("--sino_start", help="slice start",default=0,type=int)
+    parser.add_argument("--sino_end", help="slice end,",default=1200,type=int)
+    parser.add_argument("--sino_step", help="slice step",default=1)
+    parser.add_argument("--medfilt_size", help="size of median filter",default=0,type=int)
+    parser.add_argument("--level", help="level of downsampling",default=0,type=int)
+    parser.add_argument("--pad_lenght", help="sinogram padding",default=1000,type=int)
+    parser.add_argument("--chunk_size", help="chunk size",default=50,type=int)
+    parser.add_argument("--debug", help="debug messages",default=0,type=int)
+    # parser.add_argument("padding", help="sinogram padding")
     args = parser.parse_args()
+    
+    fname = args.file_name
 
+  
+    debug = args.debug
     fname = args.file_name
 
     if fname == 'auto':
         h5file = glob('*.h5')
+        print (h5file)
         fname = h5file[0] 
-        print ('Autofilename =' + 
+        print ('Autofilename =' + fname)
 
     array_dims = util.h5group_dims(fname)
     folder = os.path.dirname(fname) + os.sep
 
-    chunk_size = int(args.chunk_size)
-    medfilt_size = int(args.medfilt_size)
-    level = int(args.level)
-
-    pad_length = 1000
+    chunk_size = args.chunk_size
+    medfilt_size = args.medfilt_size
+    level = args.level
+    pad_length = args.pad_lenght
 
     # find center if not given
     if os.path.exists('center_pos.txt'):
@@ -137,68 +147,69 @@ def main(arg):
         chunk_end += chunk_size * sino_step
     chunks.append((chunk_st, sino_end))
 
-    for (chunk_st, chunk_end) in chunks:
+    pbar = tqdm(chunks)
+    for (chunk_st, chunk_end) in pbar:
 
-        print('Chunk range: ({:d}, {:d})'.format(chunk_st, chunk_end))
+        pbar.set_description('Chunk range: ({:d}, {:d})'.format(chunk_st, chunk_end))
 
         prj, flat, dark, theta = util.read_data_adaptive(file_name, sino=(chunk_st, chunk_end, sino_step), return_theta=True)
 
         # theta = tomopy.angles(prj.shape[0])
 
-        print('## Debug: after reading data:')
-        print('\n** Shape of the data:'+str(np.shape(prj)))
-        print('** Shape of theta:'+str(np.shape(theta)))
-        print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
+        debug_print(debug,'## Debug: after reading data:')
+        debug_print(debug,'\n** Shape of the data:'+str(np.shape(prj)))
+        debug_print(debug,'** Shape of theta:'+str(np.shape(theta)))
+        debug_print(debug,'\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
 
         prj = tomopy.normalize(prj, flat, dark)
-        print('\n** Flat field correction done!')
+        debug_print(debug,'\n** Flat field correction done!')
 
         fov2 = int(prj.shape[2] / 2)
         axis_side = 'left' if center_pos < fov2 else 'right'
         overlap = (prj.shape[2] - center_pos) * 2 if axis_side == 'right' else center_pos * 2
         prj = sino_360_to_180(prj, overlap=overlap, rotation=axis_side)
         theta = theta[:prj.shape[0]]
-        print('\n** Sinogram converted!')
+        debug_print(debug,'\n** Sinogram converted!')
 
-        print('## Debug: after normalization:')
-        print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
+        debug_print(debug,'## Debug: after normalization:')
+        debug_print(debug,'\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
 
         prj = tomopy.minus_log(prj)
-        print('\n** minus log applied!')
+        debug_print(debug,'\n** minus log applied!')
 
-        print('## Debug: after minus log:')
-        print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
+        debug_print(debug,'## Debug: after minus log:')
+        debug_print(debug,'\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
 
         prj = tomopy.misc.corr.remove_neg(prj, val=0.001)
         prj = tomopy.misc.corr.remove_nan(prj, val=0.001)
         prj[np.where(prj == np.inf)] = 0.001
 
-        print('## Debug: after cleaning bad values:')
-        print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
+        debug_print(debug,'## Debug: after cleaning bad values:')
+        debug_print(debug,'\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
 
         prj = tomopy.remove_stripe_ti(prj,4)
-        print('\n** Stripe removal done!')
-        print('## Debug: after remove_stripe:')
-        print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
+        debug_print(debug,'\n** Stripe removal done!')
+        debug_print(debug,'## Debug: after remove_stripe:')
+        debug_print(debug,'\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
 
         if medfilt_size not in (0, None):
             prj = tomopy.median_filter(prj, size=medfilt_size)
-            print('\n** Median filter done!')
+            debug_print(debug,'\n** Median filter done!')
             print('## Debug: after nedian filter:')
             print('\n** Min and max val in prj before recon: %0.5f, %0.3f' % (np.min(prj), np.max(prj)))
 
         if level > 0:
             prj = tomopy.downsample(prj, level=level)
-            print('\n** Down sampling done!\n')
-            print('## Debug: after down sampling:')
-            print('\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
+            debug_print(debug,'\n** Down sampling done!\n')
+            debug_print(debug,'## Debug: after down sampling:')
+            debug_print(debug,'\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
 
         recon_center = center_pos if axis_side == 'right' else (prj.shape[2] - center_pos)
         raw_shape = prj.shape
         if not pad_length == 0:
             prj = util.pad_sinogram(prj, pad_length)
         rec = tomopy.recon(prj, theta, center=recon_center+pad_length, algorithm='gridrec', filter_name='parzen')
-        print('\nReconstruction done!\n')
+        debug_print(debug,'\nReconstruction done!\n')
 
         if not pad_length == 0:
             rec = rec[:, pad_length:pad_length+raw_shape[2], pad_length:pad_length+raw_shape[2]]
