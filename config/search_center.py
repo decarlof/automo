@@ -12,9 +12,9 @@ def main(arg):
 
     parser = argparse.ArgumentParser()
     parser.add_argument("folder_name", help="name of the folder containing center files", default='center')
-    parser.add_argument("method", help="method for center search", default='auto')
-    parser.add_argument("rot_start", help="starting position of center search. Used only for vo", default='auto')
-    parser.add_argument("rot_end", help="ending position of center search. Used only for vo", default='auto')
+    parser.add_argument("--method", help="method for center search", default='auto')
+    parser.add_argument("--rot_start", help="starting position of center search. Used only for vo", default='auto')
+    parser.add_argument("--rot_end", help="ending position of center search. Used only for vo", default='auto')
 
     args = parser.parse_args()
 
