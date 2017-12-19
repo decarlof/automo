@@ -68,7 +68,11 @@ def main(arg):
         proj, flat, dark, _ = util.read_data_adaptive(fname, proj=(proj_st, proj_end, proj_step))
         print("Proj Preview: ", proj.shape)
 
+        proj_norm = (proj - dark) / (flat - dark)
+        proj_norm = util.preprocess(proj_norm)
+
         proj_fname = (folder + 'preview' + os.sep + 'proj')
+        proj_norm_fname = (folder + 'preview' + os.sep + 'proj_norm')
         print("Proj folder: ", proj_fname)
 
         dxchange.write_tiff(flat.mean(axis=0), fname=(folder + 'preview' + os.sep + 'flat'), overwrite=True)
@@ -81,6 +85,7 @@ def main(arg):
         print("Proj folder: ", proj_fname)
 
         dxchange.write_tiff_stack(proj, fname=proj_fname, axis=0, digit=5, start=0, overwrite=True)
+        dxchange.write_tiff_stack(proj_norm, fname=proj_norm_fname, axis=0, digit=5, start=0, overwrite=True)
         dxchange.write_tiff_stack(sino, fname=sino_fname, axis=0, digit=5, start=slice_st, overwrite=True)
         print("#################################")
 
