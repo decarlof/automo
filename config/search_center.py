@@ -4,6 +4,7 @@ import dxchange
 import argparse
 import os
 from glob import glob
+import sys
 
 import automo.util as util
 
@@ -68,3 +69,7 @@ def main(arg):
     f = open('center_pos.txt', 'w')
     f.write(str(center_pos))
     f.close()
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
