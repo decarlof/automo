@@ -4,14 +4,15 @@ import dxchange
 import argparse
 import os
 from glob import glob
+import sys
 
 import automo.util as util
 
 
 def main(arg):
-
+    
     parser = argparse.ArgumentParser()
-    parser.add_argument("folder_name", help="name of the folder containing center files", default='center')
+    parser.add_argument("--folder_name", help="name of the folder containing center files", default='center')
     parser.add_argument("--method", help="method for center search", default='auto')
     parser.add_argument("--rot_start", help="starting position of center search. Used only for vo", default='auto')
     parser.add_argument("--rot_end", help="ending position of center search. Used only for vo", default='auto')
@@ -22,9 +23,12 @@ def main(arg):
     search_method = args.method
 
     center_ls = []
-    slice_ls = os.listdir(folder)
-    slice_ls = [i for i in slice_ls if os.path.isdir(i)]
-    slice_ls = map(int, slice_ls)
+    slice_ls = glob(os.path.join(folder, '*'))
+    slice_ls = [int(os.path.basename(i)) for i in slice_ls if os.path.isdir(i)]
+    # slice_ls = [x for x in slice_ls if x != []]
+    print(slice_ls)
+    # slice_ls = [int(i) for i in slice_ls if os.path.isdir(i)]
+
 
     for ind, i in enumerate(slice_ls):
         outpath = os.path.join(os.getcwd(), folder, str(i))
@@ -65,6 +69,10 @@ def main(arg):
         center_pos = center_ls[0]
     else:
         center_pos = np.mean(util.most_neighbor_clustering(center_ls, 5), dtype='float')
+
     f = open('center_pos.txt', 'w')
     f.write(str(center_pos))
     f.close()
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
