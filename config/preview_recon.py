@@ -66,7 +66,7 @@ def main(arg):
 
     if os.path.isdir(fname):
         slice1 = get_yz_slice(fname, chunk_size=50, slice_y=1000)
-        dxchange.write_tiff(slice1, os.path.join('preview_'+fname+, 'yz_cs.tiff'), dtype='float32')
+        dxchange.write_tiff(slice1, os.path.join('preview_'+fname,'yz_cs.tiff'), dtype='float32')
 
 if __name__ == "__main__":
     main(sys.argv[1:])

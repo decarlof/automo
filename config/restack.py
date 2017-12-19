@@ -51,7 +51,7 @@ def main(arg):
 
     if shift == 'auto':
         try:
-            f = open(os.path.join(new_folder, 'shift.txt'), 'w+')
+            f = open(os.path.join(new_folder, 'shift.txt'), 'r')
             shift_ls = f.readlines()
             shift_ls = [int(float(i)) for i in shift_ls]
             f.close()
@@ -68,7 +68,7 @@ def main(arg):
             shift = shift_ls[i]
         file_list = glob(os.path.join(os.path.join(folder, 'recon', 'recon*.tiff')))
         file_list.sort()
-        if i < len(folder_list) - 1:
+        if i < folder_grid.shape[0] - 1:
             for j, f in enumerate(file_list[:shift]):
                 shutil.copyfile(f, os.path.join(new_folder, 'full_stack', 'recon_{:05d}.tiff'.format(j + accum)))
         else:
