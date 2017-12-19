@@ -144,6 +144,8 @@ def main(arg):
 
     slice_ls = range(sino_start, sino_end, sino_step)
     prj = util.pad_sinogram(prj, pad_length)
+    rot_start += pad_length
+    rot_end += pad_length
     for ind, i in enumerate(slice_ls):
         debug_print(debug,'Writing center {}'.format(i))
         outpath = os.path.join(os.getcwd(), 'center', str(i))
