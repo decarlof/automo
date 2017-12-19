@@ -710,7 +710,7 @@ def equalize_histogram(img, bin_min, bin_max, n_bin=256):
     return res
 
 
-def sino_360_to_180(data, overlap=0, rotation='left'):
+def sino_360_to_180(data, overlap=0, rotation='left', blend=True):
     """
     Converts 0-360 degrees sinogram to a 0-180 sinogram.
     If the number of projections in the input data is odd, the last projection
@@ -739,12 +739,23 @@ def sino_360_to_180(data, overlap=0, rotation='left'):
 
     out = np.zeros((n, dy, 2*dz-overlap), dtype=data.dtype)
 
-    if rotation == 'left':
-        out[:, :, -(dz-lo):] = data[:n, :, lo:]
-        out[:, :, :-(dz-lo)] = data[n:2*n, :, ro:][:, :, ::-1]
-    elif rotation == 'right':
-        out[:, :, :dz-lo] = data[:n, :, :-lo]
-        out[:, :, dz-lo:] = data[n:2*n, :, :-ro][:, :, ::-1]
+    if blend:
+        if rotation == 'left':
+            img1 = data[n:2*n, :, ro:][:, :, ::-1]
+            img2 = data[:n, :, lo:]
+            shift = [0, lo]
+        elif rotation == 'right':
+            img1 = data[:n, :, :-lo]
+            img2 = data[n:2*n, :, :-ro][:, :, ::-1]
+            shift = [0, dz-lo]
+        out = img_merge_pyramid(img1, img2, shift=shift, depth=2)
+    else:
+        if rotation == 'left':
+            out[:, :, -(dz-lo):] = data[:n, :, lo:]
+            out[:, :, :-(dz-lo)] = data[n:2*n, :, ro:][:, :, ::-1]
+        elif rotation == 'right':
+            out[:, :, :dz-lo] = data[:n, :, :-lo]
+            out[:, :, dz-lo:] = data[n:2*n, :, :-ro][:, :, ::-1]
 
     return out
 

@@ -24,47 +24,10 @@ from tqdm import tqdm
 
 import automo.util as util
 
+
 def debug_print(debug, text):
     if debug:
         print(text)
-
-def sino_360_to_180(data, overlap=0, rotation='left'):
-    """
-    Converts 0-360 degrees sinogram to a 0-180 sinogram.
-    If the number of projections in the input data is odd, the last projection
-    will be discarded.
-    Parameters
-    ----------
-    data : ndarray
-        Input 3D data.
-    overlap : scalar, optional
-        Overlapping number of pixels.
-    rotation : string, optional
-        Left if rotation center is close to the left of the
-        field-of-view, right otherwise.
-    Returns
-    -------
-    ndarray
-        Output 3D data.
-    """
-    dx, dy, dz = data.shape
-
-    overlap = int(np.round(overlap))
-
-    lo = overlap//2
-    ro = overlap - lo
-    n = dx//2
-
-    out = np.zeros((n, dy, 2*dz-overlap), dtype=data.dtype)
-
-    if rotation == 'left':
-        out[:, :, -(dz-lo):] = data[:n, :, lo:]
-        out[:, :, :-(dz-lo)] = data[n:2*n, :, ro:][:, :, ::-1]
-    elif rotation == 'right':
-        out[:, :, :dz-lo] = data[:n, :, :-lo]
-        out[:, :, dz-lo:] = data[n:2*n, :, :-ro][:, :, ::-1]
-
-    return out
 
 
 def main(arg):
@@ -167,7 +130,7 @@ def main(arg):
         fov2 = int(prj.shape[2] / 2)
         axis_side = 'left' if center_pos < fov2 else 'right'
         overlap = (prj.shape[2] - center_pos) * 2 if axis_side == 'right' else center_pos * 2
-        prj = sino_360_to_180(prj, overlap=overlap, rotation=axis_side)
+        prj = util.sino_360_to_180(prj, overlap=overlap, rotation=axis_side)
         theta = theta[:prj.shape[0]]
         debug_print(debug,'\n** Sinogram converted!')
 
