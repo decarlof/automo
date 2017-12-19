@@ -16,6 +16,7 @@ import warnings
 import numpy as np
 import h5py
 from glob import glob
+import tomopy
 
 import automo.util as util
 
@@ -23,13 +24,13 @@ import automo.util as util
 def main(arg):
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("file_name", help="existing hdf5 file name",default='auto')
-    parser.add_argument("proj_start", help="preview projection start; for full rec enter -1", default='auto')
-    parser.add_argument("proj_end", help="preview projection end; for full rec enter -1", default='auto')
-    parser.add_argument("proj_step", help="preview projection step; for full rec enter -1", default='auto')
-    parser.add_argument("slice_start", help="preview slice start; for full rec enter -1", default='auto')
-    parser.add_argument("slice_end", help="preview slice end; for full rec enter -1", default='auto')
-    parser.add_argument("slice_step", help="preview slice step; for full rec enter -1", default='auto')
+    parser.add_argument("--file_name", help="existing hdf5 file name",default='auto')
+    parser.add_argument("--proj_start", help="preview projection start; for full rec enter -1", default='auto')
+    parser.add_argument("--proj_end", help="preview projection end; for full rec enter -1", default='auto')
+    parser.add_argument("--proj_step", help="preview projection step; for full rec enter -1", default='auto')
+    parser.add_argument("--slice_start", help="preview slice start; for full rec enter -1", default='auto')
+    parser.add_argument("--slice_end", help="preview slice end; for full rec enter -1", default='auto')
+    parser.add_argument("--slice_step", help="preview slice step; for full rec enter -1", default='auto')
     args = parser.parse_args()
 
 
@@ -68,7 +69,11 @@ def main(arg):
         proj, flat, dark, _ = util.read_data_adaptive(fname, proj=(proj_st, proj_end, proj_step))
         print("Proj Preview: ", proj.shape)
 
-        proj_norm = (proj - dark) / (flat - dark)
+	    proj_norm = tomopy.normalize(proj_norm, flat, dark)
+	    proj_norm = tomopy.minus_log(proj_norm)
+	    proj_norm = tomopy.misc.corr.remove_neg(proj_norm, val=0.001)
+	    proj_norm = tomopy.misc.corr.remove_nan(proj_norm, val=0.001)
+	    proj_norm[np.where(proj_norm == np.inf)] = 0.001
         proj_norm = util.preprocess(proj_norm)
 
         proj_fname = (folder + 'preview' + os.sep + 'proj')

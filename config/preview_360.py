@@ -23,13 +23,13 @@ import automo.util as util
 def main(arg):
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("file_name", help="existing hdf5 file name",default='auto')
-    parser.add_argument("proj_start", help="preview projection start; for full rec enter -1", default='auto')
-    parser.add_argument("proj_end", help="preview projection end; for full rec enter -1", default='auto')
-    parser.add_argument("proj_step", help="preview projection step; for full rec enter -1", default='auto')
-    parser.add_argument("slice_start", help="preview slice start; for full rec enter -1", default='auto')
-    parser.add_argument("slice_end", help="preview slice end; for full rec enter -1", default='auto')
-    parser.add_argument("slice_step", help="preview slice step; for full rec enter -1", default='auto')
+    parser.add_argument("--file_name", help="existing hdf5 file name",default='auto')
+    parser.add_argument("--proj_start", help="preview projection start; for full rec enter -1", default='auto')
+    parser.add_argument("--proj_end", help="preview projection end; for full rec enter -1", default='auto')
+    parser.add_argument("--proj_step", help="preview projection step; for full rec enter -1", default='auto')
+    parser.add_argument("--slice_start", help="preview slice start; for full rec enter -1", default='auto')
+    parser.add_argument("--slice_end", help="preview slice end; for full rec enter -1", default='auto')
+    parser.add_argument("--slice_step", help="preview slice step; for full rec enter -1", default='auto')
     args = parser.parse_args()
 
     fname = args.file_name
