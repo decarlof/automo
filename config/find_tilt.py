@@ -152,6 +152,14 @@ if __name__ == '__main__':
     parser.add_argument('--passes', '-p', help='How many iterations to run.',
                         default=15, type=int)
     args = parser.parse_args()
+
+    proj_0_fname = args.original_image
+    proj_180_fname = args.flipped_image
+    if proj_0_fname == 'auto':
+        proj_0_fname = os.path.join('preview', 'proj_norm_00000.tiff')
+    if proj_180_fname == 'auto':
+        proj_180_fname = os.path.join('preview', 'proj_norm_00001.tiff')
+
     # Perform the correction calculation
     rot, trans = image_corrections(args.original_image, args.flipped_image,
                                    passes=args.passes)
