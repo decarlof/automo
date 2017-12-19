@@ -23,12 +23,9 @@ def main(arg):
     search_method = args.method
 
     center_ls = []
-    slice_ls = glob(os.path.join(folder, '*'))
-    slice_ls = [int(os.path.basename(i)) for i in slice_ls if os.path.isdir(i)]
-    # slice_ls = [x for x in slice_ls if x != []]
-    print(slice_ls)
-    # slice_ls = [int(i) for i in slice_ls if os.path.isdir(i)]
+    slice_ls = os.listdir(folder)
 
+    slice_ls = [int(os.path.basename(i)) for i in slice_ls if os.path.isdir(i)]
 
     for ind, i in enumerate(slice_ls):
         outpath = os.path.join(os.getcwd(), folder, str(i))

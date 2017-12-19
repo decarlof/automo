@@ -54,8 +54,8 @@ def main(arg):
         h5 = h5py.File(fname)
         dset = h5['exchange/data'] #this should be adaptative
         proj_st = 0
-        proj_end = 1
-        proj_step = 1
+        proj_end = dset.shape[0]
+        proj_step = dset.shape[0] - 1
         slice_st = int(dset.shape[1] / 2)
         slice_end = slice_st + 1
         slice_step = 1
