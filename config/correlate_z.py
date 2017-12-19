@@ -291,13 +291,11 @@ def main(arg):
     shift = args.shift
     new_folder = args.new_folder
 
-    folder_list = glob(prefix+'*')
-    folder_list.sort()
+    folder_list = sorted(glob(prefix+'*[!restack]'))
 
     if shift == 'auto':
         print ('Attempting to find shift automatically.')
         folder_grid = util.start_file_grid(folder_list, pattern=1)
-        print (folder_grid)
         slice0 = None
         shift_ls = []
         for i in range(folder_grid.shape[0] - 1):
