@@ -37,11 +37,10 @@ def main(arg):
     parser.add_argument("--rot_step", help="rotation axis end location",default=1)
     parser.add_argument("--slice_start", help="a single slice to run center.py. Put -1 for n_slice if supplied",default=600)
     parser.add_argument("--n_slice", help="number of slices. Put -1 for slice_start if supplied",default=-1)
-    parser.add_argument("--medfilt_size", help="size of median filter",default=1)
+    parser.add_argument("--medfilt_size", help="size of median filter",default=2)
     parser.add_argument("--level", help="level of downsampling",default=0)
     parser.add_argument("--padding", help="sinogram padding", default=1000)
     parser.add_argument("--debug", help="debug messages",default=0,type=int)
-    # parser.add_argument("padding", help="sinogram padding")
     args = parser.parse_args()
 
     debug = args.debug

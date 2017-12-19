@@ -68,18 +68,20 @@ def main(arg):
         # Read the APS raw data projections.
         proj, flat, dark, _ = util.read_data_adaptive(fname, proj=(proj_st, proj_end, proj_step))
         print("Proj Preview: ", proj.shape)
-
-	    proj_norm = tomopy.normalize(proj_norm, flat, dark)
-	    proj_norm = tomopy.minus_log(proj_norm)
-	    proj_norm = tomopy.misc.corr.remove_neg(proj_norm, val=0.001)
-	    proj_norm = tomopy.misc.corr.remove_nan(proj_norm, val=0.001)
-	    proj_norm[np.where(proj_norm == np.inf)] = 0.001
-        proj_norm = util.preprocess(proj_norm)
+        
+        proj_norm = tomopy.normalize(proj, flat, dark)
+        proj_norm = tomopy.minus_log(proj_norm)
+        proj_norm = tomopy.misc.corr.remove_neg(proj_norm, val=0.001)
+        proj_norm = tomopy.misc.corr.remove_nan(proj_norm, val=0.001)
+        proj_norm[np.where(proj_norm == np.inf)] = 0.001
+        #proj_norm = util.preprocess(proj_norm) #awkward
+        #proj_norm = proj_norm.astype('int16') (need a better cast)
 
         proj_fname = (folder + 'preview' + os.sep + 'proj')
         proj_norm_fname = (folder + 'preview' + os.sep + 'proj_norm')
         print("Proj folder: ", proj_fname)
-
+        
+        flat = flat.astype('float16')
         dxchange.write_tiff(flat.mean(axis=0), fname=(folder + 'preview' + os.sep + 'flat'), overwrite=True)
 
         sino, flat, dark, _ = util.read_data_adaptive(fname, sino=(slice_st, slice_end, slice_step))
