@@ -15,6 +15,7 @@ import warnings
 import numpy as np
 from glob import glob
 import re, shutil
+from scipy.ndimage import gaussian_filter
 import h5py
 from scipy import ndimage
 
@@ -212,6 +213,7 @@ def register_translation(src_image, target_image, rangeX=(None, None), rangeY=(N
     # elif rangeX[0] < 0:
     #     mask[rangeY[0]:rangeY[1], shape[1] + rangeX[0]:] = 1
     #     mask[rangeY[0]:rangeY[1], :rangeX[1]] = 1
+    dxchange.write_tiff(cross_correlation, 'cs', dtype='float32')
     cross_correlation = cross_correlation * mask
 
 
@@ -300,9 +302,21 @@ def main(arg):
         shift_ls = []
         for i in range(folder_grid.shape[0] - 1):
             if slice0 is None:
+<<<<<<< HEAD
                 slice0 = dxchange.read_tiff(os.path.join(folder_grid[i, 0],'recon_preview', 'yz_cs.tiff'))
             slice1 = dxchange.read_tiff(os.path.join(folder_grid[i+1, 0], 'recon_preview', 'yz_cs.tiff'))
             this_shift = register_translation(slice0, slice1, down=True, upsample_factor=1)
+=======
+                slice0 = dxchange.read_tiff(os.path.join(folder_grid[i, 0],'preview_recon', 'yz_cs.tiff'))
+            slice1 = dxchange.read_tiff(os.path.join(folder_grid[i+1, 0], 'preview_recon', 'yz_cs.tiff'))
+            slice0 = util.equalize_histogram(slice0, bin_min=slice0.min(), bin_max=slice0.max(), n_bin=10000)
+            slice1 = util.equalize_histogram(slice1, bin_min=slice1.min(), bin_max=slice1.max(), n_bin=10000)
+            # slice0 = gaussian_filter(slice0, 3)
+            # slice1 = gaussian_filter(slice1, 3)
+            dxchange.write_tiff(slice0, 'slice0', dtype='float32')
+            dxchange.write_tiff(slice1, 'slice1', dtype='float32')
+            this_shift = register_translation(slice0, slice1, down=True, upsample_factor=1, rangeX=(-10, 10), rangeY=(600, 1200))
+>>>>>>> 4b92f4faff05a392c6ecb4bfd727a4d7d5f19dae
             shift_ls.append(this_shift[0])
             slice0 = np.copy(slice1)
         # shift_ls = util.most_neighbor_clustering(shift_ls, 5)
