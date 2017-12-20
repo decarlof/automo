@@ -302,7 +302,7 @@ def robo_process(exp, file, proc_list, **kwargs):
                 opts += '--' + arg + ' ' + kwargs[proc][arg]
             opts += ' '
 
-        runtime_line = 'python ' + os.path.join(exp.proc_dir, proc)+ '.py ' + opts
+        runtime_line = 'python ' + os.path.join(exp.proc_dir, proc) + '.py ' + opts
         print(runtime_line)
         # log.write(runtime_line + '\n')
         # if 'recon' in proc:

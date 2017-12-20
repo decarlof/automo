@@ -68,9 +68,8 @@ def transform_image(img, rotation=0, translation=(0, 0)):
     return out
 
 
-def image_corrections(img_name_0, img_name_180, passes=15):
-    img = imread(img_name_0)
-    img_180 = imread(img_name_180)
+def image_corrections(img, img_180, passes=15):
+
     img = np.flip(img, 1)
     cume_angle = 0
     cume_trans = np.array([0, 0], dtype=float)
