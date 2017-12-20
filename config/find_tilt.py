@@ -21,7 +21,6 @@ def alignment_pass(img, img_180):
     # Register the rotation correction
     lp_center = (img.shape[0] / 2, img.shape[1] / 2)
     img = util.realign_image(img, shift=-np.array(trans))
-    dxchange.write_tiff(img, 'proj0_shifted', overwrite=True, dtype='float32')
 
     img_lp = logpolar_fancy(img, *lp_center)
     img_180_lp = logpolar_fancy(img_180, *lp_center)
@@ -67,7 +66,7 @@ def transform_image(img, rotation=0, translation=(0, 0)):
     M2 = _transformation_matrix(tx=rot_center[0], ty=rot_center[1])
     M = M2.dot(M1).dot(M0)
     tr = FundamentalMatrixTransform(M)
-    out = warp(img, tr)
+    out = warp(img, tr, mode='wrap')
     return out
 
 
@@ -137,7 +136,8 @@ def logpolar_fancy(image, i_0, j_0, p_n=None, t_n=None):
 
     (pt, ij) = _get_transform(i_0, j_0, i_n, j_n, p_n, t_n, p_s, t_s)
 
-    transformed = np.zeros((p_n, t_n) + image.shape[2:], dtype=image.dtype)
+    transformed = np.random.normal(0.5, 0.2, (p_n, t_n) + image.shape[2:])
+    # transformed = np.ones((p_n, t_n) + image.shape[2:], dtype=image.dtype)
 
     transformed[pt] = image[ij]
     return transformed
@@ -171,8 +171,9 @@ def main(arg):
 
     # Perform the correction calculation
     rot, trans = image_corrections(proj_0, proj_180, passes=args.passes)
+    rot = -(rot / 2.)
     # Display the result
-    msg = "ΔR: {:.2f}°, ΔX: {:.2f}px, ΔY: {:.2f}px".format(rot, trans[0], trans[1])
+    msg = "Angle: {:.2f}, transX: {:.2f}px, transY: {:.2f}px".format(rot, trans[0], trans[1])
     print(msg)
 
     f = open('tilt.txt', 'w')
