@@ -5,24 +5,27 @@ import argparse
 
 import dxchange
 from skimage.io import imread
-from skimage.feature import register_translation
+from skimage.feature import register_translation as sk_register
 from skimage.transform import AffineTransform, warp, FundamentalMatrixTransform
 import numpy as np
+
+from automo.register_translation import register_translation
+import automo.util as util
 
 
 def alignment_pass(img, img_180):
     upsample = 200
     # Register the translation correction
     trans = register_translation(img, img_180, upsample_factor=upsample)
-    trans = trans[0]
+    # trans = trans[0]
     # Register the rotation correction
     lp_center = (img.shape[0] / 2, img.shape[1] / 2)
-    # lp_center = (0, 0)
-    img_ft = np.fft.fft2(img)
-    img_180_ft = np.fft.fft2(img_180)
+    img = util.realign_image(img, shift=-np.array(trans))
+    dxchange.write_tiff(img, 'proj0_shifted', overwrite=True, dtype='float32')
+
     img_lp = logpolar_fancy(img, *lp_center)
     img_180_lp = logpolar_fancy(img_180, *lp_center)
-    result = register_translation(img_lp, img_180_lp, upsample_factor=upsample)
+    result = sk_register(img_lp, img_180_lp, upsample_factor=upsample)
     scale_rot = result[0]
     angle = np.degrees(scale_rot[1] / img_lp.shape[1] * 2 * np.pi)
     return angle, trans
@@ -139,6 +142,7 @@ def logpolar_fancy(image, i_0, j_0, p_n=None, t_n=None):
     transformed[pt] = image[ij]
     return transformed
 
+
 def main(arg):
 
     # Prepare arguments
@@ -159,10 +163,14 @@ def main(arg):
 
     proj_0 = dxchange.read_tiff(proj_0_fname)
     proj_180 = dxchange.read_tiff(proj_180_fname)
+    proj_0 = np.squeeze(proj_0)
+    proj_180 = np.squeeze(proj_180)
+
+    proj_0 = util.equalize_histogram(proj_0, proj_0.min(), proj_0.max(), n_bin=1000)
+    proj_180 = util.equalize_histogram(proj_180, proj_180.min(), proj_180.max(), n_bin=1000)
 
     # Perform the correction calculation
-    rot, trans = image_corrections(proj_0, proj_180,
-                                   passes=args.passes)
+    rot, trans = image_corrections(proj_0, proj_180, passes=args.passes)
     # Display the result
     msg = "ΔR: {:.2f}°, ΔX: {:.2f}px, ΔY: {:.2f}px".format(rot, trans[0], trans[1])
     print(msg)
