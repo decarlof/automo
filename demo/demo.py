@@ -17,6 +17,8 @@ center_dict_360 = {'rot_start': 1400, 'rot_end': 1650, 'rot_step': 1, 'slice_sta
 recon_dict_360 = {'center_folder': 'center', 'sino_start': 0, 'sino_end': 1200, 'sino_step': 1, 'medfilt_size': 1,
                   'level': 0, 'chunk_size': 50, 'pad_length': 1000, 'debug': 0}
 
+search_center_dict = {'folder_name': 'center', 'method': 'auto', 'rot_start': 'auto', 'rot_end': 'auto'}
+
 preview_dict_tomosaic = {'proj_st': 0, 'proj_end': 1, 'proj_step': 1, 'slice_st': 500, 'slice_end': 501,
                          'slice_step': 1, 'write_aux': True}
 
@@ -27,4 +29,5 @@ automo.robo.process_folder(os.getcwd(),
                            preview_360=preview_dict_360,
                            center_360=center_dict_360,
                            recon_360=recon_dict_360,
-                           preview_tomosaic=preview_dict_tomosaic)
+                           preview_tomosaic=preview_dict_tomosaic,
+                           search_center=search_center_dict)
