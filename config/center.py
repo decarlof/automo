@@ -39,13 +39,11 @@ def main(arg):
     parser.add_argument("--n_slice", help="number of slices. Put -1 for slice_start if supplied",default=-1)
     parser.add_argument("--medfilt_size", help="size of median filter",default=2)
     parser.add_argument("--level", help="level of downsampling",default=0)
-    parser.add_argument("--padding", help="sinogram padding", default=1000)
+    parser.add_argument("--pad_length", help="sinogram padding", default=1000)
     parser.add_argument("--debug", help="debug messages",default=0,type=int)
     args = parser.parse_args()
 
     debug = args.debug
-    fname = args.file_name
-
     fname = args.file_name
 
     if fname == 'auto':
@@ -60,7 +58,7 @@ def main(arg):
     n_slice = int(args.n_slice)
     medfilt_size = int(args.medfilt_size)
     level = int(args.level)
-    pad_length = int(args.padding)
+    pad_length = int(args.pad_length)
 
     array_dims = util.read_data_adaptive(fname, shape_only=True)
 

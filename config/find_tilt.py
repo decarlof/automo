@@ -3,8 +3,7 @@ import sys
 import os
 import argparse
 
-from scipy.optimize import least_squares
-from skimage.filters import threshold_li
+import dxchange
 from skimage.io import imread
 from skimage.feature import register_translation
 from skimage.transform import AffineTransform, warp, FundamentalMatrixTransform
@@ -69,9 +68,8 @@ def transform_image(img, rotation=0, translation=(0, 0)):
     return out
 
 
-def image_corrections(img_name_0, img_name_180, passes=15):
-    img = imread(img_name_0)
-    img_180 = imread(img_name_180)
+def image_corrections(img, img_180, passes=15):
+
     img = np.flip(img, 1)
     cume_angle = 0
     cume_trans = np.array([0, 0], dtype=float)
@@ -141,14 +139,13 @@ def logpolar_fancy(image, i_0, j_0, p_n=None, t_n=None):
     transformed[pt] = image[ij]
     return transformed
 
+def main(arg):
 
-if __name__ == '__main__':
     # Prepare arguments
     parser = argparse.ArgumentParser(
         description='Compare two images and get rotation/translation offsets.')
     parser.add_argument('original_image', help='The original image file', default='auto')
-    parser.add_argument('flipped_image',
-                        help='Image of the specimen after 180° stage rotation.', default='auto')
+    parser.add_argument('flipped_image', help='Image of the specimen after 180 degrees stage rotation.', default='auto')
     parser.add_argument('--passes', '-p', help='How many iterations to run.',
                         default=15, type=int)
     args = parser.parse_args()
@@ -160,10 +157,19 @@ if __name__ == '__main__':
     if proj_180_fname == 'auto':
         proj_180_fname = os.path.join('preview', 'proj_norm_00001.tiff')
 
+    proj_0 = dxchange.read_tiff(proj_0_fname)
+    proj_180 = dxchange.read_tiff(proj_180_fname)
+
     # Perform the correction calculation
-    rot, trans = image_corrections(args.original_image, args.flipped_image,
+    rot, trans = image_corrections(proj_0, proj_180,
                                    passes=args.passes)
     # Display the result
-    msg = "ΔR: {:.2f}°, ΔX: {:.2f}px, ΔY: {:.2f}px"
-    msg = msg.format(rot, trans[0], trans[1])
+    msg = "ΔR: {:.2f}°, ΔX: {:.2f}px, ΔY: {:.2f}px".format(rot, trans[0], trans[1])
     print(msg)
+
+    f = open('tilt.txt', 'w')
+    f.write(str(rot))
+    f.close()
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

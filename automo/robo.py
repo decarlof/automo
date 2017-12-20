@@ -249,42 +249,64 @@ def robo_rename(exp, file, rename_type):
     else:
         return file
 
+def get_arguments(exp, proc):
+
+    script_name = os.path.join(exp.proc_dir, proc + '.py')
+    f = open(script_name, 'r')
+    lines = f.readlines()
+    main_loc = 0
+    for i, line in enumerate(lines):
+        if 'def main' in line:
+            main_loc = i
+            break
+    man_args = []
+    opt_args = []
+    for i, line in enumerate(lines[main_loc:]):
+        if 'add_argument(' in line:
+            isopt = False
+            arg_st = line.find('(') + 2
+            if line[arg_st] == '-':
+                isopt = True
+            arg_name = ''
+            if isopt:
+                for j in line[arg_st+2:]:
+                    if j in ['\"', '\'']:
+                        break
+                    arg_name += j
+                opt_args.append(arg_name)
+            else:
+                for j in line[arg_st:]:
+                    if j in ['\"', '\'']:
+                        break
+                    arg_name += j
+                man_args.append(arg_name)
+    return man_args, opt_args
+
+
 def robo_process(exp, file, proc_list, **kwargs):
 
     log = open('recon.sh', 'w')
     for proc in proc_list:
-        if proc == 'preview':
-            opts = [kwargs['preview']['proj_st'], kwargs['preview']['proj_end'], kwargs['preview']['proj_step'],
-                    kwargs['preview']['slice_st'], kwargs['preview']['slice_end'], kwargs['preview']['slice_step']]
-        elif proc == 'center':
-            opts = [kwargs['center']['rot_start'], kwargs['center']['rot_end'], kwargs['center']['rot_step'],
-                    kwargs['center']['slice'], kwargs['center']['n_slice'],
-                    kwargs['center']['medfilt_size'], kwargs['center']['level']]
-        elif proc == 'recon':
-            opts = [kwargs['recon']['center_folder'], kwargs['recon']['sino_start'], kwargs['recon']['sino_end'],
-                    kwargs['recon']['sino_step'], kwargs['recon']['medfilt_size'], kwargs['recon']['level'],
-                    kwargs['recon']['chunk_size']]
-        elif proc == 'preview_360':
-            opts = [kwargs['preview_360']['slice_st'], kwargs['preview_360']['slice_end'], kwargs['preview_360']['slice_step']]
-        elif proc == 'center_360':
-            opts = [kwargs['center_360']['rot_start'], kwargs['center_360']['rot_end'], kwargs['center_360']['rot_step'],
-                    kwargs['center_360']['slice'], kwargs['center_360']['n_slice'],
-                    kwargs['center_360']['medfilt_size'], kwargs['center_360']['level']]
-        elif proc == 'recon_360':
-            opts = [kwargs['recon_360']['center_folder'], kwargs['recon_360']['sino_start'], kwargs['recon_360']['sino_end'],
-                    kwargs['recon_360']['sino_step'], kwargs['recon_360']['medfilt_size'], kwargs['recon_360']['level'],
-                    kwargs['recon_360']['chunk_size']]
-        elif proc == 'preview_tomosaic':
-            opts = [kwargs['preview']['proj_st'], kwargs['preview']['proj_end'], kwargs['preview']['proj_step'],
-                    kwargs['preview']['slice_st'], kwargs['preview']['slice_end'], kwargs['preview']['slice_step'],
-                    kwargs['preview']['write_aux']]
-        opts = ' '.join(map(str, opts))
-        opts = ' ' + opts
-        runtime_line = 'python ' + os.path.join(exp.proc_dir, proc)+ '.py ' + file + opts
+        man_args, opt_args = get_arguments(exp, proc)
+        opts = ''
+        for arg in man_args:
+            if arg in ['filename', 'file_name', 'fname']:
+                opts += file
+            else:
+                opts += kwargs[proc][arg]
+            opts += ' '
+        for arg in opt_args:
+            if arg in ['filename', 'file_name', 'fname']:
+                opts += '--' + arg + ' ' + file
+            else:
+                opts += '--' + arg + ' ' + kwargs[proc][arg]
+            opts += ' '
+
+        runtime_line = 'python ' + os.path.join(exp.proc_dir, proc) + '.py ' + opts
         print(runtime_line)
         # log.write(runtime_line + '\n')
-        if 'recon' in proc:
-            log.write('python /local/Software/rchard/automo/config/recon.py ' + file + opts + '\n')
+        # if 'recon' in proc:
+        #     log.write('python /local/Software/rchard/automo/config/recon.py ' + opts + '\n')
         os.system(runtime_line)
     log.close()
 
