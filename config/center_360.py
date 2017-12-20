@@ -33,8 +33,8 @@ def main(arg):
     parser.add_argument("rot_step", help="rotation axis end location")
     parser.add_argument("slice_start", help="a single slice to run center.py. Put -1 for n_slice if supplied")
     parser.add_argument("n_slice", help="number of slices. Put -1 for slice_start if supplied")
-    parser.add_argument("medfilt_size", help="size of median filter")
-    parser.add_argument("level", help="level of downsampling")
+    parser.add_argument("--medfilt_size", help="size of median filter", default=1)
+    parser.add_argument("--level", help="level of downsampling", default=0)
 
     args = parser.parse_args()
 
