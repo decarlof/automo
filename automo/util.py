@@ -86,7 +86,7 @@ except:
 # logger = logging.getLogger(__name__)
 PI = 3.1415927
 
-__author__ = ['Francesco De Carlo', 'Ming Du']
+__author__ = ['Francesco De Carlo', 'Ming Du','Rafael Vescovi']
 __copyright__ = "Copyright (c) 2016, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
 __all__ = ['append',
@@ -741,15 +741,19 @@ def sino_360_to_180(data, overlap=0, rotation='right', blend=True):
 
     if blend:
         if rotation == 'left':
-            img1 = data[n:2*n, :, :][:, :, ::-1]
-            img2 = data[:n, :, lo:]
-            shift = [0, lo]
+            img1 = data[n:2*n, :, ro:][:, :, ::-1]
+            img2 = data[:n, :, :]
+            img1 = np.fliplr(img1)
+            img2 = np.fliplr(img2)
+            shift = [0, dz - lo]
+            for i in range(out.shape[1]):
+                out[:, i, :] = np.fliplr(img_merge_pyramid(img2[:, i, :], img1[:, i, :], shift=shift, depth=2))
         elif rotation == 'right':
             img1 = data[:n, :, :]
             img2 = data[n:2*n, :, :-ro][:, :, ::-1]
             shift = [0, dz-lo]
-        for i in range(out.shape[1]):
-            out[:, i, :] = img_merge_pyramid(img1[:, i, :], img2[:, i, :], shift=shift, depth=2)
+            for i in range(out.shape[1]):
+                out[:, i, :] = img_merge_pyramid(img1[:, i, :], img2[:, i, :], shift=shift, depth=2)
     else:
         if rotation == 'left':
             out[:, :, -(dz-lo):] = data[:n, :, lo:]
