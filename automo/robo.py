@@ -69,7 +69,7 @@ from distutils.dir_util import mkpath
 import logging
 
 # logger = logging.getLogger(__name__)
-__author__ = "Francesco De Carlo"
+__author__ = "Francesco De Carlo, Ming Du, Rafael Vescovi"
 __copyright__ = "Copyright (c) 2016, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
 __all__ = ['process_folder']

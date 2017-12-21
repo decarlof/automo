@@ -34,20 +34,20 @@ def main(arg):
     parser.add_argument("--slice_start", help="a single slice to run center.py. Put -1 for n_slice if supplied",default=600)
     parser.add_argument("--n_slice", help="number of slices. Put -1 for slice_start if supplied",default = -1)
     parser.add_argument("--medfilt_size", help="size of median filter", default=1)
-    parser.add_argument("--level", help="level of downsampling", default=0)
+    parser.add_argument("--level", help="level of                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            downsampling", default=0)
 
     args = parser.parse_args()
+                                                                                                                                                                                                                                                            
 
+    fname = args.file_name                                                                                                                                                                                                                                      
 
-    fname = args.file_name
-
-    if fname == 'auto':
+    if fname == 'auto':                                                                                                                                                                                     
         h5file = glob('*.h5')
         fname = h5file[0] 
-        print ('Autofilename =' + fname)
+        print ('Autofilename =' + fname)                                                                                                            
 
-    rot_start = int(args.rot_start)
-    rot_end = int(args.rot_end)
+    rot_start = int(args.rot_start)                                                             
+    rot_end = int(args.rot_end)                                                                                                                                                                                                                                                                   
     rot_step = int(args.rot_step)
     slice = int(args.slice_start)
     n_slice = int(args.n_slice)
@@ -131,9 +131,9 @@ def main(arg):
     fov2 = int(prj.shape[2] / 2)
 
     for center in range(rot_start, rot_end, rot_step):
-
         axis_side = 'left' if center < fov2 else 'right'
         overlap = (prj.shape[2] - center) * 2 if axis_side == 'right' else center * 2
+        print()
         prj0 = util.sino_360_to_180(prj, overlap=overlap, rotation=axis_side)
         theta0 = theta[:prj0.shape[0]]
 
