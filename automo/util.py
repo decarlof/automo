@@ -710,7 +710,7 @@ def equalize_histogram(img, bin_min, bin_max, n_bin=256):
     return res
 
 
-def sino_360_to_180(data, overlap=0, rotation='left', blend=True):
+def sino_360_to_180(data, overlap=0, rotation='right', blend=True):
     """
     Converts 0-360 degrees sinogram to a 0-180 sinogram.
     If the number of projections in the input data is odd, the last projection
@@ -741,11 +741,11 @@ def sino_360_to_180(data, overlap=0, rotation='left', blend=True):
 
     if blend:
         if rotation == 'left':
-            img1 = data[n:2*n, :, ro:][:, :, ::-1]
+            img1 = data[n:2*n, :, :][:, :, ::-1]
             img2 = data[:n, :, lo:]
             shift = [0, lo]
         elif rotation == 'right':
-            img1 = data[:n, :, :-lo]
+            img1 = data[:n, :, :]
             img2 = data[n:2*n, :, :-ro][:, :, ::-1]
             shift = [0, dz-lo]
         for i in range(out.shape[1]):
