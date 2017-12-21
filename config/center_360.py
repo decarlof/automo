@@ -27,12 +27,12 @@ import automo.util as util
 def main(arg):
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("file_name", help="existing hdf5 file name",default='auto')
-    parser.add_argument("rot_start", help="rotation axis start location")
-    parser.add_argument("rot_end", help="rotation axis end location")
-    parser.add_argument("rot_step", help="rotation axis end location")
-    parser.add_argument("slice_start", help="a single slice to run center.py. Put -1 for n_slice if supplied")
-    parser.add_argument("n_slice", help="number of slices. Put -1 for slice_start if supplied")
+    parser.add_argument("--file_name", help="existing hdf5 file name",default='auto')
+    parser.add_argument("--rot_start", help="rotation axis start location",default = 800)
+    parser.add_argument("--rot_end", help="rotation axis end location", default = 1100)
+    parser.add_argument("--rot_step", help="rotation axis end location",default=1)
+    parser.add_argument("--slice_start", help="a single slice to run center.py. Put -1 for n_slice if supplied",default=600)
+    parser.add_argument("--n_slice", help="number of slices. Put -1 for slice_start if supplied",default = -1)
     parser.add_argument("--medfilt_size", help="size of median filter", default=1)
     parser.add_argument("--level", help="level of downsampling", default=0)
 
@@ -44,7 +44,7 @@ def main(arg):
     if fname == 'auto':
         h5file = glob('*.h5')
         fname = h5file[0] 
-        print ('Autofilename =' + h5file)
+        print ('Autofilename =' + fname)
 
     rot_start = int(args.rot_start)
     rot_end = int(args.rot_end)
