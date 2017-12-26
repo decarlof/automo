@@ -25,8 +25,6 @@ def main(arg):
     center_ls = []
     slice_ls = os.listdir(folder)
 
-    slice_ls = [int(os.path.basename(i)) for i in slice_ls if os.path.isdir(i)]
-
     for ind, i in enumerate(slice_ls):
         outpath = os.path.join(os.getcwd(), folder, str(i))
 
