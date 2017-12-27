@@ -213,7 +213,7 @@ def register_translation(src_image, target_image, rangeX=(None, None), rangeY=(N
     # elif rangeX[0] < 0:
     #     mask[rangeY[0]:rangeY[1], shape[1] + rangeX[0]:] = 1
     #     mask[rangeY[0]:rangeY[1], :rangeX[1]] = 1
-    dxchange.write_tiff(cross_correlation, 'cs', dtype='float32')
+#    dxchange.write_tiff(cross_correlation, 'cs', dtype='float32')
     cross_correlation = cross_correlation * mask
 
 
@@ -291,7 +291,7 @@ def main(arg):
     new_folder = args.new_folder
 
     folder_list = sorted(glob(prefix+'*[!restack]'))
-
+    print(folder_list)
     if shift == 'auto':
         print ('Attempting to find shift automatically.')
         folder_grid = util.start_file_grid(folder_list, pattern=1)
@@ -305,8 +305,8 @@ def main(arg):
             slice1 = util.equalize_histogram(slice1, bin_min=slice1.min(), bin_max=slice1.max(), n_bin=10000)
             # slice0 = gaussian_filter(slice0, 3)
             # slice1 = gaussian_filter(slice1, 3)
-            dxchange.write_tiff(slice0, 'slice0', dtype='float32')
-            dxchange.write_tiff(slice1, 'slice1', dtype='float32')
+#            dxchange.write_tiff(slice0, 'slice0', dtype='float32')
+#            dxchange.write_tiff(slice1, 'slice1', dtype='float32')
             this_shift = register_translation(slice0, slice1, down=True, upsample_factor=1, rangeX=(-10, 10), rangeY=(600, 1200))
             shift_ls.append(this_shift[0])
             slice0 = np.copy(slice1)
@@ -323,6 +323,7 @@ def main(arg):
         os.makedirs(new_folder)
     except:
         pass
+        
     f = open(os.path.join(new_folder, 'shift.txt'), 'w')
     for shift in shift_ls:
         f.write(str(shift) + '\n')
