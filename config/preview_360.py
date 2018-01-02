@@ -73,7 +73,8 @@ def main(arg):
         sino_fname = (folder + 'preview' + os.sep + 'sino')
         sino = np.swapaxes(sino, 0, 1)
         print("Proj folder: ", proj_fname)
-
+        flat_fname = (folder + 'preview' + os.sep + 'flat' + os.sep +'flat')
+        dxchange.write_tiff_stack(flat, fname=flat_fname, axis=0, digit=5, start=0, overwrite=True)
         dxchange.write_tiff_stack(proj, fname=proj_fname, axis=0, digit=5, start=0, overwrite=True)
         dxchange.write_tiff_stack(sino, fname=sino_fname, axis=0, digit=5, start=slice_st, overwrite=True)
         proj_flip = np.fliplr(proj[1,:,:])
