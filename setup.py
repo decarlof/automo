@@ -11,6 +11,7 @@ setup(
     description = 'Automation for tomography.',
     license='BSD-3',
     platforms='Any',
+    scripts=['config/*.py'],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Science/Research',
