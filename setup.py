@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from setuptools import setup, find_packages
-
+from glob import glob
 setup(
     name='automo',
     author='Francesco De Carlo, Rafael Vescovi',
@@ -11,7 +11,7 @@ setup(
     description = 'Automation for tomography.',
     license='BSD-3',
     platforms='Any',
-    scripts=['config/*.py'],
+    scripts=glob('config/*.py'),
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Science/Research',
