@@ -76,7 +76,7 @@ def main(arg):
     new_slice1 = np.zeros([max_size_x, max_size_y])
 
     accum = 0
-    for i, folder in tqdm(enumerate(folder_grid[:, 0])):
+    for i, folder in enumerate(tqdm(folder_grid[:, 0])):
         if i < folder_grid.shape[0] - 1:
             shift = shift_ls[i]
         file_list = glob(os.path.join(os.path.join(folder, 'recon', 'recon*.tiff')))
