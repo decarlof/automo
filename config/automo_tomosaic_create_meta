@@ -1,0 +1,52 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+AuTomo with Tomosaic.
+"""
+
+from six.moves import input
+import automo
+import os
+try:
+    import __builtin__ as bi
+except:
+    import builtins as bi
+
+entry_ls = {'prefix': ['Prefix of data files before y and x indices.', None, 'str'],
+            'data_format': ['Data format, e.g. aps_32id, aps_13bm.', 'aps_32id', 'str'],
+            'x_shift': ['Motor translation readout along x.', None, 'float'],
+            'y_shift': ['Motor translation readout along y.', None, 'float']}
+
+while True:
+    entry_items = entry_ls.items()
+    print('Current entries:')
+    for i, (key, value) in enumerate(entry_items):
+        print('{}. {} = {}'.format(i, key, value[1]))
+    print('---------------------')
+    ind = input('Enter index to edit, or enter \'ok\' if done: ')
+    if ind == 'ok':
+        break
+    else:
+        ind = int(ind)
+        print(entry_items[ind][1][0])
+        val = input('Enter value here: ')
+        val = getattr(bi, entry_items[ind][1][2])(val)
+        entry_ls[entry_items[ind][0]][1] = val
+        print('---------------------')
+
+sample_loc = automo.__file__
+sample_loc = os.path.dirname(os.path.dirname(sample_loc))
+sample_loc = os.path.join(sample_loc, 'config', 'metafile_sample')
+o = open(sample_loc)
+lines = o.readlines()
+
+entry_items = entry_ls.items()
+for var, (_, value, _) in entry_items:
+    for i, line in enumerate(lines):
+        if line.startswith(var + ' ='):
+            lines[i] = '{} = {}\n'.format(var, value)
+f = open('mosaic_meta.py', 'w')
+f.writelines(lines)
+f.close()
+o.close()
