@@ -10,7 +10,10 @@ from tomosaic import *
 from tomosaic.misc.misc import read_data_adaptive
 import glob, os
 import numpy as np
-from mosaic_meta import *
+try:
+    from mosaic_meta import *
+except:
+    raise IOError('Metadata file not found in current working diretory.')
 import dxchange
 import tomopy
 import sys
