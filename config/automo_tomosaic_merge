@@ -8,11 +8,15 @@ AuTomo with Tomosaic.
 import tomosaic
 import time
 import pickle
+import os
+import sys
+import argparse
 try:
     from mpi4py import MPI
 except:
     from tomosaic.util.pseudo import pseudo_comm
 try:
+    sys.path.append(os.getcwd())
     from mosaic_meta import *
 except:
     try:
@@ -21,9 +25,7 @@ except:
         reader.close()
     except:
         raise IOError('Metadata file not found in current working diretory.')
-import os
-import sys
-import argparse
+
 
 try:
     comm = MPI.COMM_WORLD
@@ -60,7 +62,7 @@ def main(arg):
     if blend_method == 'pyramid':
         blend_options['depth'] = int(args.depth_x)
         blend_options['blur'] = float(args.blur_x)
-    blend_method2 = args.blend_method
+    blend_method2 = args.method_y
     blend_options2 = {}
     if blend_method2 == 'none':
         blend_method2 = None

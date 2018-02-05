@@ -12,6 +12,7 @@ import time
 import tomopy
 import pickle
 try:
+    sys.path.append(os.getcwd())
     from mosaic_meta import *
 except:
     try:
@@ -46,7 +47,7 @@ def main(arg):
     parser.add_argument('--dest_folder', help='destination folder location', default='auto')
     parser.add_argument('--ds', help='downsample level', default=1)
     parser.add_argument('--chunk_size', help='chunk size for each thread', default=5)
-    parser.add_argument('--center_single', help='provide only if mode is single', default='auto')
+    parser.add_argument('--center_single', help='provide only if mode is single', default='none')
     parser.add_argument('--preprocess_single', help='provide only if mode is single', default=0)
     parser.add_argument('--output_filename', help='provide only if mode is single', default='recon.tiff')
     args = parser.parse_args()
@@ -84,7 +85,7 @@ def main(arg):
         slice_end = int(slice_end)
     dest_folder = args.dest_folder if args.dest_folder != 'auto' else 'recon_flatcorr_{}x'.format(ds)
     chunk_size = args.chunk_size
-    center_single = int(args.center_single)
+    center_single = None if args.center_single == 'none' else int(args.center_single)
     preprocess_single = int(args.preprocess_single)
     preprocess_single = False if preprocess_single == 0 else True
     dest_fname = args.output_filename

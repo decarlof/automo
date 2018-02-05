@@ -5,15 +5,15 @@ import argparse
 import sys
 import dxchange
 import numpy as np
+import time
+import tomopy
+import pickle
 try:
     from mpi4py import MPI
 except:
     from tomosaic.util.pseudo import pseudo_comm
-import time
-import tomopy
-import pickle
-
 try:
+    sys.path.append(os.getcwd())
     from mosaic_meta import *
 except:
     try:
@@ -59,7 +59,12 @@ def main(arg):
     except:
         shift_grid = tomosaic.start_shift_grid(file_grid, x_shift, y_shift)
 
-    in_tile_pos = int(args.in_tile_pos)
+    in_tile_pos = args.in_tile_pos
+    if in_tile_pos == 'auto':
+        shape = tomosaic.read_data_adaptive(os.path.join('data_raw_1x', file_grid[0, 0]), shape_only=True)
+        in_tile_pos = int(shape[1] / 2)
+    else:
+        in_tile_pos = int(in_tile_pos)
     ds = int(args.ds)
     shift_grid = shift_grid / float(ds)
     in_tile_pos = in_tile_pos / float(ds)
@@ -79,7 +84,6 @@ def main(arg):
         sino_name = args.source
     preprocess_single = int(args.preprocess_single)
     preprocess_single = False if preprocess_single == 0 else True
-
 
     t0 = time.time()
     if mode == 'merged':

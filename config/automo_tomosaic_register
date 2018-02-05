@@ -4,13 +4,14 @@ import os
 import argparse
 import sys
 import numpy as np
+import pickle
+import time
 try:
     from mpi4py import MPI
 except:
     from tomosaic.util.pseudo import pseudo_comm
-import pickle
-import time
 try:
+    sys.path.append(os.getcwd())
     from mosaic_meta import *
 except:
     try:
@@ -38,9 +39,8 @@ def main(arg):
     parser.add_argument('--source', help='folder with source data', default='auto')
     parser.add_argument('--method', help='method', default='pc')
     parser.add_argument('--ds', help='downsample level', default=1)
-    parser.add_argument('--center_st', help='provide if method is hybrid', default=1)
-    parser.add_argument('--center_end', help='provide if method is hybrid', default=1)
-    parser.add_argument('--ds', help='downsample level', default=1)
+    parser.add_argument('--center_st', help='provide if method is hybrid', default='none')
+    parser.add_argument('--center_end', help='provide if method is hybrid', default='none')
     args = parser.parse_args()
 
     ds = int(args.ds)

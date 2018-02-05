@@ -7,11 +7,16 @@ AuTomo with Tomosaic.
 
 import tomosaic
 import time
+import os
+import sys
+import argparse
+import pickle
 try:
     from mpi4py import MPI
 except:
     from tomosaic.util.pseudo import pseudo_comm
 try:
+    sys.path.append(os.getcwd())
     from mosaic_meta import *
 except:
     try:
@@ -20,9 +25,6 @@ except:
         reader.close()
     except:
         raise IOError('Metadata file not found in current working diretory.')
-import os
-import sys
-import argparse
 
 
 try:
