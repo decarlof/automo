@@ -35,8 +35,7 @@ def main(arg):
                         default='merged')
     parser.add_argument('--source', help='location of data files. If mode is merged or single, this should be the '
                                          'path to a file. If mode is discrete, this should be a folder.', default='auto')
-
-    parser.add_argument('--dest_folder', help='destination folder location', default='recon_flatcorr_1x')
+    parser.add_argument('--dest_folder', help='destination folder location', default='auto')
     parser.add_argument('--ds', help='downsample level', default=1)
     parser.add_argument('--chunk_size', help='chunk size for each thread', default=5)
     parser.add_argument('--center_single', help='provide only if mode is single', default='auto')
