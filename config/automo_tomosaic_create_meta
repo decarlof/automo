@@ -19,7 +19,7 @@ entry_ls = {'prefix': ['Prefix of data files before y and x indices.', None, 'st
             'y_shift': ['Motor translation readout along y.', None, 'float']}
 
 while True:
-    entry_items = entry_ls.items()
+    entry_items = list(entry_ls.items())
     print('Current entries:')
     for i, (key, value) in enumerate(entry_items):
         print('{}. {} = {}'.format(i, key, value[1]))
@@ -41,7 +41,7 @@ sample_loc = os.path.join(sample_loc, 'config', 'metafile_sample')
 o = open(sample_loc)
 lines = o.readlines()
 
-entry_items = entry_ls.items()
+entry_items = list(entry_ls.items())
 for var, (_, value, _) in entry_items:
     for i, line in enumerate(lines):
         if line.startswith(var + ' ='):
