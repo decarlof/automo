@@ -91,8 +91,7 @@ __all__ = ['append',
            'dataset_info',
            'try_folder',
            'h5group_dims',
-           'touch',
-           'search_in_folder_dnn']
+           'touch']
 
 
 def h5group_dims(fname, dataset='exchange/data'):
