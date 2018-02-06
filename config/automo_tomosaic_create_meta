@@ -20,7 +20,7 @@ entry_ls = {'prefix': ['Prefix of data files before y and x indices.', None, 'st
             'x_shift': ['Motor translation readout along x.', None, 'float'],
             'y_shift': ['Motor translation readout along y.', None, 'float']}
 
-print('Python interpreter: {}'.sys.executable)
+print('Python interpreter: {}'.format(sys.executable))
 while True:
     entry_items = list(entry_ls.items())
     print('Current entries:')
