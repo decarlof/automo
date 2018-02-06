@@ -17,7 +17,6 @@ import numpy as np
 from glob import glob
 import re
 
-import automo.util as util
 
 ##PROBABLY SHOULD GO TO A STANDARD OPERATIONS FILE.
 def get_yz_slice(recon_folder, chunk_size=50, slice_y=1000):

@@ -18,7 +18,7 @@ import h5py
 from glob import glob
 import tomopy
 
-import automo.util as util
+from automo.util import read_data_adaptive, preprocess
 
 
 def main(arg):
@@ -66,7 +66,7 @@ def main(arg):
         # dset = h5['exchange/data'] #this should be adaptative
 
         # Read the APS raw data projections.
-        proj, flat, dark, _ = util.read_data_adaptive(fname, proj=(proj_st, proj_end, proj_step))
+        proj, flat, dark, _ = read_data_adaptive(fname, proj=(proj_st, proj_end, proj_step))
         print("Proj Preview: ", proj.shape)
         
         proj_norm = tomopy.normalize(proj, flat, dark)
@@ -74,7 +74,7 @@ def main(arg):
         proj_norm = tomopy.misc.corr.remove_neg(proj_norm, val=0.001)
         proj_norm = tomopy.misc.corr.remove_nan(proj_norm, val=0.001)
         proj_norm[np.where(proj_norm == np.inf)] = 0.001
-        #proj_norm = util.preprocess(proj_norm) #awkward
+        #proj_norm = preprocess(proj_norm) #awkward
         #proj_norm = proj_norm.astype('int16') (need a better cast)
 
         proj_fname = (folder + 'preview' + os.sep + 'proj')
@@ -84,7 +84,7 @@ def main(arg):
         flat = flat.astype('float16')
         dxchange.write_tiff(flat.mean(axis=0), fname=(folder + 'preview' + os.sep + 'flat'), overwrite=True)
 
-        sino, flat, dark, _ = util.read_data_adaptive(fname, sino=(slice_st, slice_end, slice_step))
+        sino, flat, dark, _ = read_data_adaptive(fname, sino=(slice_st, slice_end, slice_step))
         print("Sino Preview: ", sino.shape)
 
         sino_fname = (folder + 'preview' + os.sep + 'sino')

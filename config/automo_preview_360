@@ -17,7 +17,7 @@ import numpy as np
 from glob import glob
 import h5py
 
-import automo.util as util
+from automo.util import read_data_adaptive, preprocess
 
 
 def main(arg):
@@ -61,13 +61,13 @@ def main(arg):
             slice_step = 1
 
         # Read the APS raw data projections.
-        proj, flat, dark, _ = util.read_data_adaptive(fname, proj=(proj_st, proj_end, proj_step))
+        proj, flat, dark, _ = read_data_adaptive(fname, proj=(proj_st, proj_end, proj_step))
         print("Proj Preview: ", proj.shape)
 
         proj_fname = (folder + 'preview' + os.sep + 'proj')
         print("Proj folder: ", proj_fname)
 
-        sino, flat, dark, _ = util.read_data_adaptive(fname, sino=(slice_st, slice_end, slice_step))
+        sino, flat, dark, _ = read_data_adaptive(fname, sino=(slice_st, slice_end, slice_step))
         print("Sino Preview: ", sino.shape)
     
         sino_fname = (folder + 'preview' + os.sep + 'sino')
