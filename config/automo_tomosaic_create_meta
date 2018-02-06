@@ -8,25 +8,34 @@ AuTomo with Tomosaic.
 from six.moves import input
 import automo
 import os
+import sys
 try:
     import __builtin__ as bi
 except:
     import builtins as bi
+
 
 entry_ls = {'prefix': ['Prefix of data files before y and x indices.', None, 'str'],
             'data_format': ['Data format, e.g. aps_32id, aps_13bm.', 'aps_32id', 'str'],
             'x_shift': ['Motor translation readout along x.', None, 'float'],
             'y_shift': ['Motor translation readout along y.', None, 'float']}
 
+print('Python interpreter: {}'.sys.executable)
 while True:
     entry_items = list(entry_ls.items())
     print('Current entries:')
     for i, (key, value) in enumerate(entry_items):
         print('{}. {} = {}'.format(i, key, value[1]))
     print('---------------------')
-    ind = input('Enter index to edit, or enter \'ok\' if done: ')
+    print('Enter:')
+    print('[index] to edit;')
+    print('[ok] to finish;')
+    print('[w] to write all first frames;')
+    ind = input('Input here: ')
     if ind == 'ok':
         break
+    elif ind == 'w':
+        automo.write_first_frames()
     else:
         ind = int(ind)
         print(entry_items[ind][1][0])

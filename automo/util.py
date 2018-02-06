@@ -91,7 +91,8 @@ __all__ = ['append',
            'dataset_info',
            'try_folder',
            'h5group_dims',
-           'touch']
+           'touch',
+           'write_first_frames']
 
 
 def h5group_dims(fname, dataset='exchange/data'):
@@ -557,9 +558,6 @@ def _create_mask(nrow, ncol, radius, drop):
     return mask
 
 
-
-
-
 def pad_sinogram(sino, length, mean_length=40, mode='edge'):
 
     assert sino.ndim == 3
@@ -993,3 +991,14 @@ def preprocess(dat, blur=None, normalize_bg=False):
         dat = gaussian_filter(dat, blur)
 
     return dat
+
+
+def write_first_frames(folder='.', data_format='aps_32id'):
+
+    flist = glob.glob(os.path.join(folder, '*.h5'))
+    for f in flist:
+        print(f)
+        dat, flt, drk, _ = read_data_adaptive(os.path.join(folder, f), proj=(0, 1), data_format=data_format)
+        dat = tomopy.normalize(dat, flt, drk)
+        f = os.path.splitext(os.path.basename(f))[0]
+        dxchange.write_tiff(dat, os.path.join('first_frames', f), dtype='float32', overwrite=True)
