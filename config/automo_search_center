@@ -104,10 +104,10 @@ def main(arg):
                 print('Entropy finds center {}.'.format(center_pos))
             except:
                 print('Switching to CNN...')
-                center_pos = util.search_in_folder_dnn(outpath)
+                center_pos = search_in_folder_dnn(outpath)
             if center_pos is None:
                 print('Switching to CNN...')
-                center_pos = util.search_in_folder_dnn(outpath)
+                center_pos = search_in_folder_dnn(outpath)
         elif search_method == 'vo':
             h5file = glob('*.h5')
             fname = h5file[0]
