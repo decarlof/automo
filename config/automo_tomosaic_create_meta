@@ -47,6 +47,7 @@ while True:
 sample_loc = automo.__file__
 sample_loc = os.path.dirname(os.path.dirname(sample_loc))
 sample_loc = os.path.join(sample_loc,'automo' ,'metafile_sample.py')
+
 o = open(sample_loc)
 lines = o.readlines()
 
