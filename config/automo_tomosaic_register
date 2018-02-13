@@ -11,23 +11,11 @@ import os
 import argparse
 import sys
 import numpy as np
-import pickle
 import time
 try:
     from mpi4py import MPI
 except:
     from tomosaic.util.pseudo import pseudo_comm
-try:
-    sys.path.append(os.getcwd())
-    from mosaic_meta import *
-except:
-    try:
-        reader = open(os.path.join('tomosaic_misc', 'meta'), 'rb')
-        prefix, file_grid, x_shift, y_shift = pickle.load(reader)
-        reader.close()
-    except:
-        raise IOError('Metadata file not found in current working diretory.')
-
 
 try:
     comm = MPI.COMM_WORLD
@@ -46,6 +34,7 @@ def main(arg):
     parser.add_argument('--source', help='folder with source data', default='auto')
     parser.add_argument('--method', help='method', default='pc')
     parser.add_argument('--ds', help='downsample level', default=1)
+    parser.add_argument('--shift_file', help='shift file', default='auto')
     parser.add_argument('--center_st', help='provide if method is hybrid', default='none')
     parser.add_argument('--center_end', help='provide if method is hybrid', default='none')
     args = parser.parse_args()
@@ -53,19 +42,34 @@ def main(arg):
     ds = int(args.ds)
     method = args.method
     src_folder = args.source if args.source != 'auto' else 'data_raw_{}x'.format(ds)
+
+    f_pattern = 1
+    prefix = ''
+    file_list = tomosaic.get_files(src_folder, prefix, type='h5')
+    file_grid = tomosaic.start_file_grid(file_list, pattern=f_pattern)
+    
+    
+    if args.shift_file == 'auto':
+        shift_file = 'shifts.txt'
+    else:
+        shift_file = args.shift_file
+
     if method == 'hybrid':
         center_search_range = (float(args.center_st), float(args.center_end))
 
+    shift_grid = tomosaic.file2grid(shift_file)
+    
     t0 = time.time()
-    shift_grid = tomosaic.start_shift_grid(file_grid, x_shift, y_shift)
     if method == 'pc':
-        refined_shift = tomosaic.refine_shift_grid(file_grid, shift_grid, src_folder=src_folder,
-                                                   motor_readout=(y_shift, x_shift))
+        refined_shift = tomosaic.refine_shift_grid(file_grid, shift_grid, src_folder=src_folder)
     elif method == 'reslice':
         refined_shift = tomosaic.refine_shift_grid_hybrid(file_grid, shift_grid, src_folder,
-                                                          rough_shift=(y_shift, x_shift),
                                                           center_search_range=center_search_range)
     print('Rank {}: total time: {} s.'.format(rank, time.time() - t0))
+
+    print(refined_shift)
+
+##    tomosaic.grid2file(shift_grid, 'shifts.txt')
 
 
 if __name__ == "__main__":

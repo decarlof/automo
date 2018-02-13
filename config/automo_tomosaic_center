@@ -14,83 +14,87 @@ import dxchange
 import numpy as np
 import time
 import tomopy
-import pickle
-try:
-    from mpi4py import MPI
-except:
-    from tomosaic.util.pseudo import pseudo_comm
-try:
-    sys.path.append(os.getcwd())
-    from mosaic_meta import *
-except:
-    try:
-        reader = open(os.path.join('tomosaic_misc', 'meta'), 'rb')
-        prefix, file_grid, x_shift, y_shift = pickle.load(reader)
-        reader.close()
-    except:
-        raise IOError('Metadata file not found in current working diretory.')
 
 try:
+    from mpi4py import MPI
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
     size = comm.Get_size()
     name = MPI.Get_processor_name()
 except:
+    from tomosaic.util.pseudo import pseudo_comm
     comm = pseudo_comm()
     rank = 0
     size = 1
 
 
+
+
 def main(arg):
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--center_st', help='starting position for center search', default='auto')
-    parser.add_argument('--center_end', help='ending position for center search', default='auto')
+    parser.add_argument('--source', help='location of data files. If mode is merged or single, this should be the path to a file. If mode is discrete, this should be a folder.', default='auto')
+    parser.add_argument('--center_st', help='starting position for center search')
+    parser.add_argument('--center_end', help='ending position for center search')
     parser.add_argument('--center_step', help='step size for center search', default=1)
     parser.add_argument('--row_st', help='starting row in mosaic grid', default=0)
     parser.add_argument('--row_end', help='ending row in mosaic grid', default='auto')
     parser.add_argument('--in_tile_pos', help='the slice within a tile to be used for center searching', default='auto')
-    parser.add_argument('--mode', help='reconstruction mode. Available options: merged, discrete, single',
-                        default='merged')
+    parser.add_argument('--mode', help='reconstruction mode. Available options: merged, discrete, single', default='merged')
     parser.add_argument('--method', help='algorithm', default='entropy')
-    parser.add_argument('--source', help='location of data files. If mode is merged or single, this should be the '
-                                         'path to a file. If mode is discrete, this should be a folder.',
-                        default='auto')
     parser.add_argument('--ds', help='downsample level', default=1)
+    parser.add_argument('--shift_file', help='shift file', default='auto')
     parser.add_argument('--preprocess_single', help='provide only if mode is single', default=0)
     args = parser.parse_args()
 
-    try:
-        shift_grid = tomosaic.util.file2grid("shifts.txt")
-        shift_grid = tomosaic.absolute_shift_grid(shift_grid, file_grid)
-    except:
-        shift_grid = tomosaic.start_shift_grid(file_grid, x_shift, y_shift)
+    ds = int(args.ds)
+    mode = args.mode
+    center_st = int(args.center_st)
+    center_end = int(args.center_end)
+    center_step = int(args.center_step)
+    row_st = int(args.row_st)
+    method = args.method
+    fname = 'fulldata_flatcorr_{}x/fulldata_flatcorr_{}x.h5'.format(ds, ds)
+    src_folder = 'data_raw_{}x'.format(ds)
 
+
+    f_pattern = 1
+    prefix = ''
+    file_list = tomosaic.get_files(src_folder, prefix, type='h5')
+    file_grid = tomosaic.start_file_grid(file_list, pattern=f_pattern)
+
+    row_end = int(args.row_end) if args.row_end != 'auto' else file_grid.shape[0]
+
+
+
+
+    if args.shift_file == 'auto':
+        shift_file = 'shifts.txt'
+    else:
+        shift_file = args.shift_file
+    shift_grid = tomosaic.file2grid(shift_file)
+
+    shift_grid = shift_grid / float(ds)
     in_tile_pos = args.in_tile_pos
     if in_tile_pos == 'auto':
         shape = tomosaic.read_data_adaptive(os.path.join('data_raw_1x', file_grid[0, 0]), shape_only=True)
         in_tile_pos = int(shape[1] / 2)
     else:
         in_tile_pos = int(in_tile_pos)
-    ds = int(args.ds)
-    shift_grid = shift_grid / float(ds)
+
     in_tile_pos = in_tile_pos / float(ds)
 
-    center_st = int(args.center_st)
-    center_end = int(args.center_end)
-    center_step = int(args.center_step)
-    row_st = int(args.row_st)
-    row_end = int(args.row_end) if args.row_end != 'auto' else file_grid.shape[0]
-    method = args.method
-    mode = args.mode
-    if mode == 'merged':
-        fname = args.source if args.source != 'auto' else 'fulldata_flatcorr_{}x/fulldata_flatcorr_{}x.h5'.format(ds, ds)
-    elif mode == 'discrete':
-        source_folder = args.source if args.source != 'auto' else 'data_raw_{}x'.format(ds, ds)
+    if method == 'hybrid':
+        center_search_range = (float(args.center_st), float(args.center_end))
+
+    
+
     elif mode == 'single':
         sino_name = args.source
     preprocess_single = int(args.preprocess_single)
     preprocess_single = False if preprocess_single == 0 else True
+
+
 
     t0 = time.time()
     if mode == 'merged':

@@ -10,16 +10,29 @@ import time
 import os
 import sys
 import argparse
-import glob
-
+import pickle
 try:
     from mpi4py import MPI
+except:
+    from tomosaic.util.pseudo import pseudo_comm
+try:
+    sys.path.append(os.getcwd())
+    from mosaic_meta import *
+except:
+    try:
+        reader = open(os.path.join('tomosaic_misc', 'meta'), 'rb')
+        prefix, file_grid, x_shift, y_shift = pickle.load(reader)
+        reader.close()
+    except:
+        raise IOError('Metadata file not found in current working diretory.')
+
+
+try:
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
     size = comm.Get_size()
     name = MPI.Get_processor_name()
 except:
-    from tomosaic.util.pseudo import pseudo_comm
     comm = pseudo_comm()
     rank = 0
     size = 1
@@ -32,7 +45,7 @@ def main(arg):
     args = parser.parse_args()
     ds = args.ds
     ds = [int(i) for i in ds.split(',')]
-    file_list = glob.glob('*.h5')
+
     t0 = time.time()
     tomosaic.reorganize_dir(file_list, raw_ds=ds)
 

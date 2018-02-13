@@ -29,7 +29,7 @@ def main(arg):
     f_pattern = int(args.pattern)
 
     file_list = tomosaic.get_files(src_folder, prefix, type='h5')
-    file_grid = tomosaic.start_file_grid(file_list, f_pattern)
+    file_grid = tomosaic.start_file_grid(file_list, pattern=f_pattern)
 
     shift_x = float(args.shift_x)
     shift_y = float(args.shift_y)
@@ -43,8 +43,7 @@ def main(arg):
     except:
         shift_grid = tomosaic.start_shift_grid(file_grid, shift_x, shift_y)
 
-    np.savetxt('shifts.txt', shift_grid, fmt=str('%4.2f'))
-
+    tomosaic.grid2file(shift_grid, 'shifts.txt')
 
 if __name__ == "__main__":
     main(sys.argv[1:])
