@@ -102,7 +102,7 @@ def main(arg):
                            slice=in_tile_pos,
                            method=method)
     elif mode == 'discrete':
-        find_center_discrete(source_folder, file_grid, shift_grid, (row_st, row_end), (center_st, center_end),
+        find_center_discrete(src_folder, file_grid, shift_grid, (row_st, row_end), (center_st, center_end),
                              center_step,
                              slice=in_tile_pos, method=method)
     elif mode == 'single':
