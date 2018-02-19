@@ -28,14 +28,12 @@ except:
     size = 1
 
 
-
-
 def main(arg):
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--source', help='location of data files. If mode is merged or single, this should be the path to a file. If mode is discrete, this should be a folder.', default='auto')
-    parser.add_argument('--center_st', help='starting position for center search')
-    parser.add_argument('--center_end', help='ending position for center search')
+    parser.add_argument('--center_st', help='starting position for center search', default='auto')
+    parser.add_argument('--center_end', help='ending position for center search', default='auto')
     parser.add_argument('--center_step', help='step size for center search', default=1)
     parser.add_argument('--row_st', help='starting row in mosaic grid', default=0)
     parser.add_argument('--row_end', help='ending row in mosaic grid', default='auto')

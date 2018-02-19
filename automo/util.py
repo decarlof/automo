@@ -92,7 +92,8 @@ __all__ = ['append',
            'try_folder',
            'h5group_dims',
            'touch',
-           'write_first_frames']
+           'write_first_frames',
+           'find_center_com']
 
 
 def h5group_dims(fname, dataset='exchange/data'):
@@ -1002,3 +1003,17 @@ def write_first_frames(folder='.', data_format='aps_32id'):
         dat = tomopy.normalize(dat, flt, drk)
         f = os.path.splitext(os.path.basename(f))[0]
         dxchange.write_tiff(dat, os.path.join('first_frames', f), dtype='float32', overwrite=True)
+
+
+def find_center_com(sino, return_com_list=False):
+
+    sino = np.squeeze(sino)
+    line_com_ls = []
+    for i, line in enumerate(sino):
+        line_int = np.sum(line)
+        com = np.sum(np.arange(sino.shape[1]) * line) / line_int
+        line_com_ls.append(com)
+    if return_com_list:
+        return (np.mean(line_com_ls), line_com_ls)
+    else:
+        return np.mean(line_com_ls)
