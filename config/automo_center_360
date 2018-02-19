@@ -56,22 +56,25 @@ def main(arg):
     n_slice = int(args.n_slice)
     medfilt_size = int(args.medfilt_size)
     level = float(args.level)
+    array_dims = util.read_data_adaptive(fname, shape_only=True)
+
     try:
         rot_start = int(args.rot_start)
         rot_end = int(args.rot_end)
     except ValueError:
-        print('Getting initial guess using center-of-mass.')
-        sino, _, _ = util.read_data_adaptive(fname, sino=(slice, slice+1), return_theta=False)
-        sino = np.squeeze(sino)
-
+        print('Getting initial guess using phase correlation.')
+        ind_180 = int(array_dims[0] / 2)
+        img1, _, _ = util.read_data_adaptive(fname, proj=(0, 1), return_theta=False)
+        img2, _, _ = util.read_data_adaptive(fname, proj=(ind_180, ind_180+1), return_theta=False)
+        center_init = tomopy.find_center_pc(img1, img2)
+        rot_start = center_init - 5
+        rot_end = center_init + 5
     rot_step = int(args.rot_step)
-
-    array_dims = util.read_data_adaptive(fname, shape_only=True)
 
 
     if slice == -1:
         sino_start = 200
-        sino_end = array_dims[1]-200
+        sino_end = array_dims[1] - 200
         sino_step = int((sino_end - sino_start)) / n_slice + 1
     else:
         sino_start = slice

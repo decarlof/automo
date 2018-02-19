@@ -64,6 +64,7 @@ import scipy.ndimage as ndimage
 from scipy.ndimage import fourier_shift
 from scipy.ndimage.filters import gaussian_filter
 from scipy.signal import convolve2d
+from tomopy import find_center_pc
 import dxchange
 import operator
 import h5py
