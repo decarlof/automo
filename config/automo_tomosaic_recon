@@ -64,11 +64,13 @@ def main(arg):
         shift_grid = tomosaic.absolute_shift_grid(shift_grid, file_grid)
     except:
         shift_grid = tomosaic.start_shift_grid(file_grid, x_shift, y_shift)
+    print(os.getcwd())
 
     ds = int(args.ds)
     center_vec = tomosaic.read_center_pos('center_pos.txt')
     shift_grid = shift_grid / float(ds)
     center_vec = center_vec / float(ds)
+    print(os.getcwd())
 
     slice_st = int(args.slice_st)
     slice_step = int(args.slice_step)
@@ -79,6 +81,7 @@ def main(arg):
         source_folder = args.source if args.source != 'auto' else 'data_raw_{}x'.format(ds, ds)
     elif mode == 'single':
         sino_name = args.source
+    print(os.getcwd())
 
     slice_end = args.slice_end
     if slice_end == 'auto':
@@ -90,6 +93,8 @@ def main(arg):
             slice_end = shift_grid[-1, 0, 0] + shape[1]
     else:
         slice_end = int(slice_end)
+    print(os.getcwd())
+
     dest_folder = args.dest_folder if args.dest_folder != 'auto' else 'recon_flatcorr_{}x'.format(ds)
     chunk_size = args.chunk_size
     center_single = None if args.center_single == 'none' else int(args.center_single)
