@@ -60,6 +60,7 @@ def main(arg):
 
     shift_grid = tomosaic.file2grid(shift_file)
     shift_grid = tomosaic.absolute_shift_grid(shift_grid, file_grid)
+    print(shift_grid)
     
     t0 = time.time()
     if method == 'pc':
