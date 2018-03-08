@@ -54,12 +54,7 @@ def main(arg):
         f = os.path.splitext(os.path.basename(f))[0]
         dxchange.write_tiff(dat, os.path.join('first_frames', f), dtype='float32', overwrite=True)
 
-
-
-
     shift_grid = tomosaic.file2grid("shifts.txt")
-
-
 
     buff = np.zeros([1, 1])
     for (y, x), value in np.ndenumerate(file_grid):
