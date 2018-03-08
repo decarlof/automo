@@ -82,9 +82,11 @@ def main(arg):
         shift_file = 'shifts.txt'
     else:
         shift_file = args.shift_file
-    shift_grid = tomosaic.file2grid(shift_file)
 
+    shift_grid = tomosaic.file2grid(shift_file)
+    shift_grid = tomosaic.absolute_shift_grid(shift_grid, file_grid)
     shift_grid = shift_grid / float(ds)
+
     in_tile_pos = args.in_tile_pos
     if in_tile_pos == 'auto':
         shape = tomosaic.read_data_adaptive(os.path.join('data_raw_1x', file_grid[0, 0]), shape_only=True)
