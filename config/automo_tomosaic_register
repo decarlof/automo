@@ -58,8 +58,7 @@ def main(arg):
     if method == 'hybrid':
         center_search_range = (float(args.center_st), float(args.center_end))
 
-    # shift_grid = tomosaic.file2grid(shift_file)
-    shift_grid = tomosaic.start_shift_grid(file_grid, x_shift, y_shift)
+    shift_grid = tomosaic.file2grid(shift_file)
     
     t0 = time.time()
     if method == 'pc':

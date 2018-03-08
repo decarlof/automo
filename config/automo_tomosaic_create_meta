@@ -55,6 +55,8 @@ entry_items = list(entry_ls.items())
 for var, (_, value, _) in entry_items:
     for i, line in enumerate(lines):
         if line.startswith(var + ' ='):
+            if isinstance(value, str):
+                value = '\'' + value + '\''
             lines[i] = '{} = {}\n'.format(var, value)
 f = open('mosaic_meta.py', 'w')
 f.writelines(lines)
