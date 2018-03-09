@@ -352,12 +352,12 @@ def read_data_adaptive(fname, proj=None, sino=None, data_format='aps_32id', shap
                 dat, flt, drk = dxchange.read_aps_32id(fname, proj=proj, sino=sino)
                 f = h5py.File(fname)
                 theta = f['exchange/theta'].value
-                # theta = theta / 180 * np.pi
+                theta = theta / 180 * np.pi
         except:
             f = h5py.File(fname)
             d = f['exchange/data']
             theta = f['exchange/theta'].value
-            # theta = theta / 180 * np.pi
+            theta = theta / 180 * np.pi
             if proj is None:
                 dat = d[:, sino[0]:sino[1]:sino_step, :]
                 flt = f['exchange/data_white'][:, sino[0]:sino[1]:sino_step, :]
@@ -401,7 +401,7 @@ def read_data_adaptive(fname, proj=None, sino=None, data_format='aps_32id', shap
             drk[...] = 64
 
     if not (abs(theta[-1] - theta[0] - 360) < 3 or abs(theta[-1] - theta[0] - 180) < 3):
-        theta = np.linspace(0, 180, dat.shape[0])
+        theta = np.linspace(0, np.pi, dat.shape[0])
     if return_theta:
         return dat, flt, drk, theta
     else:
