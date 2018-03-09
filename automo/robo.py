@@ -293,16 +293,22 @@ def robo_process(exp, file, proc_list, **kwargs):
             if arg in ['filename', 'file_name', 'fname']:
                 opts += file
             else:
-                opts += kwargs[proc][arg]
+                try:
+                    opts += kwargs[proc][arg]
+                except:
+                    pass
             opts += ' '
         for arg in opt_args:
             if arg in ['filename', 'file_name', 'fname']:
                 opts += '--' + arg + ' ' + file
             else:
-                opts += '--' + arg + ' ' + kwargs[proc][arg]
+                try:
+                    opts += '--' + arg + ' ' + kwargs[proc][arg]
+                except:
+                    pass
             opts += ' '
 
-        runtime_line = 'python ' + os.path.join(exp.proc_dir, proc) + '.py ' + opts
+        runtime_line = proc + ' ' + opts
         print(runtime_line)
         # log.write(runtime_line + '\n')
         # if 'recon' in proc:
