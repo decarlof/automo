@@ -32,8 +32,8 @@ def main(arg):
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--file_name", help="existing hdf5 file name",default='auto')
-    parser.add_argument("--rot_start", help="rotation axis start location",default=860)
-    parser.add_argument("--rot_end", help="rotation axis end location",default=1060)
+    parser.add_argument("--rot_start", help="rotation axis start location",default='auto')
+    parser.add_argument("--rot_end", help="rotation axis end location",default='auto')
     parser.add_argument("--rot_step", help="rotation axis end location",default=1)
     parser.add_argument("--slice_start", help="a single slice to run center.py. Put -1 for n_slice if supplied",default=600)
     parser.add_argument("--n_slice", help="number of slices. Put -1 for slice_start if supplied",default=-1)

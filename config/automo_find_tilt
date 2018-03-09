@@ -180,5 +180,20 @@ def main(arg):
     f.write(str(rot))
     f.close()
 
+
+def my_register_translation(src_image, target_image, upsample_factor=1,
+                            space="real", down=0):
+    shifts = register_translation(src_image, target_image, upsample_factor=upsample_factor,
+                                  space=space)[0]
+    shape = src_image.shape
+    if not down:
+        if shifts[1] < 0:
+            shifts[1] += float(shape[1])
+    else:
+        if shifts[0] < 0:
+            shifts[0] += float(shape[0])
+    return shifts
+
+
 if __name__ == "__main__":
     main(sys.argv[1:])
