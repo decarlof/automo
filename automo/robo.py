@@ -251,7 +251,7 @@ def robo_rename(exp, file, rename_type):
 
 def get_arguments(exp, proc):
 
-    script_name = os.path.join(exp.proc_dir, proc + '.py')
+    script_name = os.path.join(exp.proc_dir, proc)
     f = open(script_name, 'r')
     lines = f.readlines()
     main_loc = 0
