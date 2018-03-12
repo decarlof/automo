@@ -15,7 +15,7 @@ import numpy as np
 def main(arg):
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--prefix", help="File pattern",default='*.')
+    parser.add_argument("--prefix", help="File pattern",default='*')
     parser.add_argument("--shift_x", help="shift_x",default='auto')
     parser.add_argument("--shift_y", help="shift_y",default='auto')
     parser.add_argument("--pattern", help="File pattern",default=1)
@@ -40,7 +40,16 @@ def main(arg):
     except:
         shift_grid = tomosaic.start_shift_grid(file_grid, shift_x, shift_y)
 
-    tomosaic.grid2file(shift_grid, 'shifts.txt')
+    pairs_shift = np.zeros([file_grid.size, 6])
+    for (y, x), fname in np.ndenumerate(file_grid):
+        line = y * file_grid.shape[0] + x
+        pairs_shift[line, 0:2] = (y, x)
+        if x < file_grid.shape[1] - 1:
+            pairs_shift[line, 3] = shift_x
+        if y < file_grid.shape[0] - 1:
+            pairs_shift[line, 4] = shift_y
+
+    np.savetxt('shifts.txt', pairs_shift, fmt=str('%4.2f'))
 
 if __name__ == "__main__":
     main(sys.argv[1:])

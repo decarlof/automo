@@ -64,6 +64,7 @@ import scipy.ndimage as ndimage
 from scipy.ndimage import fourier_shift
 from scipy.ndimage.filters import gaussian_filter
 from scipy.signal import convolve2d
+from tomopy import find_center_pc
 import dxchange
 import operator
 import h5py
@@ -92,7 +93,8 @@ __all__ = ['append',
            'try_folder',
            'h5group_dims',
            'touch',
-           'write_first_frames']
+           'write_first_frames',
+           'find_center_com']
 
 
 def h5group_dims(fname, dataset='exchange/data'):
@@ -398,6 +400,8 @@ def read_data_adaptive(fname, proj=None, sino=None, data_format='aps_32id', shap
             drk = np.zeros([1, flt.shape[1], flt.shape[2]]).astype('uint16')
             drk[...] = 64
 
+    if not (abs(theta[-1] - theta[0] - 360) < 3 or abs(theta[-1] - theta[0] - 180) < 3):
+        theta = np.linspace(0, np.pi, dat.shape[0])
     if return_theta:
         return dat, flt, drk, theta
     else:
@@ -1002,3 +1006,17 @@ def write_first_frames(folder='.', data_format='aps_32id'):
         dat = tomopy.normalize(dat, flt, drk)
         f = os.path.splitext(os.path.basename(f))[0]
         dxchange.write_tiff(dat, os.path.join('first_frames', f), dtype='float32', overwrite=True)
+
+
+def find_center_com(sino, return_com_list=False):
+
+    sino = np.squeeze(sino)
+    line_com_ls = []
+    for i, line in enumerate(sino):
+        line_int = np.sum(line)
+        com = np.sum(np.arange(sino.shape[1]) * line) / line_int
+        line_com_ls.append(com)
+    if return_com_list:
+        return (np.mean(line_com_ls), line_com_ls)
+    else:
+        return np.mean(line_com_ls)

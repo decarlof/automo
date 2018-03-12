@@ -28,14 +28,12 @@ except:
     size = 1
 
 
-
-
 def main(arg):
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--source', help='location of data files. If mode is merged or single, this should be the path to a file. If mode is discrete, this should be a folder.', default='auto')
-    parser.add_argument('--center_st', help='starting position for center search')
-    parser.add_argument('--center_end', help='ending position for center search')
+    parser.add_argument('--center_st', help='starting position for center search', default='auto')
+    parser.add_argument('--center_end', help='ending position for center search', default='auto')
     parser.add_argument('--center_step', help='step size for center search', default=1)
     parser.add_argument('--row_st', help='starting row in mosaic grid', default=0)
     parser.add_argument('--row_end', help='ending row in mosaic grid', default='auto')
@@ -49,13 +47,25 @@ def main(arg):
 
     ds = int(args.ds)
     mode = args.mode
-    center_st = int(args.center_st)
-    center_end = int(args.center_end)
-    center_step = int(args.center_step)
     row_st = int(args.row_st)
     method = args.method
     fname = 'fulldata_flatcorr_{}x/fulldata_flatcorr_{}x.h5'.format(ds, ds)
     src_folder = 'data_raw_{}x'.format(ds)
+    try:
+        center_st = int(args.center_st)
+        center_end = int(args.center_end)
+    except ValueError:
+        if mode != 'merged':
+            raise ValueError('Mode must be \'merged\' in order to automatically determine search range.')
+        else:
+            print('Getting initial guess using phase correlation.')
+            array_dims = tomosaic.read_data_adaptive(fname, shape_only=True)
+            img1, _, _ = tomosaic.read_data_adaptive(fname, proj=(0, 1), return_theta=False)
+            img2, _, _ = tomosaic.read_data_adaptive(fname, proj=(array_dims[0] - 1, array_dims[0]), return_theta=False)
+            center_init = tomopy.find_center_pc(img1, img2)
+            center_st = center_init - 10
+            center_end = center_init + 10
+    center_step = int(args.center_step)
 
 
     f_pattern = 1
@@ -72,9 +82,11 @@ def main(arg):
         shift_file = 'shifts.txt'
     else:
         shift_file = args.shift_file
-    shift_grid = tomosaic.file2grid(shift_file)
 
+    shift_grid = tomosaic.file2grid(shift_file)
+    shift_grid = tomosaic.absolute_shift_grid(shift_grid, file_grid)
     shift_grid = shift_grid / float(ds)
+
     in_tile_pos = args.in_tile_pos
     if in_tile_pos == 'auto':
         shape = tomosaic.read_data_adaptive(os.path.join('data_raw_1x', file_grid[0, 0]), shape_only=True)

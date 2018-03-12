@@ -56,6 +56,7 @@ def main(arg):
     file_grid = tomosaic.start_file_grid(file_list, pattern=f_pattern)
 
     shift_grid = tomosaic.file2grid("shifts.txt")
+    shift_grid = tomosaic.absolute_shift_grid(shift_grid, file_grid)
     shift_grid = shift_grid / float(ds)
 
     ##

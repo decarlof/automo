@@ -143,9 +143,9 @@ def process_folder(folder, ini_name='automo.ini', check_usage=True, **kwargs):
     # option_dict = classify_kwargs(exp, **kwargs)
 
     for kfile in files:
-        if '_180_' in kfile:
+        if '_180_' in kfile or '_180deg_' in kfile:
             robo_type = 'tomo_180'
-        elif '_360_' in kfile:
+        elif '_360_' in kfile or '_360deg_' in kfile:
             robo_type = 'tomo_360'
         elif re.match(tomosaic_naming, kfile):
             robo_type = 'tomosaic'
@@ -251,7 +251,7 @@ def robo_rename(exp, file, rename_type):
 
 def get_arguments(exp, proc):
 
-    script_name = os.path.join(exp.proc_dir, proc + '.py')
+    script_name = os.path.join(exp.proc_dir, proc)
     f = open(script_name, 'r')
     lines = f.readlines()
     main_loc = 0
@@ -293,16 +293,22 @@ def robo_process(exp, file, proc_list, **kwargs):
             if arg in ['filename', 'file_name', 'fname']:
                 opts += file
             else:
-                opts += kwargs[proc][arg]
+                try:
+                    opts += kwargs[proc][arg]
+                except:
+                    pass
             opts += ' '
         for arg in opt_args:
             if arg in ['filename', 'file_name', 'fname']:
                 opts += '--' + arg + ' ' + file
             else:
-                opts += '--' + arg + ' ' + kwargs[proc][arg]
+                try:
+                    opts += '--' + arg + ' ' + kwargs[proc][arg]
+                except:
+                    pass
             opts += ' '
 
-        runtime_line = 'python ' + os.path.join(exp.proc_dir, proc) + '.py ' + opts
+        runtime_line = proc + ' ' + opts
         print(runtime_line)
         # log.write(runtime_line + '\n')
         # if 'recon' in proc:
