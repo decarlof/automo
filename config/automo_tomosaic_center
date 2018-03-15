@@ -62,7 +62,7 @@ def main(arg):
             array_dims = tomosaic.read_data_adaptive(fname, shape_only=True)
             img1, _, _ = tomosaic.read_data_adaptive(fname, proj=(0, 1), return_theta=False)
             img2, _, _ = tomosaic.read_data_adaptive(fname, proj=(array_dims[0] - 1, array_dims[0]), return_theta=False)
-            center_init = tomopy.find_center_pc(img1, img2)
+            center_init = tomopy.find_center_pc(np.squeeze(img1), np.squeeze(img2))
             center_st = center_init - 20
             center_end = center_init + 20
     center_step = int(args.center_step)
