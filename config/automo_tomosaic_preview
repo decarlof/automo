@@ -31,10 +31,12 @@ def main(arg):
     parser = argparse.ArgumentParser()
     parser.add_argument("--src_folder", help="folder where the H5 files are located",default='data_raw_1x')
     parser.add_argument("--frame", help="frame to preview",default=0)
+    parser.add_argument("--pano", help="Preview Panorama",default=0)
     args = parser.parse_args()
     
     src_folder = args.src_folder
     frame = int(args.frame)
+    pano = int(args.pano)
 
     method = 'pyramid'
     margin = 50
@@ -46,27 +48,26 @@ def main(arg):
     prefix = ''
     file_list = tomosaic.get_files(src_folder, prefix, type='h5')
     file_grid = tomosaic.start_file_grid(file_list, pattern=f_pattern)
-
     data_format = 'aps_32id'
-    for f in file_list:
-        dat, flt, drk, _ = read_data_adaptive(os.path.join(src_folder, f), proj=(0, 1), data_format=data_format)
-        dat = tomopy.normalize(dat, flt, drk)
-        f = os.path.splitext(os.path.basename(f))[0]
-        dxchange.write_tiff(dat, os.path.join('first_frames', f), dtype='float32', overwrite=True)
 
-    shift_grid = tomosaic.file2grid("shifts.txt")
+    print (file_grid)
+    print (frame)
+    print (pano)
+    if(frame):
+        for f in file_list:
+            dat, flt, drk, _ = read_data_adaptive(os.path.join(src_folder, f), proj=(0, 1), data_format=data_format)
+            dat = tomopy.normalize(dat, flt, drk)
+            dat = tomopy.minus_log(dat)
+            f = os.path.splitext(os.path.basename(f))[0]
+            dxchange.write_tiff(dat, os.path.join('first_frames', f), dtype='float32', overwrite=True)
 
-    buff = np.zeros([1, 1])
-    for (y, x), value in np.ndenumerate(file_grid):
-        if value != None:
-            fpath = os.path.join(src_folder, value)
-            prj, flt, drk, _ = read_data_adaptive(fpath, proj=(frame, frame + 1))
-            prj = tomopy.normalize(prj, flt, drk)
-            prj = preprocess(np.copy(prj))
-            buff = blend(buff, np.squeeze(prj), shift_grid[y, x, :], method=method)
-            print(y, x)
 
-    dxchange.write_tiff(buff, 'panos/{}_norm'.format(frame), dtype='float32', overwrite=True)
+    if(pano):
+        shift_grid = tomosaic.file2grid("shifts.txt")
+        buff = build_panorama('data_raw_1x',file_grid,shift_grid,frame=pano, data_format=data_format)
+        dxchange.write_tiff(buff, 'panos/{}_norm'.format(pano), dtype='float32', overwrite=True)
+
+
 
 
 if __name__ == "__main__":

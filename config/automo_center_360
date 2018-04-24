@@ -66,7 +66,7 @@ def main(arg):
         ind_180 = int(array_dims[0] / 2)
         img1, _, _ = util.read_data_adaptive(fname, proj=(0, 1), return_theta=False)
         img2, _, _ = util.read_data_adaptive(fname, proj=(ind_180, ind_180+1), return_theta=False)
-        center_init = tomopy.find_center_pc(img1, img2)
+        center_init = tomopy.find_center_pc(np.squeeze(img1), np.squeeze(img2))
         rot_start = center_init - 5
         rot_end = center_init + 5
     rot_step = int(args.rot_step)
