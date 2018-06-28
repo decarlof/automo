@@ -10,23 +10,24 @@ import glob
 import os
 import argparse
 import sys
+sys.path.append(os.getcwd())
 import numpy as np
 import time
 from mosaic_meta import *
-try:
-    from mpi4py import MPI
-except:
-    from tomosaic.util.pseudo import pseudo_comm
 
 try:
+    from mpi4py import MPI
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
     size = comm.Get_size()
     name = MPI.Get_processor_name()
 except:
+    from tomosaic.util.pseudo import pseudo_comm
     comm = pseudo_comm()
     rank = 0
     size = 1
+
+
 
 
 def main(arg):
@@ -48,8 +49,6 @@ def main(arg):
     prefix = ''
     file_list = tomosaic.get_files(src_folder, prefix, type='h5')
     file_grid = tomosaic.start_file_grid(file_list, pattern=f_pattern)
-    
-    
     if args.shift_file == 'auto':
         shift_file = 'shifts.txt'
     else:
@@ -60,7 +59,6 @@ def main(arg):
 
     shift_grid = tomosaic.file2grid(shift_file)
     shift_grid = tomosaic.absolute_shift_grid(shift_grid, file_grid)
-    print(shift_grid)
     
     t0 = time.time()
     if method == 'pc':
@@ -69,10 +67,6 @@ def main(arg):
         refined_shift = tomosaic.refine_shift_grid_hybrid(file_grid, shift_grid, src_folder,
                                                           center_search_range=center_search_range)
     print('Rank {}: total time: {} s.'.format(rank, time.time() - t0))
-
-    print(refined_shift)
-
-# tomosaic.grid2file(shift_grid, 'shifts.txt')
 
 
 if __name__ == "__main__":

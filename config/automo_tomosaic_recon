@@ -13,32 +13,18 @@ import dxchange
 import numpy as np
 try:
     from mpi4py import MPI
-except:
-    from tomosaic.util.pseudo import pseudo_comm
-import time
-import tomopy
-import pickle
-try:
-    sys.path.append(os.getcwd())
-    from mosaic_meta import *
-except:
-    try:
-        reader = open(os.path.join('tomosaic_misc', 'meta'), 'rb')
-        prefix, file_grid, x_shift, y_shift = pickle.load(reader)
-        reader.close()
-    except:
-        raise IOError('Metadata file not found in current working diretory.')
-
-
-try:
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
     size = comm.Get_size()
     name = MPI.Get_processor_name()
 except:
+    from tomosaic.util.pseudo import pseudo_comm
     comm = pseudo_comm()
     rank = 0
     size = 1
+import time
+import tomopy
+
 
 
 def main(arg):
@@ -67,6 +53,7 @@ def main(arg):
 
     ds = int(args.ds)
     center_vec = tomosaic.read_center_pos('center_pos.txt')
+    print center_vec
     shift_grid = shift_grid / float(ds)
     center_vec = center_vec / float(ds)
 
