@@ -66,7 +66,7 @@ def main(arg):
         ind_180 = int(array_dims[0] / 2)
         img1, _, _ = util.read_data_adaptive(fname, proj=(0, 1), return_theta=False)
         img2, _, _ = util.read_data_adaptive(fname, proj=(ind_180, ind_180+1), return_theta=False)
-        center_init = tomopy.find_center_pc(img1, img2)
+        center_init = tomopy.find_center_pc(np.squeeze(img1), np.squeeze(img2))
         rot_start = center_init - 5
         rot_end = center_init + 5
     rot_step = int(args.rot_step)
@@ -103,7 +103,7 @@ def main(arg):
 
     prj, flat, dark, theta = util.read_data_adaptive(fname, sino=(sino_start, sino_end, sino_step), return_theta=True)
 
-    max_size = max([2 * rot_end + 2, (prj.shape[2] - rot_start) * 2 + 2])
+    max_size = int(max([2 * rot_end + 2, (prj.shape[2] - rot_start) * 2 + 2]))
 
 
     # Read theta from the dataset:
@@ -145,7 +145,7 @@ def main(arg):
 
     fov2 = int(prj.shape[2] / 2)
 
-    pabs = tqdm(range(rot_start, rot_end, rot_step))
+    pabs = tqdm(np.arange(rot_start, rot_end, rot_step))
     for center in pabs:
         axis_side = 'left' if center < fov2 else 'right'
         overlap = (prj.shape[2] - center) * 2 if axis_side == 'right' else center * 2
