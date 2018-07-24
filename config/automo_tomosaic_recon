@@ -45,17 +45,28 @@ def main(arg):
     parser.add_argument('--output_filename', help='provide only if mode is single', default='recon.tiff')
     args = parser.parse_args()
 
+    ds = int(args.ds)
+
+    fname = 'fulldata_flatcorr_{}x/fulldata_flatcorr_{}x.h5'.format(ds, ds)
+    src_folder = 'data_raw_{}x'.format(ds)
+    f_pattern = 1
+    prefix = ''
+    file_list = tomosaic.get_files(src_folder, prefix, type='h5')
+    file_grid = tomosaic.start_file_grid(file_list, pattern=f_pattern)
+    print (file_grid)
+
     try:
         shift_grid = tomosaic.util.file2grid('shifts.txt')
         shift_grid = tomosaic.absolute_shift_grid(shift_grid, file_grid)
     except:
         shift_grid = tomosaic.start_shift_grid(file_grid, x_shift, y_shift)
 
-    ds = int(args.ds)
+
     center_vec = tomosaic.read_center_pos('center_pos.txt')
-    print center_vec
+    print (center_vec)
     shift_grid = shift_grid / float(ds)
     center_vec = center_vec / float(ds)
+
 
     slice_st = int(args.slice_st)
     slice_step = int(args.slice_step)
