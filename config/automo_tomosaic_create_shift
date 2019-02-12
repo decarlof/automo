@@ -1,0 +1,58 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+AuTomo with Tomosaic.
+"""
+import sys
+import argparse
+import automo
+import tomosaic
+import numpy as np
+
+
+
+def main(arg):
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--prefix", help="File pattern",default='*')
+    parser.add_argument("--shift_x", help="shift_x",default='auto')
+    parser.add_argument("--shift_y", help="shift_y",default='auto')
+    parser.add_argument("--pattern", help="File pattern",default=1)
+    args = parser.parse_args()
+
+    prefix = str(args.prefix)
+
+    ds = 1
+    src_folder = 'data_raw_{}x'.format(ds)
+    f_pattern = int(args.pattern)
+
+    file_list = tomosaic.get_files(src_folder, prefix, type='h5')
+    file_grid = tomosaic.start_file_grid(file_list, pattern=f_pattern)
+
+    shift_x = float(args.shift_x)
+    shift_y = float(args.shift_y)
+
+    # try read shifts
+    try:
+        shift_grid = tomosaic.util.file2grid("shifts.txt")
+        print ('Shift data have been read from existing shifts.txt.')
+    except:
+        shift_grid = tomosaic.start_shift_grid(file_grid, shift_x, shift_y)
+
+    pairs_shift = np.zeros([file_grid.size, 6])
+    for (y, x), fname in np.ndenumerate(file_grid):
+        line = y * file_grid.shape[1] + x
+        pairs_shift[line, 0:2] = (y, x)
+        if x < file_grid.shape[1] - 1:
+            pairs_shift[line, 3] = shift_x
+        if y < file_grid.shape[0] - 1:
+            pairs_shift[line, 4] = shift_y
+
+    np.savetxt('shifts.txt', pairs_shift, fmt=str('%4.2f'))
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
+
+
+

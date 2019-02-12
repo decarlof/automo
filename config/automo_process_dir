@@ -1,0 +1,44 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+AuTomo example to generage sample previews.
+"""
+
+from __future__ import print_function
+
+import argparse
+import os
+import sys
+from os.path import expanduser
+import dxchange
+import warnings
+import numpy as np
+from glob import glob
+import re, shutil
+from tqdm import tqdm
+import automo.util as util
+
+
+def main(arg):
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("prefix", help="existing recon foldername")
+    parser.add_argument("--shift", help="shift between datasets",default='auto')
+    parser.add_argument("--new_folder",help="target folder",default='auto')
+    args = parser.parse_args()
+
+
+automo.robo.process_folder(os.getcwd(),
+                           preview=preview_dict,
+                           center=center_dict,
+                           recon=recon_dict,
+                           preview_360=preview_dict_360,
+                           center_360=center_dict_360,
+                           recon_360=recon_dict_360,
+                           preview_tomosaic=preview_dict_tomosaic,
+                           search_center=search_center_dict)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
