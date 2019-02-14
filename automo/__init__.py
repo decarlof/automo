@@ -51,6 +51,7 @@ from __future__ import (absolute_import, division, print_function,
 
 from automo.robo import *
 from automo.util import *
+from automo.register_translation import register_translation
 
 try:
     import pkg_resources

@@ -59,16 +59,17 @@ import re
 import string
 import argparse
 import unicodedata
-import ConfigParser
+import six.moves.configparser as ConfigParser
 from os.path import expanduser
 import h5py
 import automo.util as util
+import subprocess
 
 from distutils.dir_util import mkpath
 import logging
 
-logger = logging.getLogger(__name__)
-__author__ = "Francesco De Carlo"
+# logger = logging.getLogger(__name__)
+__author__ = "Francesco De Carlo, Ming Du, Rafael Vescovi"
 __copyright__ = "Copyright (c) 2016, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
 __all__ = ['process_folder']
@@ -83,7 +84,7 @@ class automo_exp:
     macro_list = ''
     proc_folder = ''
     log_file = ''
-    log_name = '    '
+    log_name = ''
 
 class automo_robo:
     type = ''
@@ -91,13 +92,13 @@ class automo_robo:
     rename = ''
     proc_list = ''
 
-def init():
+def init(ini_name='automo.ini'):
     global exp
     exp = automo_exp()
     exp.user_home = expanduser("~")
     exp.proc_dir = os.path.join(exp.user_home, '.automo')
 
-    exp.cf_file = os.path.join(exp.proc_dir, 'automo.ini')
+    exp.cf_file = os.path.join(exp.proc_dir, ini_name)
     exp.cf = ConfigParser.ConfigParser()
     exp.cf.read(exp.cf_file)
 
@@ -113,7 +114,7 @@ def init():
     return exp
 
 
-def process_folder(folder, **kwargs):
+def process_folder(folder, ini_name='automo.ini', check_usage=True, **kwargs):
     """
     Create process list for all files in a folder
 
@@ -127,7 +128,7 @@ def process_folder(folder, **kwargs):
                                    'slice_st':500, 'slice_end':501, 'slice_step':1}, etc.
     """
 
-    exp = init()
+    exp = init(ini_name=ini_name)
     # files are sorted alphabetically
     exp.folder = folder
 
@@ -137,14 +138,31 @@ def process_folder(folder, **kwargs):
 
     os.chdir(exp.folder)
 
+    tomosaic_naming = '.+_[x,y]\d+\..+'
+
     # option_dict = classify_kwargs(exp, **kwargs)
 
     for kfile in files:
-        create_process(exp, kfile, **kwargs)
+        if '_180_' in kfile or '_180deg_' in kfile:
+            robo_type = 'tomo_180'
+        elif '_360_' in kfile or '_360deg_' in kfile:
+            robo_type = 'tomo_360'
+        elif re.match(tomosaic_naming, kfile):
+            robo_type = 'tomosaic'
+        else:
+            robo_type = 'std'
+        if check_usage:
+            ret = str(subprocess.check_output('lsof'))
+            if kfile not in ret:
+                create_process(exp, kfile, robo_type=robo_type, check_usage=check_usage, **kwargs)
+            else:
+                print('{:s} skipped because it is currently in use.'.format(kfile))
+        else:
+            create_process(exp, kfile, robo_type=robo_type, check_usage=check_usage, **kwargs)
 
     return
 
-def create_process(exp, file, **kwargs):
+def create_process(exp, file, robo_type='tomo', **kwargs):
     """
     Create a list of commands to run a set of default functions
     on .h5 files located in folder/user_selected_name/data.h5
@@ -154,7 +172,6 @@ def create_process(exp, file, **kwargs):
     folder : str
         Folder containing multiple h5 files.
     """
-    robo_type = 'tomo'
     robo_att = get_robo_att(exp, robo_type)
     if robo_att:
         exec_process(exp, file, robo_att, **kwargs)
@@ -173,6 +190,7 @@ def exec_process(exp, fname, robo_att, **kwargs):
     return
 
 def get_robo_att(exp, robo_type):
+
     global robo_att
     robo_att = automo_robo()
     if exp.cf.has_option('robos', robo_type):
@@ -184,7 +202,7 @@ def get_robo_att(exp, robo_type):
         else:
             robo_att.move = exp.new_folder
         if exp.cf.has_option('robos_rename', robo_type):
-            robo_att.rename = exp.cf.get('robos_rename', robo_type)
+            robo_att.rename = True if (exp.cf.get('robos_rename', robo_type) == True) else False
         else:
             robo_att.rename = False
     else:
@@ -194,46 +212,109 @@ def get_robo_att(exp, robo_type):
     return robo_att
 
 def get_file_name(file):
-    print file
+
+    print(file)
     basename = os.path.splitext(file)[0]
     return basename
 
 def robo_move(exp, file, move_type):
+
     basename = get_file_name(file)
     if move_type=='new_folder':
-        os.mkdir(basename)
-        shutil.move (file, os.path.join(basename,file))
-    elif move_type=='same_folder':
-        print 'not implemented'
+        basename = get_file_name(file)
+        if ~os.path.exists(basename):
+            os.mkdir(basename)
+        shutil.move(file, os.path.join(basename,file))
+    elif move_type == 'existing_folder':
+        regex = re.compile(r"(.+)_y(\d+)_x(\d+).+")
+        reg_dict = regex.search(file)
+        if reg_dict is not None:
+            basename = reg_dict.group(1)
+        else:
+            basename = get_file_name(file)
+        try:
+            os.mkdir(basename)
+        except:
+            pass
+        shutil.move(file, os.path.join(basename,file))
     else:
-        print 'not implemented'
+        print('not implemented')
     return basename
 
 def robo_rename(exp, file, rename_type):
+
     if rename_type:
-        os.rename(file,exp.def_h5_fname)
+        os.rename(file, exp.def_h5_fname)
         return exp.def_h5_fname
     else:
         return file
 
+def get_arguments(exp, proc):
+
+    script_name = os.path.join(exp.proc_dir, proc)
+    f = open(script_name, 'r')
+    lines = f.readlines()
+    main_loc = 0
+    for i, line in enumerate(lines):
+        if 'def main' in line:
+            main_loc = i
+            break
+    man_args = []
+    opt_args = []
+    for i, line in enumerate(lines[main_loc:]):
+        if 'add_argument(' in line:
+            isopt = False
+            arg_st = line.find('(') + 2
+            if line[arg_st] == '-':
+                isopt = True
+            arg_name = ''
+            if isopt:
+                for j in line[arg_st+2:]:
+                    if j in ['\"', '\'']:
+                        break
+                    arg_name += j
+                opt_args.append(arg_name)
+            else:
+                for j in line[arg_st:]:
+                    if j in ['\"', '\'']:
+                        break
+                    arg_name += j
+                man_args.append(arg_name)
+    return man_args, opt_args
+
+
 def robo_process(exp, file, proc_list, **kwargs):
 
+    log = open('recon.sh', 'w')
     for proc in proc_list:
-        if proc == 'preview':
-            opts = [kwargs['preview']['proj_st'], kwargs['preview']['proj_end'], kwargs['preview']['proj_step'],
-                    kwargs['preview']['slice_st'], kwargs['preview']['slice_end'], kwargs['preview']['slice_step']]
-        elif proc == 'center':
-            opts = [kwargs['center']['rot_start'], kwargs['center']['rot_end'], kwargs['center']['rot_step'],
-                    kwargs['center']['slice'], kwargs['center']['medfilt_size'], kwargs['center']['level']]
-        elif proc == 'recon':
-            opts = [kwargs['recon']['center_folder'], kwargs['recon']['sino_start'], kwargs['recon']['sino_end'],
-                    kwargs['recon']['sino_step'], kwargs['recon']['medfilt_size'], kwargs['recon']['level'],
-                    kwargs['recon']['chunk_size']]
-        opts = ' '.join(map(str, opts))
-        opts = ' ' + opts
-        runtime_line = 'python ' + os.path.join(exp.proc_dir, proc)+ '.py ' + file + opts
-        print runtime_line
+        man_args, opt_args = get_arguments(exp, proc)
+        opts = ''
+        for arg in man_args:
+            if arg in ['filename', 'file_name', 'fname']:
+                opts += file
+            else:
+                try:
+                    opts += kwargs[proc][arg]
+                except:
+                    pass
+            opts += ' '
+        for arg in opt_args:
+            if arg in ['filename', 'file_name', 'fname']:
+                opts += '--' + arg + ' ' + file
+            else:
+                try:
+                    opts += '--' + arg + ' ' + kwargs[proc][arg]
+                except:
+                    pass
+            opts += ' '
+
+        runtime_line = proc + ' ' + opts
+        print(runtime_line)
+        # log.write(runtime_line + '\n')
+        # if 'recon' in proc:
+        #     log.write('python /local/Software/rchard/automo/config/recon.py ' + opts + '\n')
         os.system(runtime_line)
+    log.close()
 
 
 if __name__ == "__main__":
