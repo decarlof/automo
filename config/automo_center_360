@@ -40,6 +40,7 @@ def main(arg):
     parser.add_argument("--n_slice", help="number of slices. Put -1 for slice_start if supplied",default=-1)
     parser.add_argument("--medfilt_size", help="size of median filter", default=1)
     parser.add_argument("--level", help="level of                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            downsampling", default=0)
+    parser.add_argument("--invert", help="Invert rotation axis", default=None)
     parser.add_argument("--debug", help="debug messages",default=0,type=int)
     args = parser.parse_args()
                                                                                                                                                                                                                                                             
@@ -66,6 +67,12 @@ def main(arg):
         ind_180 = int(array_dims[0] / 2)
         img1, _, _ = util.read_data_adaptive(fname, proj=(0, 1), return_theta=False)
         img2, _, _ = util.read_data_adaptive(fname, proj=(ind_180, ind_180+1), return_theta=False)
+        
+        if args.invert:
+            img1_buff = img2
+            img2 = img1
+            img1 = img1_buff
+    
         center_init = tomopy.find_center_pc(np.squeeze(img1), np.squeeze(img2))
         rot_start = center_init - 5
         rot_end = center_init + 5
@@ -103,9 +110,9 @@ def main(arg):
 
     prj, flat, dark, theta = util.read_data_adaptive(fname, sino=(sino_start, sino_end, sino_step), return_theta=True)
 
-    max_size = max([2 * rot_end + 2, (prj.shape[2] - rot_start) * 2 + 2])
+    max_size = int(max([2 * rot_end + 2, (prj.shape[2] - rot_start) * 2 + 2]))
 
-
+        
     # Read theta from the dataset:
     # theta = tomopy.angles(int(prj.shape[0]//2))
 
@@ -145,10 +152,17 @@ def main(arg):
 
     fov2 = int(prj.shape[2] / 2)
 
-    pabs = tqdm(range(rot_start, rot_end, rot_step))
+    pabs = tqdm(np.arange(rot_start, rot_end, rot_step))
     for center in pabs:
         axis_side = 'left' if center < fov2 else 'right'
         overlap = (prj.shape[2] - center) * 2 if axis_side == 'right' else center * 2
+        
+
+        if args.invert:
+            prj = np.rot90(np.squeeze(prj),2)
+            prj = np.expand_dims(prj, axis=1)
+
+        
         prj0 = util.sino_360_to_180(prj, overlap=overlap, rotation=axis_side)
         theta0 = theta[:prj0.shape[0]]
 

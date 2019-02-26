@@ -301,13 +301,15 @@ def main(arg):
         shift_ls = []
         for i in range(folder_grid.shape[0] - 1):
             if slice0 is None:
-                slice0 = dxchange.read_tiff(os.path.join(folder_grid[i, 0],'preview_recon', 'yz_cs.tiff'))
-                slice0_x = slice0.shape[0]
-                slice0 = slice0[(slice0_x-size_x)/2:(slice0_x-size_x)/2+size_x,:]
+                slice0_buff = dxchange.read_tiff(os.path.join(folder_grid[i, 0],'preview_recon', 'yz_cs.tiff'))
+                slice0_x = slice0_buff.shape[1]
+                slice0_side = int(slice0_x/2-size_x/2)
+                slice0 = slice0_buff[:,slice0_side:slice0_side+size_x]
                 slice0 = util.equalize_histogram(slice0, bin_min=slice0.min(), bin_max=slice0.max(), n_bin=10000)
             slice1 = dxchange.read_tiff(os.path.join(folder_grid[i+1, 0], 'preview_recon', 'yz_cs.tiff'))
-            slice1_x = slice1.shape[0]
-            slice1 = slice1[(slice1_x-size_x)/2:(slice1_x-size_x)/2+size_x,:]
+            slice1_x = slice1.shape[1]
+            slice1_side = int(slice1_x/2 -size_x/2)
+            slice1 = slice1[:,slice1_side:slice1_side+size_x]
             slice1 = util.equalize_histogram(slice1, bin_min=slice1.min(), bin_max=slice1.max(), n_bin=10000)
             
 
