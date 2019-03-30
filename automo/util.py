@@ -58,6 +58,7 @@ from distutils.dir_util import mkpath
 import re
 import logging
 import pyfftw
+from scipy.misc import imsave
 from tomopy import downsample
 import tomopy.util.dtype as dtype
 import scipy.ndimage as ndimage
@@ -1020,3 +1021,30 @@ def find_center_com(sino, return_com_list=False):
         return (np.mean(line_com_ls), line_com_ls)
     else:
         return np.mean(line_com_ls)
+
+
+def save_png(data, fname):
+
+    dir_name = os.path.dirname(fname)
+    if len(dir_name) > 0 and (not os.path.exists(dir_name)):
+        os.makedirs(dir_name)
+    data = data.astype('float32')
+    data[np.where(np.logical_not(np.isfinite(data)))] = 0
+    data = (data - data.min()) / (data.max() - data.min()) * 255.
+    data = data.astype('int')
+    if '.png' not in fname:
+        fname = fname + '.png'
+    imsave(fname, data, format='png')
+    return None 
+
+
+def save_png_stack(data, fname, axis=0, digit=5, start=0):
+
+    dir_name = os.path.dirname(fname)
+    if len(dir_name) > 0 and (not os.path.exists(dir_name)):
+        os.makedirs(dir_name)
+    for i in range(start, data.shape[axis]):
+        save_png(np.take(data, i, axis=axis), fname + ('_{:0' + str(digit) + '}').format(i))
+    return None
+
+

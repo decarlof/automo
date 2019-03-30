@@ -18,7 +18,7 @@ import h5py
 from glob import glob
 import tomopy
 
-from automo.util import read_data_adaptive, preprocess
+from automo.util import read_data_adaptive, preprocess, save_png, save_png_stack
 
 
 def main(arg):
@@ -82,7 +82,8 @@ def main(arg):
         print("Proj folder: ", proj_fname)
         
         flat = flat.astype('float16')
-        dxchange.write_tiff(flat.mean(axis=0), fname=(folder + 'preview' + os.sep + 'flat'), overwrite=True)
+        # dxchange.write_tiff(flat.mean(axis=0), fname=(folder + 'preview' + os.sep + 'flat'), overwrite=True)
+        save_png(flat.mean(axis=0), fname=(folder + 'preview' + os.sep + 'flat.png'))
 
         sino, flat, dark, _ = read_data_adaptive(fname, sino=(slice_st, slice_end, slice_step))
         print("Sino Preview: ", sino.shape)
@@ -91,9 +92,9 @@ def main(arg):
         sino = np.swapaxes(sino, 0, 1)
         print("Proj folder: ", proj_fname)
 
-        dxchange.write_tiff_stack(proj, fname=proj_fname, axis=0, digit=5, start=0, overwrite=True)
-        dxchange.write_tiff_stack(proj_norm, fname=proj_norm_fname, axis=0, digit=5, start=0, overwrite=True)
-        dxchange.write_tiff_stack(sino, fname=sino_fname, axis=0, digit=5, start=slice_st, overwrite=True)
+        save_png_stack(proj, fname=proj_fname, axis=0, digit=5, start=0)
+        save_png_stack(proj_norm, fname=proj_norm_fname, axis=0, digit=5, start=0)
+        save_png_stack(sino, fname=sino_fname, axis=0, digit=5, start=0)
         print("#################################")
 
 
