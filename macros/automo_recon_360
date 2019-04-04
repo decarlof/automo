@@ -40,7 +40,7 @@ def main(arg):
     parser.add_argument("--sino_step", help="slice step",default=1)
     parser.add_argument("--medfilt_size", help="size of median filter",default=0,type=int)
     parser.add_argument("--level", help="level of downsampling",default=0,type=int)
-    parser.add_argument("--pad_lenght", help="sinogram padding",default=1000,type=int)
+    parser.add_argument("--pad_length", help="sinogram padding",default=0,type=int)
     parser.add_argument("--chunk_size", help="chunk size",default=50,type=int)
     parser.add_argument("--debug", help="debug messages",default=0,type=int)
     # parser.add_argument("padding", help="sinogram padding")
@@ -64,7 +64,7 @@ def main(arg):
     chunk_size = args.chunk_size
     medfilt_size = args.medfilt_size
     level = args.level
-    pad_length = args.pad_lenght
+    pad_length = args.pad_length
 
     # find center if not given
     if os.path.exists('center_pos.txt'):
@@ -115,6 +115,7 @@ def main(arg):
         pbar.set_description('Chunk range: ({:d}, {:d})'.format(chunk_st, chunk_end))
 
         prj, flat, dark, theta = util.read_data_adaptive(fname, sino=(chunk_st, chunk_end, sino_step), return_theta=True)
+        raw_shape = prj.shape
 
         # theta = tomopy.angles(prj.shape[0])
 
@@ -131,7 +132,7 @@ def main(arg):
         overlap = (prj.shape[2] - center_pos) * 2 if axis_side == 'right' else center_pos * 2
         prj = util.sino_360_to_180(prj, overlap=overlap, rotation=axis_side, blend=True)
         theta = theta[:prj.shape[0]]
-        dxchange.write_tiff(np.squeeze(prj), 'debug_sino', dtype='float32', overwrite=True)
+
         debug_print(debug,'\n** Sinogram converted!')
 
         debug_print(debug,'## Debug: after normalization:')
@@ -167,7 +168,8 @@ def main(arg):
             debug_print(debug,'## Debug: after down sampling:')
             debug_print(debug,'\n** Min and max val in prj before recon: %0.5f, %0.3f'  % (np.min(prj), np.max(prj)))
 
-        recon_center = center_pos if axis_side == 'right' else (prj.shape[2] - center_pos)
+        recon_center = center_pos if axis_side == 'right' else (raw_shape[2] - center_pos)
+        
         raw_shape = prj.shape
         if not pad_length == 0:
             prj = util.pad_sinogram(prj, pad_length)
