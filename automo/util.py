@@ -682,10 +682,8 @@ def sino_360_to_180(data, overlap=0, rotation='right', blend=True):
 
     if blend:
         if rotation == 'left':
-            img1 = data[n:2*n, :, ro:][:, :, ::-1]
-            img2 = data[:n, :, :]
-            img1 = np.fliplr(img1)
-            img2 = np.fliplr(img2)
+            img1 = data[n:2*n, :, ro:][:, :, :]
+            img2 = data[:n, :, ::-1]
             shift = [0, dz - lo]
             for i in range(out.shape[1]):
                 out[:, i, :] = np.fliplr(img_merge_pyramid(img2[:, i, :], img1[:, i, :], shift=shift, depth=2))
