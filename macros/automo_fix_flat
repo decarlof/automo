@@ -1,0 +1,45 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+TomoPy example script to reconstruct tomography data with different center.
+
+"""
+
+from __future__ import print_function
+
+import argparse
+import numpy as np
+import h5py
+import dxchange
+import glob
+import os
+
+def main(arg):
+
+	parser = argparse.ArgumentParser()
+	parser.add_argument("--good_flat", help="existing hdf5 file name",default='auto')
+	parser.add_argument("--bad_flat", help="amount of tilt in degree",default='auto')
+	args = parser.parse_args()
+
+
+
+	file1 = args.good_flat
+	file2 = args.bad_flat
+
+
+	f1 = h5py.File(file1)
+	dset_good = f1['exchange/data_white']
+
+
+	f2 = h5py.File(file2)
+	dset_bad = f2['exchange/data_white']
+        dset_backup = f2.create_dataset("exchange/data_white_backup", data = dset_bad[...])
+
+	dset_bad[...] = dset_good[...]
+
+	f1.close()
+	f2.close()
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
