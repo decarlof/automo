@@ -3,6 +3,10 @@
 
 from setuptools import setup, find_packages
 from glob import glob
+import os
+from os.path import expanduser
+home = expanduser("~")
+
 setup(
     name='automo',
     author='Francesco De Carlo, Rafael Vescovi',
@@ -21,3 +25,12 @@ setup(
         'Programming Language :: Python :: 3.6',
     ],
 )
+
+print('Do you want to add PATH exporting of automo macro folder to your bashrc? (y/n) ')
+write_bashrc = input()
+if write_bashrc in ['Y', 'y']:
+    f = open(os.path.join(home, '.bashrc'), 'a')
+    f.write('export PATH=' + os.path.join(os.path.dirname(os.path.abspath(__file__)), 'macros') + ':$PATH\n')
+    f.close()
+
+os.system('export PATH=' + os.path.join(os.path.dirname(os.path.abspath(__file__)), 'macros') + ':$PATH')
