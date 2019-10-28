@@ -26,11 +26,16 @@ setup(
     ],
 )
 
-print('Do you want to add PATH exporting of automo macro folder to your bashrc? (y/n) ')
-write_bashrc = input()
-if write_bashrc in ['Y', 'y']:
-    f = open(os.path.join(home, '.bashrc'), 'a')
-    f.write('export PATH=' + os.path.join(os.path.dirname(os.path.abspath(__file__)), 'macros') + ':$PATH\n')
-    f.close()
+try:
+    print('Do you want to add PATH exporting of automo macro folder to your bashrc? (y/n) ')
+    write_bashrc = input()
+    if write_bashrc in ['Y', 'y']:
+        f = open(os.path.join(home, '.bashrc'), 'a')
+        f.write('export PATH=' + os.path.join(os.path.dirname(os.path.abspath(__file__)), 'macros') + ':$PATH\n')
+        f.close()
+except:
+    print('I can\'t write into .bashrc when installing with pip. Please append the following line to your .bashrc:')
+    print('export PATH=' + os.path.join(os.path.dirname(os.path.abspath(__file__)), 'macros') + ':$PATH\n')
+    
 
 os.system('export PATH=' + os.path.join(os.path.dirname(os.path.abspath(__file__)), 'macros') + ':$PATH')

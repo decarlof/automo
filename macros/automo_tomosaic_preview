@@ -31,7 +31,7 @@ def main(arg):
     parser = argparse.ArgumentParser()
     parser.add_argument("--src_folder", help="folder where the H5 files are located",default='data_raw_1x')
     parser.add_argument("--frame", help="frame to preview",default=None)   
-    parser.add_argument("--pano", help="Preview Panorama",default=None)
+    parser.add_argument("--pano", help="Preview Panorama; if set to auto, will generate 0 and 180 panoramas.",default=None)
     args = parser.parse_args()
     
     src_folder = args.src_folder
@@ -59,15 +59,20 @@ def main(arg):
 
 
     if(args.pano!=None):
-        pano = int(args.pano)
-        shift_grid = tomosaic.file2grid("shifts.txt")
-        shift_grid = tomosaic.absolute_shift_grid(shift_grid, file_grid)
-        buff = build_panorama('data_raw_1x',file_grid,shift_grid.astype(int),frame=pano,data_format=data_format,
-                              method=method, 
-                              method2='overlay', 
-                              blend_options=pyramid_options, 
-                              blend_options2={})
-        dxchange.write_tiff(buff, 'preview_panos/{}_norm'.format(pano), dtype='float32', overwrite=True)
+        file_shape = read_data_adaptive(os.path.join(src_folder, file_list[0]), shape_only=True)
+        if pano == 'auto':
+            pano_ls = [0, file_shape[0] - 1]
+        else:
+            pano_ls = [int(args.pano)]
+        for pano in pano_ls:
+            shift_grid = tomosaic.file2grid("shifts.txt")
+            shift_grid = tomosaic.absolute_shift_grid(shift_grid, file_grid)
+            buff = build_panorama('data_raw_1x',file_grid,shift_grid.astype(int),frame=pano,data_format=data_format,
+                                method=method, 
+                                method2='overlay', 
+                                blend_options=pyramid_options, 
+                                blend_options2={})
+            dxchange.write_tiff(buff, 'preview_panos/{}_norm'.format(pano), dtype='float32', overwrite=True)
 
 
 
