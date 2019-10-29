@@ -13,7 +13,10 @@ data analysis tasks.
 Features
 --------
 
-* Automation for tomography processing.
+* Automatically organizes the directory, creates an individual folder for HDF5 files associated with each sample
+* Comes with preset scripts for tomography processing
+* Automatically processes single field-of-view and 360-degree samples
+* Generates bash commands that calls scripts for mosaic tomography processing (powered by [Tomosaic](https://github.com/mdw771/tomosaic2)).
 
 
 Contribute
