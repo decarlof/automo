@@ -24,98 +24,92 @@ except:
     size = 1
 import time
 import tomopy
+sys.path.append(os.getcwd())
+from mosaic_meta import *
 
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--slice_st', help='starting index of sample slice', default=0)
+parser.add_argument('--slice_end', help='ending index of sample slice', default='auto')
+parser.add_argument('--slice_step', help='step size of reconstruction', default=1)
+parser.add_argument('--mode', help='reconstruction mode. Available options: merged, discrete, single',
+                    default='merged')
+parser.add_argument('--source', help='location of data files. If mode is merged or single, this should be the '
+                                     'path to a file. If mode is discrete, this should be a folder.', default='auto')
+parser.add_argument('--dest_folder', help='destination folder location', default='auto')
+parser.add_argument('--ds', help='downsample level', default=1)
+parser.add_argument('--chunk_size', help='chunk size for each thread', default=5)
+parser.add_argument('--center_single', help='provide only if mode is single', default='none')
+parser.add_argument('--preprocess_single', help='provide only if mode is single', default=0)
+parser.add_argument('--output_filename', help='provide only if mode is single', default='recon.tiff')
+args = parser.parse_args()
 
-def main(arg):
-    
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--slice_st', help='starting index of sample slice', default=0)
-    parser.add_argument('--slice_end', help='ending index of sample slice', default='auto')
-    parser.add_argument('--slice_step', help='step size of reconstruction', default=1)
-    parser.add_argument('--mode', help='reconstruction mode. Available options: merged, discrete, single',
-                        default='merged')
-    parser.add_argument('--source', help='location of data files. If mode is merged or single, this should be the '
-                                         'path to a file. If mode is discrete, this should be a folder.', default='auto')
-    parser.add_argument('--dest_folder', help='destination folder location', default='auto')
-    parser.add_argument('--ds', help='downsample level', default=1)
-    parser.add_argument('--chunk_size', help='chunk size for each thread', default=5)
-    parser.add_argument('--center_single', help='provide only if mode is single', default='none')
-    parser.add_argument('--preprocess_single', help='provide only if mode is single', default=0)
-    parser.add_argument('--output_filename', help='provide only if mode is single', default='recon.tiff')
-    args = parser.parse_args()
+ds = int(args.ds)
 
-    ds = int(args.ds)
+fname = 'fulldata_flatcorr_{}x/fulldata_flatcorr_{}x.h5'.format(ds, ds)
+src_folder = 'data_raw_{}x'.format(ds)
+f_pattern = 1
+prefix = ''
 
-    fname = 'fulldata_flatcorr_{}x/fulldata_flatcorr_{}x.h5'.format(ds, ds)
-    src_folder = 'data_raw_{}x'.format(ds)
-    f_pattern = 1
-    prefix = ''
-    file_list = tomosaic.get_files(src_folder, prefix, type='h5')
-    file_grid = tomosaic.start_file_grid(file_list, pattern=f_pattern)
-    print (file_grid)
-
-    try:
-        shift_grid = tomosaic.util.file2grid('shifts.txt')
-        shift_grid = tomosaic.absolute_shift_grid(shift_grid, file_grid)
-    except:
-        shift_grid = tomosaic.start_shift_grid(file_grid, x_shift, y_shift)
+try:
+    shift_grid = tomosaic.util.file2grid("shifts.txt")
+    shift_grid = tomosaic.absolute_shift_grid(shift_grid, file_grid)
+except:
+    print('Refined shift is not provided. Using pre-set shift values. ')
+    shift_grid = tomosaic.start_shift_grid(file_grid, x_shift, y_shift)
 
 
-    center_vec = tomosaic.read_center_pos('center_pos.txt')
-    print (center_vec)
-    shift_grid = shift_grid / float(ds)
-    center_vec = center_vec / float(ds)
+center_vec = tomosaic.read_center_pos('center_pos.txt')
+print (center_vec)
+shift_grid = shift_grid / float(ds)
+center_vec = center_vec / float(ds)
 
 
-    slice_st = int(args.slice_st)
-    slice_step = int(args.slice_step)
-    mode = args.mode
+slice_st = int(args.slice_st)
+slice_step = int(args.slice_step)
+mode = args.mode
+if mode == 'merged':
+    fname = args.source if args.source != 'auto' else 'fulldata_flatcorr_{}x/fulldata_flatcorr_{}x.h5'.format(ds, ds)
+elif mode == 'discrete':
+    source_folder = args.source if args.source != 'auto' else 'data_raw_{}x'.format(ds, ds)
+elif mode == 'single':
+    sino_name = args.source
+
+slice_end = args.slice_end
+if slice_end == 'auto':
     if mode == 'merged':
-        fname = args.source if args.source != 'auto' else 'fulldata_flatcorr_{}x/fulldata_flatcorr_{}x.h5'.format(ds, ds)
+        shape = tomosaic.read_data_adaptive(fname, shape_only=True)
+        slice_end = shape[1]
     elif mode == 'discrete':
-        source_folder = args.source if args.source != 'auto' else 'data_raw_{}x'.format(ds, ds)
-    elif mode == 'single':
-        sino_name = args.source
+        shape = tomosaic.read_data_adaptive(os.path.join(source_folder, file_grid[0, 0]), shape_only=True)
+        slice_end = shift_grid[-1, 0, 0] + shape[1]
+else:
+    slice_end = int(slice_end)
 
-    slice_end = args.slice_end
-    if slice_end == 'auto':
-        if mode == 'merged':
-            shape = tomosaic.read_data_adaptive(fname, shape_only=True)
-            slice_end = shape[1]
-        elif mode == 'discrete':
-            shape = tomosaic.read_data_adaptive(os.path.join(source_folder, file_grid[0, 0]), shape_only=True)
-            slice_end = shift_grid[-1, 0, 0] + shape[1]
-    else:
-        slice_end = int(slice_end)
+dest_folder = args.dest_folder if args.dest_folder != 'auto' else 'recon_flatcorr_{}x'.format(ds)
+chunk_size = args.chunk_size
+center_single = None if args.center_single == 'none' else int(args.center_single)
+preprocess_single = int(args.preprocess_single)
+preprocess_single = False if preprocess_single == 0 else True
+dest_fname = args.output_filename
 
-    dest_folder = args.dest_folder if args.dest_folder != 'auto' else 'recon_flatcorr_{}x'.format(ds)
-    chunk_size = args.chunk_size
-    center_single = None if args.center_single == 'none' else int(args.center_single)
-    preprocess_single = int(args.preprocess_single)
-    preprocess_single = False if preprocess_single == 0 else True
-    dest_fname = args.output_filename
+t0 = time.time()
+if mode == 'merged':
+    tomosaic.recon.recon_hdf5(fname, dest_folder, (slice_st, slice_end),
+                              slice_step, shift_grid, center_vec=center_vec, chunk_size=chunk_size,
+                              dtype='float32', save_sino=False, filter_name='parzen')
+elif mode == 'discrete':
+    tomosaic.recon_block(file_grid, shift_grid, source_folder, dest_folder, (slice_st, slice_end), 1,
+                         center_vec, algorithm='gridrec', test_mode=False, ds_level=0, save_sino=True,
+                         blend_method='pyramid', data_format=data_format, filter_name='parzen')
+elif mode == 'single':
+    sino = dxchange.read_tiff(sino_name)
+    sino = sino.reshape([sino.shape[0], 1, sino.shape[1]])
+    if preprocess_single:
+        sino = tomosaic.preprocess(np.copy(sino))
+    theta = tomopy.angles(sino.shape[0])
+    rec = tomopy.recon(sino, theta, center=center_single, algorithm='gridrec', filter_name='parzen')
+    dxchange.write_tiff(rec, dest_fname, dtype='float32')
 
-    t0 = time.time()
-    if mode == 'merged':
-        tomosaic.recon.recon_hdf5(fname, dest_folder, (slice_st, slice_end),
-                                  slice_step, shift_grid, center_vec=center_vec, chunk_size=chunk_size,
-                                  dtype='float32', save_sino=False, filter_name='parzen')
-    elif mode == 'discrete':
-        tomosaic.recon_block(file_grid, shift_grid, source_folder, dest_folder, (slice_st, slice_end), 1,
-                             center_vec, algorithm='gridrec', test_mode=False, ds_level=0, save_sino=True,
-                             blend_method='pyramid', data_format=data_format, filter_name='parzen')
-    elif mode == 'single':
-        sino = dxchange.read_tiff(sino_name)
-        sino = sino.reshape([sino.shape[0], 1, sino.shape[1]])
-        if preprocess_single:
-            sino = tomosaic.preprocess(np.copy(sino))
-        theta = tomopy.angles(sino.shape[0])
-        rec = tomopy.recon(sino, theta, center=center_single, algorithm='gridrec', filter_name='parzen')
-        dxchange.write_tiff(rec, dest_fname, dtype='float32')
+print('Rank {}: total time: {} s.'.format(rank, time.time() - t0))
 
-    print('Rank {}: total time: {} s.'.format(rank, time.time() - t0))
-
-
-if __name__ == '__main__':
-    main(sys.argv[1:])

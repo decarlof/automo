@@ -4,7 +4,6 @@
 """
 AuTomo with Tomosaic.
 """
-
 import tomosaic
 from tomosaic import *
 from tomosaic.misc.misc import read_data_adaptive
@@ -14,6 +13,10 @@ import dxchange
 import tomopy
 import sys
 import argparse
+
+sys.path.append(os.getcwd())
+from mosaic_meta import *
+
 
 def preprocess(dat, blur=None):
 
@@ -26,56 +29,55 @@ def preprocess(dat, blur=None):
 
     return dat
 
-def main(arg):
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--src_folder", help="folder where the H5 files are located",default='data_raw_1x')
-    parser.add_argument("--frame", help="frame to preview",default=None)   
-    parser.add_argument("--pano", help="Preview Panorama; if set to auto, will generate 0 and 180 panoramas.",default=None)
-    args = parser.parse_args()
-    
-    src_folder = args.src_folder
+parser = argparse.ArgumentParser()
+parser.add_argument("--src_folder", help="folder where the H5 files are located",default='data_raw_1x')
+parser.add_argument("--frame", help="frame to preview",default=None)
+parser.add_argument("--pano", help="Preview Panorama; if set to auto, will generate 0 and 180 panoramas.",default=None)
+args = parser.parse_args()
 
-    method = 'pyramid'
-    margin = 50
-    pyramid_options = {'depth': 7,
-                 'blur': 0.4}
+src_folder = args.src_folder
 
-    f_pattern = 1
-    prefix = ''
-    file_list = tomosaic.get_files(src_folder, prefix, type='h5')
-    file_grid = tomosaic.start_file_grid(file_list, pattern=f_pattern)
-    data_format = 'aps_32id'
+method = 'pyramid'
+margin = 50
+pyramid_options = {'depth': 7,
+             'blur': 0.4}
 
-    if(args.frame!=None):
-        frame = int(args.frame)
-        for f in file_list:
-            dat, flt, drk, _ = read_data_adaptive(os.path.join(src_folder, f), proj=(0, 1), data_format=data_format)
-            dat = tomopy.normalize(dat, flt, drk)
-            dat = tomopy.minus_log(dat)
-            f = os.path.splitext(os.path.basename(f))[0]
-            dxchange.write_tiff(flt.mean(0), os.path.join('preview_flats', f), dtype='float32', overwrite=True)
-            dxchange.write_tiff(dat, os.path.join('preview_frames', f), dtype='float32', overwrite=True)
+f_pattern = 1
+prefix = ''
+file_list = tomosaic.get_files(src_folder, prefix, type='h5')
+file_grid = tomosaic.start_file_grid(file_list, pattern=f_pattern)
+data_format = 'aps_32id'
+
+if(args.frame!=None):
+    frame = int(args.frame)
+    for f in file_list:
+        dat, flt, drk, _ = read_data_adaptive(os.path.join(src_folder, f), proj=(0, 1), data_format=data_format)
+        dat = tomopy.normalize(dat, flt, drk)
+        dat = tomopy.minus_log(dat)
+        f = os.path.splitext(os.path.basename(f))[0]
+        dxchange.write_tiff(flt.mean(0), os.path.join('preview_flats', f), dtype='float32', overwrite=True)
+        dxchange.write_tiff(dat, os.path.join('preview_frames', f), dtype='float32', overwrite=True)
 
 
-    if(args.pano!=None):
-        file_shape = read_data_adaptive(os.path.join(src_folder, file_list[0]), shape_only=True)
-        if pano == 'auto':
-            pano_ls = [0, file_shape[0] - 1]
-        else:
-            pano_ls = [int(args.pano)]
-        for pano in pano_ls:
-            shift_grid = tomosaic.file2grid("shifts.txt")
+if(args.pano!=None):
+    pano = args.pano
+    file_shape = read_data_adaptive(os.path.join(src_folder, file_list[0]), shape_only=True)
+    if pano == 'auto':
+        pano_ls = [0, file_shape[0] - 1]
+    else:
+        pano_ls = [int(args.pano)]
+    for pano in pano_ls:
+        try:
+            shift_grid = tomosaic.util.file2grid("shifts.txt")
             shift_grid = tomosaic.absolute_shift_grid(shift_grid, file_grid)
-            buff = build_panorama('data_raw_1x',file_grid,shift_grid.astype(int),frame=pano,data_format=data_format,
-                                method=method, 
-                                method2='overlay', 
-                                blend_options=pyramid_options, 
-                                blend_options2={})
-            dxchange.write_tiff(buff, 'preview_panos/{}_norm'.format(pano), dtype='float32', overwrite=True)
+        except:
+            print('Refined shift is not provided. Using pre-set shift values. ')
+            shift_grid = tomosaic.start_shift_grid(file_grid, x_shift, y_shift)
+        buff = build_panorama('data_raw_1x',file_grid,shift_grid.astype(int),frame=pano, data_format=data_format,
+                            method=method,
+                            method2='overlay',
+                            blend_options=pyramid_options,
+                            blend_options2={})
+        dxchange.write_tiff(buff, 'preview_panos/{}_norm'.format(pano), dtype='float32', overwrite=True)
 
-
-
-
-if __name__ == "__main__":
-    main(sys.argv[1:])

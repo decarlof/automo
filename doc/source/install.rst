@@ -7,7 +7,29 @@ This section covers the basics of how to download and install `auTomo <https://g
 .. contents:: Contents:
    :local:
 
+   
+Installing from source (recommended)
+======================
 
+Installing from source can be done easily by running the setup script:
+::
+    git clone https://github.com/decarlof/automo.git automo
+    cd automo
+    python setup.py install
+
+The script will ask whether you want to add a line in your ``.bashrc`` file so that bash will automatically 
+add the ``macros`` folder in the Automo source directory to your ``$PATH`` variable. This is necessary if you
+would like to use the feature of calling Automo script directly from bash command line. If you prefer to
+have the scripts and the configuration file (``automo.ini``) somewhere else, you need to manually copy them
+there. For example, to move the files to ``~/.automo``, follow the above commands by
+::
+    mkdir ~/.automo
+    cp macros ~/.automo
+    export PATH=~/.automo:$PATH
+
+Subsequently, add the last line ``export PATH=~/.automo:$PATH`` to your ``~/.bashrc``.
+    
+    
 Installing from conda
 =====================
 
@@ -18,27 +40,3 @@ auTomo has an conda install script that does all the job. Please follow the scri
     conda build .
     conda install --use-local automo
 
-Installing from source
-======================
-
-To install from source some other steps are needed. Please follow the script:
-
-    git clone https://github.com/decarlof/automo.git automo
-    cd automo
-    python setup.py install
-    mkdir ~/.automo
-    cp config/* ~/.automo
-
-Creating new auTomo robos
-=========================
-
-After installing (either via conda or source) you will find the automo robos at `~/.automo/automo.ini`
-
-The initial configuration will be exactly as `automo.ini<../../config/automo.ini>`
-
-You can create new robo process by adding at the `~/.automo/` folder the corresponded script. This script needs
-to be self-contained and run into a single file (this is the information auTomo will provide to the robo).
-This process also needs to be added to the configuration file and default auto test python scripts
-to run on the data matching the names defined in the `python_proc` label.
-Some examples are: :download:`center.py<../../config/center.py>`, :download:`preview.py<../../config/preview.py>`,
-and :download:`recon.py<../../config/recon.py>`.

@@ -93,12 +93,15 @@ class automo_robo:
     rename = ''
     proc_list = ''
 
-def init(ini_name='automo.ini'):
+def init(ini_path=None, ini_name='automo.ini'):
     global exp
     exp = automo_exp()
     exp.user_home = expanduser("~")
     exp.automo_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    exp.proc_dir = os.path.join(exp.automo_path, 'macros')
+    if ini_path is None:
+        exp.proc_dir = os.path.join(exp.automo_path, 'macros')
+    else:
+        exp.proc_dir = ini_path
 
     exp.cf_file = os.path.join(exp.proc_dir, ini_name)
     exp.cf = ConfigParser.ConfigParser()
@@ -116,7 +119,7 @@ def init(ini_name='automo.ini'):
     return exp
 
 
-def process_folder(folder, ini_name='automo.ini', check_usage=True, **kwargs):
+def process_folder(folder, ini_path=None, ini_name='automo.ini', check_usage=True, **kwargs):
     """
     Create process list for all files in a folder
 
@@ -130,7 +133,7 @@ def process_folder(folder, ini_name='automo.ini', check_usage=True, **kwargs):
                                    'slice_st':500, 'slice_end':501, 'slice_step':1}, etc.
     """
 
-    exp = init(ini_name=ini_name)
+    exp = init(ini_path=ini_path, ini_name=ini_name)
     # files are sorted alphabetically
     exp.folder = folder
 
@@ -195,6 +198,7 @@ def exec_process(exp, fname, robo_type, robo_att, **kwargs):
     os.chdir(exp.folder)
     return
 
+
 def get_robo_att(exp, robo_type):
 
     global robo_att
@@ -217,11 +221,13 @@ def get_robo_att(exp, robo_type):
         robo_att = None
     return robo_att
 
+
 def get_file_name(file):
 
     print(file)
     basename = os.path.splitext(file)[0]
     return basename
+
 
 def robo_move(exp, file, move_type):
 
@@ -248,6 +254,7 @@ def robo_move(exp, file, move_type):
     else:
         print('not implemented')
     return basename
+
 
 def robo_rename(exp, file, rename_type):
 
@@ -291,10 +298,10 @@ def get_arguments(exp, proc):
     return man_args, opt_args
 
 
-def robo_process(exp, file, proc_list, robo_type, **kwargs):
+def robo_process(exp, file, proc_list, robo_type, execute=True, **kwargs):
 
     log = open('process.sh', 'w')
-    print(proc_list)
+    print('Command list:', proc_list)
     for proc in proc_list:
         if len(proc) > 0:
             man_args, opt_args = get_arguments(exp, proc)
@@ -316,14 +323,13 @@ def robo_process(exp, file, proc_list, robo_type, **kwargs):
                     try:
                         opts += '--' + arg + ' ' + str(kwargs[proc][arg])
                         opts += ' '
-                        print(opts)
                     except:
                         pass
 
             runtime_line = proc + ' ' + opts
             print(runtime_line)
             log.write(runtime_line + '\n')
-            if robo_type != 'tomosaic':
+            if robo_type != 'tomosaic' and execute:
                 os.system(runtime_line)
     log.close()
 
