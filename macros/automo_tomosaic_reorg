@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 
 """
-AuTomo with Tomosaic.
+Move files into a folder called "data_raw_1x". If the --ds flag contains values other than 1, then
+downsample the files at the specified rates, and save the downsized files in "data_raw_?x".
 """
 
 import tomosaic
@@ -23,9 +24,8 @@ except:
     rank = 0
     size = 1
 
-
-parser = argparse.ArgumentParser()
-parser.add_argument("--ds", help="downsample levels, separated by comma",default='1,2,4')
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--ds", help="downsample levels, separated by comma. Use 1 for original size.",default='1,2,4')
 args = parser.parse_args()
 ds = args.ds
 ds = [int(i) for i in ds.split(',')]

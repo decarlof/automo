@@ -56,7 +56,7 @@ shift_grid = tomosaic.absolute_shift_grid(shift_grid, file_grid)
 t0 = time.time()
 if method == 'pc':
     refined_shift = tomosaic.refine_shift_grid(file_grid, shift_grid, src_folder=src_folder)
-elif method == 'reslice':
+elif method == 'hybrid':
     refined_shift = tomosaic.refine_shift_grid_hybrid(file_grid, shift_grid, src_folder,
                                                       center_search_range=center_search_range)
 print('Rank {}: total time: {} s.'.format(rank, time.time() - t0))

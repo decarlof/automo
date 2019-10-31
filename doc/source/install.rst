@@ -4,9 +4,6 @@ Install directions
 
 This section covers the basics of how to download and install `auTomo <https://github.com/decarlof/automo>`_.
 
-.. contents:: Contents:
-   :local:
-
    
 Installing from source (recommended)
 ====================================

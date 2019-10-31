@@ -32,8 +32,7 @@ Content
 .. toctree::
    :maxdepth: 1
 
-   source/about
    source/install
-   source/api
+   source/overview
    source/demo
    source/credits
