@@ -1,0 +1,42 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+Move files into a folder called "data_raw_1x". If the --ds flag contains values other than 1, then
+downsample the files at the specified rates, and save the downsized files in "data_raw_?x".
+"""
+
+import tomosaic
+import time
+import os
+import sys
+import argparse
+import pickle
+try:
+    from mpi4py import MPI
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
+    size = comm.Get_size()
+    name = MPI.Get_processor_name()
+except:
+    from tomosaic.util.pseudo import pseudo_comm
+    comm = pseudo_comm()
+    rank = 0
+    size = 1
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--ds", help="downsample levels, separated by comma. Use 1 for original size.",default='1,2,4')
+args = parser.parse_args()
+ds = args.ds
+ds = [int(i) for i in ds.split(',')]
+
+f_pattern = 1
+prefix = ''
+src_folder = '.'
+file_list = tomosaic.get_files(src_folder, prefix, type='h5')
+
+t0 = time.time()
+tomosaic.reorganize_dir(file_list, raw_ds=ds)
+
+print('Total time: {}s'.format(time.time() - t0))
+

@@ -1,0 +1,44 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+AuTomo with Tomosaic.
+"""
+
+from six.moves import input
+import automo
+import os
+import sys
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--prefix", help="prefix of HDF5 files. Leave it empty if you are at the sample's own folder.",default='')
+parser.add_argument("--data_format", help="Data format",default='aps_32id')
+parser.add_argument("--x_shift", help="Sample position offset in x",default=None)
+parser.add_argument("--y_shift", help="Sample position offset in y",default=None)
+args = parser.parse_args()
+
+entry_ls = {'prefix': ['Prefix of data files before y and x indices.', args.prefix, 'str'],
+            'data_format': ['Data format, e.g. aps_32id, aps_13bm.', args.data_format, 'str'],
+            'x_shift': ['Motor translation readout along x.', float(args.x_shift), 'float'],
+            'y_shift': ['Motor translation readout along y.', float(args.y_shift), 'float']}
+
+sample_loc = automo.__file__
+sample_loc = os.path.dirname(os.path.dirname(sample_loc))
+sample_loc = os.path.join(sample_loc, 'macros', 'tomosaic_metafile_sample.py')
+
+o = open(sample_loc)
+lines = o.readlines()
+
+entry_items = list(entry_ls.items())
+for var, (_, value, _) in entry_items:
+    for i, line in enumerate(lines):
+        if line.startswith(var + ' ='):
+            if isinstance(value, str):
+                value = '\'' + value + '\''
+            lines[i] = '{} = {}\n'.format(var, value)
+f = open('mosaic_meta.py', 'w')
+f.writelines(lines)
+f.close()
+o.close()
+

@@ -1,0 +1,59 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+AuTomo example to generage sample previews.
+"""
+
+from __future__ import print_function
+
+import argparse
+import os
+import sys
+from os.path import expanduser
+import dxchange
+import warnings
+import numpy as np
+from glob import glob
+import re, shutil
+from tqdm import tqdm
+import automo
+import automo.util as util
+import automo.robo
+
+    
+def main(arg):
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--prefix", help="existing recon foldername", default='')
+    parser.add_argument("--new_folder",help="target folder", default='auto')
+    parser.add_argument("--params_file",help="parameter filename", default='auto')
+    parser.add_argument("--ini_file",help="ini filename", default='automo.ini')
+    parser.add_argument("--check_usage",help="check the usage of HDF5 files, skipping if in use (e.g. being transferred)", default='True')
+    args = parser.parse_args()
+    
+    params_file = args.params_file
+    if params_file == 'auto':
+        params_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'automo_params.csv')
+    kwargs = util.get_parameters(params_file)
+
+    ini_file = args.ini_file
+    if ini_file == 'auto':
+        ini_path = None
+        ini_name = 'automo.ini'
+    else:
+        ini_path = os.path.dirname(ini_file)
+        ini_name = os.path.basename(ini_file)
+
+    check_usage = True if args.check_usage in ['True', 'true'] else False
+
+
+    automo.robo.process_folder(os.getcwd(),
+                               ini_path=ini_path,
+                               ini_name=ini_name,
+			                   check_usage=check_usage,
+                               **kwargs)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

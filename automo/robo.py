@@ -76,12 +76,12 @@ __all__ = ['process_folder']
 
 class automo_exp:
     user_home = ''
+    automo_path = ''
     proc_dir = ''
     cf_file = ''
     cf = ''
     def_h5_fname = ''
     proc_list = ''
-    macro_list = ''
     proc_folder = ''
     log_file = ''
     log_name = ''
@@ -92,11 +92,15 @@ class automo_robo:
     rename = ''
     proc_list = ''
 
-def init(ini_name='automo.ini'):
+def init(ini_path=None, ini_name='automo.ini'):
     global exp
     exp = automo_exp()
     exp.user_home = expanduser("~")
-    exp.proc_dir = os.path.join(exp.user_home, '.automo')
+    exp.automo_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if ini_path is None:
+        exp.proc_dir = os.path.join(exp.automo_path, 'macros')
+    else:
+        exp.proc_dir = ini_path
 
     exp.cf_file = os.path.join(exp.proc_dir, ini_name)
     exp.cf = ConfigParser.ConfigParser()
@@ -110,11 +114,10 @@ def init(ini_name='automo.ini'):
         exp.proc_dir = exp.cf.get('settings', 'python_proc_dir')
 
     exp.proc_list = exp.cf.options('robos')
-    exp.macro_list = [f for f in os.listdir(exp.proc_dir) if re.match(r'.+.py', f)]
     return exp
 
 
-def process_folder(folder, ini_name='automo.ini', check_usage=True, **kwargs):
+def process_folder(folder, ini_path=None, ini_name='automo.ini', check_usage=True, **kwargs):
     """
     Create process list for all files in a folder
 
@@ -128,7 +131,7 @@ def process_folder(folder, ini_name='automo.ini', check_usage=True, **kwargs):
                                    'slice_st':500, 'slice_end':501, 'slice_step':1}, etc.
     """
 
-    exp = init(ini_name=ini_name)
+    exp = init(ini_path=ini_path, ini_name=ini_name)
     # files are sorted alphabetically
     exp.folder = folder
 
@@ -143,15 +146,19 @@ def process_folder(folder, ini_name='automo.ini', check_usage=True, **kwargs):
     # option_dict = classify_kwargs(exp, **kwargs)
 
     for kfile in files:
-        if '_180_' in kfile or '_180deg_' in kfile:
+        print('=================================')
+        print(kfile)
+        if re.match(tomosaic_naming, kfile):
+            robo_type = 'tomosaic'
+        elif '_180_' in kfile or '_180deg_' in kfile:
             robo_type = 'tomo_180'
         elif '_360_' in kfile or '_360deg_' in kfile:
             robo_type = 'tomo_360'
-        elif re.match(tomosaic_naming, kfile):
-            robo_type = 'tomosaic'
         else:
             robo_type = 'std'
+        print('Data pattern recognized as {}.'.format(robo_type))
         if check_usage:
+	    # Do not touch files being written
             ret = str(subprocess.check_output('lsof'))
             if kfile not in ret:
                 create_process(exp, kfile, robo_type=robo_type, check_usage=check_usage, **kwargs)
@@ -159,8 +166,8 @@ def process_folder(folder, ini_name='automo.ini', check_usage=True, **kwargs):
                 print('{:s} skipped because it is currently in use.'.format(kfile))
         else:
             create_process(exp, kfile, robo_type=robo_type, check_usage=check_usage, **kwargs)
-
     return
+
 
 def create_process(exp, file, robo_type='tomo', **kwargs):
     """
@@ -174,20 +181,21 @@ def create_process(exp, file, robo_type='tomo', **kwargs):
     """
     robo_att = get_robo_att(exp, robo_type)
     if robo_att:
-        exec_process(exp, file, robo_att, **kwargs)
+        exec_process(exp, file, robo_type, robo_att, **kwargs)
     return
 
 
-def exec_process(exp, fname, robo_att, **kwargs):
+def exec_process(exp, fname, robo_type, robo_att, **kwargs):
     new_folder = robo_move(exp, fname, robo_att.move)
     os.chdir(new_folder)
 
     new_fname = robo_rename(exp, fname, robo_att.rename)
 
-    robo_process(exp, new_fname, robo_att.proc_list, **kwargs)
+    robo_process(exp, new_fname, robo_att.proc_list, robo_type, **kwargs)
 
     os.chdir(exp.folder)
     return
+
 
 def get_robo_att(exp, robo_type):
 
@@ -211,20 +219,23 @@ def get_robo_att(exp, robo_type):
         robo_att = None
     return robo_att
 
+
 def get_file_name(file):
 
     print(file)
     basename = os.path.splitext(file)[0]
     return basename
 
+
 def robo_move(exp, file, move_type):
 
     basename = get_file_name(file)
-    if move_type=='new_folder':
+    if move_type == 'new_folder':
         basename = get_file_name(file)
         if ~os.path.exists(basename):
             os.mkdir(basename)
         shutil.move(file, os.path.join(basename,file))
+        print('Moved {} to folder {}.'.format(file, basename))
     elif move_type == 'existing_folder':
         regex = re.compile(r"(.+)_y(\d+)_x(\d+).+")
         reg_dict = regex.search(file)
@@ -237,9 +248,11 @@ def robo_move(exp, file, move_type):
         except:
             pass
         shutil.move(file, os.path.join(basename,file))
+        print('Moved {} to folder {}.'.format(file, basename))
     else:
         print('not implemented')
     return basename
+
 
 def robo_rename(exp, file, rename_type):
 
@@ -251,7 +264,7 @@ def robo_rename(exp, file, rename_type):
 
 def get_arguments(exp, proc):
 
-    script_name = os.path.join(exp.proc_dir, proc)
+    script_name = os.path.join(exp.automo_path, 'macros', proc)
     f = open(script_name, 'r')
     lines = f.readlines()
     main_loc = 0
@@ -283,37 +296,39 @@ def get_arguments(exp, proc):
     return man_args, opt_args
 
 
-def robo_process(exp, file, proc_list, **kwargs):
+def robo_process(exp, file, proc_list, robo_type, execute=True, **kwargs):
 
-    log = open('recon.sh', 'w')
+    log = open('process.sh', 'w')
+    print('Command list:', proc_list)
     for proc in proc_list:
-        man_args, opt_args = get_arguments(exp, proc)
-        opts = ''
-        for arg in man_args:
-            if arg in ['filename', 'file_name', 'fname']:
-                opts += file
-            else:
-                try:
-                    opts += kwargs[proc][arg]
-                except:
-                    pass
-            opts += ' '
-        for arg in opt_args:
-            if arg in ['filename', 'file_name', 'fname']:
-                opts += '--' + arg + ' ' + file
-            else:
-                try:
-                    opts += '--' + arg + ' ' + kwargs[proc][arg]
-                except:
-                    pass
-            opts += ' '
+        if len(proc) > 0:
+            man_args, opt_args = get_arguments(exp, proc)
+            opts = ''
+            for arg in man_args:
+                if arg in ['filename', 'file_name', 'fname']:
+                    opts += file
+                else:
+                    try:
+                        opts += kwargs[proc][arg]
+                    except:
+                        pass
+                opts += ' '
+            for arg in opt_args:
+                if arg in ['filename', 'file_name', 'fname']:
+                    opts += '--' + arg + ' ' + file
+                    opts += ' '
+                else:
+                    try:
+                        opts += '--' + arg + ' ' + str(kwargs[proc][arg])
+                        opts += ' '
+                    except:
+                        pass
 
-        runtime_line = proc + ' ' + opts
-        print(runtime_line)
-        # log.write(runtime_line + '\n')
-        # if 'recon' in proc:
-        #     log.write('python /local/Software/rchard/automo/config/recon.py ' + opts + '\n')
-        os.system(runtime_line)
+            runtime_line = proc + ' ' + opts
+            print(runtime_line)
+            log.write(runtime_line + '\n')
+            if robo_type != 'tomosaic' and execute:
+                os.system(runtime_line)
     log.close()
 
 

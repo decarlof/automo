@@ -1,0 +1,292 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Overview &mdash; auTomo 0.2 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Demonstration" href="demo.html" />
+    <link rel="prev" title="Install directions" href="install.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> auTomo
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install directions</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#configuration-file">Configuration file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#parameter-file">Parameter file</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="demo.html">Demonstration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="credits.html">Credits</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">auTomo</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Overview</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/source/overview.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="overview">
+<h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
+<p>Automo creates and/or executes processing operation commands based on the configuration file
+(default to be <code class="docutils literal notranslate"><span class="pre">automo.ini</span></code>) and the parameter setting file (default to be <code class="docutils literal notranslate"><span class="pre">automo_params.csv</span></code>).
+You can specify the path to both files when running <code class="docutils literal notranslate"><span class="pre">automo_process_dir</span></code> and <code class="docutils literal notranslate"><span class="pre">automo_create_commands</span></code>.</p>
+<div class="section" id="configuration-file">
+<h2>Configuration file<a class="headerlink" href="#configuration-file" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">automo.ini</span></code> contains the settings that define the behavior of Automo as well as the processing procesures
+to be taken for different types of tomography data. Below is the content of a sample file (also available in the
+<code class="docutils literal notranslate"><span class="pre">macros</span></code> folder):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">settings</span><span class="p">]</span>
+<span class="n">default_h5_fname</span>    <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">h5</span>
+<span class="p">[</span><span class="n">robos</span><span class="p">]</span>
+<span class="n">tomo_180</span>            <span class="o">=</span> <span class="n">automo_preview</span><span class="p">,</span> <span class="n">automo_center</span><span class="p">,</span> <span class="n">automo_search_center</span><span class="p">,</span> <span class="n">automo_recon</span>
+<span class="n">tomo_360</span>        <span class="o">=</span> <span class="n">automo_preview_360</span><span class="p">,</span> <span class="n">automo_center_360</span><span class="p">,</span> <span class="n">automo_search_center</span><span class="p">,</span> <span class="n">automo_recon_360</span>
+<span class="n">tomosaic</span>        <span class="o">=</span> <span class="n">automo_tomosaic_create_meta</span><span class="p">,</span> <span class="n">automo_tomosaic_reorg</span><span class="p">,</span> <span class="n">automo_tomosaic_preview</span><span class="p">,</span> <span class="n">automo_tomosaic_center</span><span class="p">,</span> <span class="n">automo_tomosaic_recon</span>
+<span class="n">std</span>             <span class="o">=</span> <span class="n">preview</span><span class="p">,</span> <span class="n">center</span><span class="p">,</span> <span class="n">recon</span>
+<span class="p">[</span><span class="n">robos_move</span><span class="p">]</span>
+<span class="n">tomo_180</span>            <span class="o">=</span> <span class="n">new_folder</span>
+<span class="n">tomo_360</span>        <span class="o">=</span> <span class="n">new_folder</span>
+<span class="n">tomosaic</span>        <span class="o">=</span> <span class="n">existing_folder</span>
+<span class="n">std</span>             <span class="o">=</span> <span class="n">new_folder</span>
+<span class="p">[</span><span class="n">robos_rename</span><span class="p">]</span>
+<span class="n">tomo_180</span>            <span class="o">=</span> <span class="kc">False</span>
+<span class="n">tomo_360</span>        <span class="o">=</span> <span class="kc">False</span>
+<span class="n">tomosaic</span>        <span class="o">=</span> <span class="kc">False</span>
+<span class="n">std</span>             <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">robos</span></code> section specifies the workflow that Automo should adopt for each of the three types of tomography data
+(the <cite>std</cite> entry is for the exception case where Automo fails to recognize the data files as any of the three categories):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">tomo_180</span></code>: single field-of-view tomography</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tomo_360</span></code>: off-centered 360-degree tomography</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tomosaic</span></code>: mosaic tomography using the Tomosaic acquisition scheme</p></li>
+</ul>
+<p>The data type is automatically detected according to the naming pattern of the HDF5 files. It is thus necessary to keep
+a consistent naming style as listed in the table below:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 75%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Data type</p></td>
+<td><p>Naming pattern</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">tomo_180</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">*_180_*.h5</span></code> (must contain <code class="docutils literal notranslate"><span class="pre">_180_</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">tomo_360</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">*_360_*.h5</span></code> (must contain <code class="docutils literal notranslate"><span class="pre">_360_</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">tomosaic</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">*_y_?_x_?_*.h5</span></code> (indices start from 0)</p></td>
+</tr>
+</tbody>
+</table>
+<p>Automo will execute commands (for <code class="docutils literal notranslate"><span class="pre">tomo_180</span></code> and <code class="docutils literal notranslate"><span class="pre">tomo_360</span></code>) or create bash command scripts (for <code class="docutils literal notranslate"><span class="pre">tomosaic</span></code>)
+following the order at which operations are listed. The name of the operations, such as <code class="docutils literal notranslate"><span class="pre">automo_preview</span></code>, or
+<code class="docutils literal notranslate"><span class="pre">automo_tomosaic_reorg</span></code>, must match the name of the processing scripts contained in the <code class="docutils literal notranslate"><span class="pre">macros</span></code> directory.</p>
+<p>When running <code class="docutils literal notranslate"><span class="pre">automo_process_dir</span></code> in the folder containing all HDF5 data files collected in a beamtime,
+the <code class="docutils literal notranslate"><span class="pre">robos_move</span></code> section tells Automo whether to move a file into a new directory named exactly after the basename
+of the file (<code class="docutils literal notranslate"><span class="pre">new_folder</span></code>) or to move it into an existing folder named after the prefix of the filename
+(<code class="docutils literal notranslate"><span class="pre">existing</span> <span class="pre">folder</span></code>; useful for <code class="docutils literal notranslate"><span class="pre">tomosaic</span></code>). It is recommended to keep the default settings as shown in the
+sample file above.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">robos_rename</span></code> section specifies whether Automo should rename the moved HDF5 file according to the setting in
+<code class="docutils literal notranslate"><span class="pre">settings/default_h5_fname</span></code>. Keep this setting as <code class="docutils literal notranslate"><span class="pre">False</span></code> for <code class="docutils literal notranslate"><span class="pre">tomosaic</span></code> unless specifically needed.</p>
+</div>
+<div class="section" id="parameter-file">
+<h2>Parameter file<a class="headerlink" href="#parameter-file" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">automo_params.csv</span></code> contains the parameter settings for all operations. The parameters of the same operation must
+stay in the same line with names and values separated by a semicolon (<code class="docutils literal notranslate"><span class="pre">;</span></code>). The file should follow the format of</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">operation_name</span><span class="p">;</span> <span class="n">param_1_name</span><span class="p">;</span> <span class="n">param_1_value</span><span class="p">;</span> <span class="n">param_2_name</span><span class="p">;</span> <span class="n">param_2_value</span><span class="p">;</span> <span class="o">...</span>
+</pre></div>
+</div>
+<p>If an optional parameter is not provided in the <code class="docutils literal notranslate"><span class="pre">csv</span></code> file, it will use the default value.
+Please refer to the docstring of an operation script (for example, <code class="docutils literal notranslate"><span class="pre">automo_tomosaic_center</span> <span class="pre">--help</span></code>)
+to get help on the names and meanings of all its parameters. As in the case of the <code class="docutils literal notranslate"><span class="pre">ini</span></code> file, <code class="docutils literal notranslate"><span class="pre">operation_name</span></code>’s
+must match operation scripts contained in the <code class="docutils literal notranslate"><span class="pre">macros</span></code> folder.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="demo.html" class="btn btn-neutral float-right" title="Demonstration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="install.html" class="btn btn-neutral float-left" title="Install directions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Argonne National Laboratory
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
