@@ -81,13 +81,15 @@ tomosaic.total_fusion(src_folder, dest_folder, dest_fname, file_grid,
                            color_correction=False, blend_options=blend_options, blend_options2=blend_options2,
                            dtype='float16')
 
-f = h5py.File(os.path.join('fulldata_flatcorr_1x', 'fulldata_flatcorr_1x.h5'), 'r')
-dat = f['exchange/data']
-dxchange.write_tiff(dat[0], os.path.join('fulldata_flatcorr_1x', 'proj_0'), dtype='float32', overwrite=True)
-last_ind = dat.shape[0] - 1
-dxchange.write_tiff(dat[last_ind], os.path.join('fulldata_flatcorr_1x', 'proj_{}'.format(last_ind)),
-                    dtype='float32', overwrite=True)
-f.close()
+if rank == 0:
+    print('Outputting the first and last frames from the merged file for a quality check...')
+    f = h5py.File(os.path.join('fulldata_flatcorr_1x', 'fulldata_flatcorr_1x.h5'), 'r')
+    dat = f['exchange/data']
+    dxchange.write_tiff(dat[0], os.path.join('fulldata_flatcorr_1x', 'proj_0'), dtype='float32', overwrite=True)
+    last_ind = dat.shape[0] - 1
+    dxchange.write_tiff(dat[last_ind], os.path.join('fulldata_flatcorr_1x', 'proj_{}'.format(last_ind)),
+                        dtype='float32', overwrite=True)
+    f.close()
 
-print('Total time: {}s'.format(time.time() - t0))
+    print('Total time: {}s'.format(time.time() - t0))
 

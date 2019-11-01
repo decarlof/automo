@@ -82,7 +82,6 @@ class automo_exp:
     cf = ''
     def_h5_fname = ''
     proc_list = ''
-    macro_list = ''
     proc_folder = ''
     log_file = ''
     log_name = ''
@@ -115,7 +114,6 @@ def init(ini_path=None, ini_name='automo.ini'):
         exp.proc_dir = exp.cf.get('settings', 'python_proc_dir')
 
     exp.proc_list = exp.cf.options('robos')
-    exp.macro_list = [f for f in os.listdir(exp.proc_dir) if re.match(r'.+.py', f)]
     return exp
 
 
@@ -266,7 +264,7 @@ def robo_rename(exp, file, rename_type):
 
 def get_arguments(exp, proc):
 
-    script_name = os.path.join(exp.proc_dir, proc)
+    script_name = os.path.join(exp.automo_path, 'macros', proc)
     f = open(script_name, 'r')
     lines = f.readlines()
     main_loc = 0
