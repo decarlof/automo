@@ -10,9 +10,10 @@ import glob
 import os
 import argparse
 import sys
-sys.path.append(os.getcwd())
 import numpy as np
 import time
+
+sys.path.append(os.getcwd())
 from mosaic_meta import *
 
 try:
@@ -28,46 +29,34 @@ except:
     size = 1
 
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--source', help='folder with source data', default='auto')
+parser.add_argument('--method', help='method', default='pc')
+parser.add_argument('--ds', help='downsample level', default=1)
+parser.add_argument('--shift_file', help='shift file', default='auto')
+parser.add_argument('--center_st', help='provide if method is hybrid', default='none')
+parser.add_argument('--center_end', help='provide if method is hybrid', default='none')
+args = parser.parse_args()
 
+ds = int(args.ds)
+method = args.method
+src_folder = args.source if args.source != 'auto' else 'data_raw_{}x'.format(ds)
 
-def main(arg):
+if args.shift_file == 'auto':
+    shift_file = 'shifts.txt'
+else:
+    shift_file = args.shift_file
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--source', help='folder with source data', default='auto')
-    parser.add_argument('--method', help='method', default='pc')
-    parser.add_argument('--ds', help='downsample level', default=1)
-    parser.add_argument('--shift_file', help='shift file', default='auto')
-    parser.add_argument('--center_st', help='provide if method is hybrid', default='none')
-    parser.add_argument('--center_end', help='provide if method is hybrid', default='none')
-    args = parser.parse_args()
+if method == 'hybrid':
+    center_search_range = (float(args.center_st), float(args.center_end))
 
-    ds = int(args.ds)
-    method = args.method
-    src_folder = args.source if args.source != 'auto' else 'data_raw_{}x'.format(ds)
+shift_grid = tomosaic.file2grid(shift_file)
+shift_grid = tomosaic.absolute_shift_grid(shift_grid, file_grid)
 
-    f_pattern = 1
-    prefix = ''
-    file_list = tomosaic.get_files(src_folder, prefix, type='h5')
-    file_grid = tomosaic.start_file_grid(file_list, pattern=f_pattern)
-    if args.shift_file == 'auto':
-        shift_file = 'shifts.txt'
-    else:
-        shift_file = args.shift_file
-
-    if method == 'hybrid':
-        center_search_range = (float(args.center_st), float(args.center_end))
-
-    shift_grid = tomosaic.file2grid(shift_file)
-    shift_grid = tomosaic.absolute_shift_grid(shift_grid, file_grid)
-    
-    t0 = time.time()
-    if method == 'pc':
-        refined_shift = tomosaic.refine_shift_grid(file_grid, shift_grid, src_folder=src_folder)
-    elif method == 'reslice':
-        refined_shift = tomosaic.refine_shift_grid_hybrid(file_grid, shift_grid, src_folder,
-                                                          center_search_range=center_search_range)
-    print('Rank {}: total time: {} s.'.format(rank, time.time() - t0))
-
-
-if __name__ == "__main__":
-    main(sys.argv[1:])
+t0 = time.time()
+if method == 'pc':
+    refined_shift = tomosaic.refine_shift_grid(file_grid, shift_grid, src_folder=src_folder)
+elif method == 'hybrid':
+    refined_shift = tomosaic.refine_shift_grid_hybrid(file_grid, shift_grid, src_folder,
+                                                      center_search_range=center_search_range)
+print('Rank {}: total time: {} s.'.format(rank, time.time() - t0))

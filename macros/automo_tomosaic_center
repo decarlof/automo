@@ -14,7 +14,6 @@ import dxchange
 import numpy as np
 import time
 import tomopy
-
 try:
     from mpi4py import MPI
     comm = MPI.COMM_WORLD
@@ -26,65 +25,68 @@ except:
     comm = pseudo_comm()
     rank = 0
     size = 1
+sys.path.append(os.getcwd())
+from mosaic_meta import *
 
 
-def main(arg):
+parser = argparse.ArgumentParser()
+parser.add_argument('--source', help='location of data files. If mode is merged or single, this should be the path to a file. If mode is discrete, this should be a folder.', default='auto')
+parser.add_argument('--center_st', help='starting position for center search', default='auto')
+parser.add_argument('--center_end', help='ending position for center search', default='auto')
+parser.add_argument('--center_step', help='step size for center search', default=1)
+parser.add_argument('--row_st', help='starting row in mosaic grid', default=0)
+parser.add_argument('--row_end', help='ending row in mosaic grid', default='auto')
+parser.add_argument('--in_tile_pos', help='the slice within a tile to be used for center searching', default='auto')
+parser.add_argument('--mode', help='reconstruction mode. Available options: merged, discrete, single', default='merged')
+parser.add_argument('--method', help='algorithm', default='entropy')
+parser.add_argument('--ds', help='downsample level', default=1)
+parser.add_argument('--preprocess_single', help='provide only if mode is single', default=0)
+args = parser.parse_args()
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--source', help='location of data files. If mode is merged or single, this should be the path to a file. If mode is discrete, this should be a folder.', default='auto')
-    parser.add_argument('--center_st', help='starting position for center search', default='auto')
-    parser.add_argument('--center_end', help='ending position for center search', default='auto')
-    parser.add_argument('--center_step', help='step size for center search', default=1)
-    parser.add_argument('--row_st', help='starting row in mosaic grid', default=0)
-    parser.add_argument('--row_end', help='ending row in mosaic grid', default='auto')
-    parser.add_argument('--in_tile_pos', help='the slice within a tile to be used for center searching', default='auto')
-    parser.add_argument('--mode', help='reconstruction mode. Available options: merged, discrete, single', default='merged')
-    parser.add_argument('--method', help='algorithm', default='entropy')
-    parser.add_argument('--ds', help='downsample level', default=1)
-    parser.add_argument('--shift_file', help='shift file', default='auto')
-    parser.add_argument('--preprocess_single', help='provide only if mode is single', default=0)
-    args = parser.parse_args()
+ds = int(args.ds)
+mode = args.mode
+row_st = int(args.row_st)
+method = args.method
+fname = 'fulldata_flatcorr_{}x/fulldata_flatcorr_{}x.h5'.format(ds, ds)
+src_folder = 'data_raw_{}x'.format(ds)
 
-    ds = int(args.ds)
-    mode = args.mode
-    row_st = int(args.row_st)
-    method = args.method
-    fname = 'fulldata_flatcorr_{}x/fulldata_flatcorr_{}x.h5'.format(ds, ds)
-    src_folder = 'data_raw_{}x'.format(ds)
-    try:
-        center_st = int(args.center_st)
-        center_end = int(args.center_end)
-    except ValueError:
-        if mode != 'merged':
-            raise ValueError('Mode must be \'merged\' in order to automatically determine search range.')
-        else:
-            print('Getting initial guess using phase correlation.')
-            array_dims = tomosaic.read_data_adaptive(fname, shape_only=True)
-            img1, _, _ = tomosaic.read_data_adaptive(fname, proj=(0, 1), return_theta=False)
-            img2, _, _ = tomosaic.read_data_adaptive(fname, proj=(array_dims[0] - 1, array_dims[0]), return_theta=False)
+try:
+    center_st = int(args.center_st)
+    center_end = int(args.center_end)
+except ValueError:
+    if mode in ['merged', 'single']:
+        print('Getting initial guess using phase correlation.')
+        array_dims = tomosaic.read_data_adaptive(fname, shape_only=True)
+        img1, _, _ = tomosaic.read_data_adaptive(fname, proj=(0, 1), return_theta=False)
+        img2, _, _ = tomosaic.read_data_adaptive(fname, proj=(array_dims[0] - 1, array_dims[0]), return_theta=False)
+        center_init = tomopy.find_center_pc(np.squeeze(img1), np.squeeze(img2))
+        center_st = center_init - 5
+        center_end = center_init + 5
+    elif mode == 'discrete':
+        try:
+            file_shape = tomosaic.read_data_adaptive(os.path.join(src_folder, file_list[0]), shape_only=True)
+            img1 = dxchange.read_tiff(os.path.join('preview_panos', '0_norm.tiff'))
+            img2 = dxchange.read_tiff(os.path.join('preview_panos', '{}_norm.tiff'.format(file_shape[0] - 1)))
             center_init = tomopy.find_center_pc(np.squeeze(img1), np.squeeze(img2))
-            center_st = center_init - 20
-            center_end = center_init + 20
-    center_step = int(args.center_step)
+            center_st = center_init - 5
+            center_end = center_init + 5
+        except:
+            raise ValueError('Run automo_tomosaic_preview and generate panoramas at 0 and 180 degrees to enable '
+                             'automatic center guess.')
+center_step = int(args.center_step)
 
+row_end = int(args.row_end) if args.row_end != 'auto' else file_grid.shape[0]
 
-    f_pattern = 1
-    prefix = ''
-    file_list = tomosaic.get_files(src_folder, prefix, type='h5')
-    file_grid = tomosaic.start_file_grid(file_list, pattern=f_pattern)
-
-    row_end = int(args.row_end) if args.row_end != 'auto' else file_grid.shape[0]
-
-
-
-
-    if args.shift_file == 'auto':
-        shift_file = 'shifts.txt'
-    else:
-        shift_file = args.shift_file
-
-    shift_grid = tomosaic.file2grid(shift_file)
-    shift_grid = tomosaic.absolute_shift_grid(shift_grid, file_grid)
+if method == 'pc':
+    np.savetxt('center_pos.txt', np.vstack([range(row_st, row_end), [center_init] * (row_end - row_st)]).transpose(),
+               fmt=['%d', '%.1f'])
+else:
+    try:
+        shift_grid = tomosaic.util.file2grid("shifts.txt")
+        shift_grid = tomosaic.absolute_shift_grid(shift_grid, file_grid)
+    except:
+        print('Refined shift is not provided. Using pre-set shift values. ')
+        shift_grid = tomosaic.start_shift_grid(file_grid, x_shift, y_shift)
     shift_grid = shift_grid / float(ds)
 
     in_tile_pos = args.in_tile_pos
@@ -98,15 +100,10 @@ def main(arg):
 
     if method == 'hybrid':
         center_search_range = (float(args.center_st), float(args.center_end))
-
-    
-
     elif mode == 'single':
         sino_name = args.source
     preprocess_single = int(args.preprocess_single)
     preprocess_single = False if preprocess_single == 0 else True
-
-
 
     t0 = time.time()
     if mode == 'merged':
@@ -122,6 +119,3 @@ def main(arg):
                            method=method)
     print('Rank {}: total time = {} s.'.format(rank, time.time() - t0))
 
-
-if __name__ == "__main__":
-    main(sys.argv[1:])

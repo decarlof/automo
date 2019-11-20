@@ -17,27 +17,42 @@ import numpy as np
 from glob import glob
 import re, shutil
 from tqdm import tqdm
+import automo
 import automo.util as util
+import automo.robo
 
-
+    
 def main(arg):
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("prefix", help="existing recon foldername")
-    parser.add_argument("--shift", help="shift between datasets",default='auto')
-    parser.add_argument("--new_folder",help="target folder",default='auto')
+    parser.add_argument("--prefix", help="existing recon foldername", default='')
+    parser.add_argument("--new_folder",help="target folder", default='auto')
+    parser.add_argument("--params_file",help="parameter filename", default='auto')
+    parser.add_argument("--ini_file",help="ini filename", default='automo.ini')
+    parser.add_argument("--check_usage",help="check the usage of HDF5 files, skipping if in use (e.g. being transferred)", default='True')
     args = parser.parse_args()
+    
+    params_file = args.params_file
+    if params_file == 'auto':
+        params_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'automo_params.csv')
+    kwargs = util.get_parameters(params_file)
+
+    ini_file = args.ini_file
+    if ini_file == 'auto':
+        ini_path = None
+        ini_name = 'automo.ini'
+    else:
+        ini_path = os.path.dirname(ini_file)
+        ini_name = os.path.basename(ini_file)
+
+    check_usage = True if args.check_usage in ['True', 'true'] else False
 
 
-automo.robo.process_folder(os.getcwd(),
-                           preview=preview_dict,
-                           center=center_dict,
-                           recon=recon_dict,
-                           preview_360=preview_dict_360,
-                           center_360=center_dict_360,
-                           recon_360=recon_dict_360,
-                           preview_tomosaic=preview_dict_tomosaic,
-                           search_center=search_center_dict)
+    automo.robo.process_folder(os.getcwd(),
+                               ini_path=ini_path,
+                               ini_name=ini_name,
+			                   check_usage=check_usage,
+                               **kwargs)
 
 
 if __name__ == "__main__":

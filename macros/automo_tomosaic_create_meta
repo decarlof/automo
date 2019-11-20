@@ -9,44 +9,23 @@ from six.moves import input
 import automo
 import os
 import sys
-try:
-    import __builtin__ as bi
-except:
-    import builtins as bi
+import argparse
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--prefix", help="prefix of HDF5 files. Leave it empty if you are at the sample's own folder.",default='')
+parser.add_argument("--data_format", help="Data format",default='aps_32id')
+parser.add_argument("--x_shift", help="Sample position offset in x",default=None)
+parser.add_argument("--y_shift", help="Sample position offset in y",default=None)
+args = parser.parse_args()
 
-entry_ls = {'prefix': ['Prefix of data files before y and x indices.', None, 'str'],
-            'data_format': ['Data format, e.g. aps_32id, aps_13bm.', 'aps_32id', 'str'],
-            'x_shift': ['Motor translation readout along x.', None, 'float'],
-            'y_shift': ['Motor translation readout along y.', None, 'float']}
-
-print('Python interpreter: {}'.format(sys.executable))
-while True:
-    entry_items = list(entry_ls.items())
-    print('Current entries:')
-    for i, (key, value) in enumerate(entry_items):
-        print('{}. {} = {}'.format(i, key, value[1]))
-    print('---------------------')
-    print('Enter:')
-    print('[index] to edit;')
-    print('[ok] to finish;')
-    print('[w] to write all first frames;')
-    ind = input('Input here: ')
-    if ind == 'ok':
-        break
-    elif ind == 'w':
-        automo.write_first_frames()
-    else:
-        ind = int(ind)
-        print(entry_items[ind][1][0])
-        val = input('Enter value here: ')
-        val = getattr(bi, entry_items[ind][1][2])(val)
-        entry_ls[entry_items[ind][0]][1] = val
-        print('---------------------')
+entry_ls = {'prefix': ['Prefix of data files before y and x indices.', args.prefix, 'str'],
+            'data_format': ['Data format, e.g. aps_32id, aps_13bm.', args.data_format, 'str'],
+            'x_shift': ['Motor translation readout along x.', float(args.x_shift), 'float'],
+            'y_shift': ['Motor translation readout along y.', float(args.y_shift), 'float']}
 
 sample_loc = automo.__file__
 sample_loc = os.path.dirname(os.path.dirname(sample_loc))
-sample_loc = os.path.join(sample_loc,'automo' ,'metafile_sample.py')
+sample_loc = os.path.join(sample_loc, 'macros', 'tomosaic_metafile_sample.py')
 
 o = open(sample_loc)
 lines = o.readlines()
@@ -62,3 +41,4 @@ f = open('mosaic_meta.py', 'w')
 f.writelines(lines)
 f.close()
 o.close()
+

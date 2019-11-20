@@ -98,6 +98,26 @@ __all__ = ['append',
            'find_center_com']
 
 
+def get_parameters(params_file):
+    
+    f = open(params_file)
+    kwargs = {}
+    lines = f.readlines()
+    for line in lines:
+        if len(line) > 0 and line != '\n':
+            temp = ''
+            for i in line:
+                if i != ' ': temp += i
+            a = temp.split(';')
+            kwargs[a[0]] = {}
+            for par_ind, par in enumerate(a[1::2]):
+                val = a[par_ind * 2 + 2]
+                if '\n' in val: val = val[:-1]
+                kwargs[a[0]][par] = val
+    return kwargs
+            
+
+
 def h5group_dims(fname, dataset='exchange/data'):
     """
     Read data from hdf5 file array dims for a specific group.
