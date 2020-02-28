@@ -58,7 +58,10 @@ from distutils.dir_util import mkpath
 import re
 import logging
 import pyfftw
-from scipy.misc import imsave
+try:
+    from scipy.misc import imsave
+except:
+    pass
 from tomopy import downsample
 import tomopy.util.dtype as dtype
 import scipy.ndimage as ndimage
