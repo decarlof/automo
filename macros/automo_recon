@@ -34,13 +34,14 @@ def main(arg):
     parser.add_argument("--file_name", help="existing hdf5 file name",default='auto')
     parser.add_argument("--center_folder", help="folder containing center testing images",default='center')
     parser.add_argument("--sino_start", help="slice start",default=0,type=int)
-    parser.add_argument("--sino_end", help="slice end,",default=1200,type=int)
+    parser.add_argument("--sino_end", help="slice end,",default='auto')
     parser.add_argument("--sino_step", help="slice step",default=1)
     parser.add_argument("--medfilt_size", help="size of median filter",default=0,type=int)
     parser.add_argument("--level", help="level of downsampling",default=0,type=int)
     parser.add_argument("--pad_lenght", help="sinogram padding",default=1000,type=int)
     parser.add_argument("--chunk_size", help="chunk size",default=50,type=int)
     parser.add_argument("--debug", help="debug messages",default=0,type=int)
+    parser.add_argument("--output_folder", help="output folder",default='recon')
     # parser.add_argument("padding", help="sinogram padding")
     args = parser.parse_args()
 
@@ -55,13 +56,14 @@ def main(arg):
 
     array_dims = util.h5group_dims(fname)
     folder = os.path.dirname(fname) + os.sep
+    output_folder = args.output_folder
 
     chunk_size = args.chunk_size
     medfilt_size = args.medfilt_size
     level = args.level
     pad_length = args.pad_lenght
 
-
+   
     # find center if not given
     if os.path.exists('center_pos.txt'):
         f = open('center_pos.txt')
@@ -89,9 +91,16 @@ def main(arg):
 
     debug_print(debug,"Data: "+str(array_dims))
     # Select the sinogram range to reconstruct.
-    sino_start = int(args.sino_start)
-    sino_end = int(args.sino_end)
+    sino_start = int(args.sino_start) 
     sino_step = int(args.sino_step)
+    sino_end = args.sino_end
+    if sino_end == 'auto':
+        f = h5py.File(fname, 'r')
+        sino_end = f['exchange/data'].shape[1]
+    else:
+        sino_end = int(sino_end)
+
+
 
     chunks = []
     chunk_st = sino_start
@@ -160,12 +169,14 @@ def main(arg):
         rec = tomopy.recon(prj, theta, center=center_pos+pad_length, algorithm='gridrec', filter_name='parzen')
         debug_print(debug,'\nReconstruction done!\n')
 
+        rec = tomopy.remove_ring(rec)
+
         if not pad_length == 0:
             rec = rec[:, pad_length:pad_length+raw_shape[2], pad_length:pad_length+raw_shape[2]]
 
         #rec = tomopy.circ_mask(rec, 0, ratio=0.9)
 
-        dxchange.write_tiff_stack(rec, fname=os.path.join('recon', 'recon'), start=chunk_st, dtype='float32')
+        dxchange.write_tiff_stack(rec, fname=os.path.join(output_folder, 'recon'), start=chunk_st, dtype='float32', overwrite=True)
 
 
 if __name__ == "__main__":

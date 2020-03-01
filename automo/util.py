@@ -58,6 +58,10 @@ from distutils.dir_util import mkpath
 import re
 import logging
 import pyfftw
+try:
+    from scipy.misc import imsave
+except:
+    pass
 from tomopy import downsample
 import tomopy.util.dtype as dtype
 import scipy.ndimage as ndimage
@@ -701,10 +705,8 @@ def sino_360_to_180(data, overlap=0, rotation='right', blend=True):
 
     if blend:
         if rotation == 'left':
-            img1 = data[n:2*n, :, ro:][:, :, ::-1]
-            img2 = data[:n, :, :]
-            img1 = np.fliplr(img1)
-            img2 = np.fliplr(img2)
+            img1 = data[n:2*n, :, ro:][:, :, :]
+            img2 = data[:n, :, ::-1]
             shift = [0, dz - lo]
             for i in range(out.shape[1]):
                 out[:, i, :] = np.fliplr(img_merge_pyramid(img2[:, i, :], img1[:, i, :], shift=shift, depth=2))
@@ -1040,3 +1042,30 @@ def find_center_com(sino, return_com_list=False):
         return (np.mean(line_com_ls), line_com_ls)
     else:
         return np.mean(line_com_ls)
+
+
+def save_png(data, fname):
+
+    dir_name = os.path.dirname(fname)
+    if len(dir_name) > 0 and (not os.path.exists(dir_name)):
+        os.makedirs(dir_name)
+    data = data.astype('float32')
+    data[np.where(np.logical_not(np.isfinite(data)))] = 0
+    data = (data - data.min()) / (data.max() - data.min()) * 255.
+    data = data.astype('int')
+    if '.png' not in fname:
+        fname = fname + '.png'
+    imsave(fname, data, format='png')
+    return None 
+
+
+def save_png_stack(data, fname, axis=0, digit=5, start=0):
+
+    dir_name = os.path.dirname(fname)
+    if len(dir_name) > 0 and (not os.path.exists(dir_name)):
+        os.makedirs(dir_name)
+    for i in range(start, data.shape[axis]):
+        save_png(np.take(data, i, axis=axis), fname + ('_{:0' + str(digit) + '}').format(i))
+    return None
+
+

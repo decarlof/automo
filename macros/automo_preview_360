@@ -17,7 +17,7 @@ import numpy as np
 from glob import glob
 import h5py
 
-from automo.util import read_data_adaptive, preprocess
+from automo.util import read_data_adaptive, preprocess, save_png, save_png_stack
 
 
 def main(arg):
@@ -63,7 +63,8 @@ def main(arg):
         # Read the APS raw data projections.
         proj, flat, dark, _ = read_data_adaptive(fname, proj=(proj_st, proj_end, proj_step))
         print("Proj Preview: ", proj.shape)
-
+        flat_fname = (folder + 'preview' + os.sep + 'flat' + os.sep +'flat')
+        save_png_stack(flat, fname=flat_fname, axis=0, digit=5, start=0)
         proj_fname = (folder + 'preview' + os.sep + 'proj')
         print("Proj folder: ", proj_fname)
 
@@ -73,13 +74,11 @@ def main(arg):
         sino_fname = (folder + 'preview' + os.sep + 'sino')
         sino = np.swapaxes(sino, 0, 1)
         print("Proj folder: ", proj_fname)
-        flat_fname = (folder + 'preview' + os.sep + 'flat' + os.sep +'flat')
-        dxchange.write_tiff_stack(flat, fname=flat_fname, axis=0, digit=5, start=0, overwrite=True)
-        dxchange.write_tiff_stack(proj, fname=proj_fname, axis=0, digit=5, start=0, overwrite=True)
-        dxchange.write_tiff_stack(sino, fname=sino_fname, axis=0, digit=5, start=slice_st, overwrite=True)
+        save_png_stack(proj, fname=proj_fname, axis=0, digit=5, start=0)
+        save_png_stack(sino, fname=sino_fname, axis=0, digit=5, start=0)
         proj_flip = np.fliplr(proj[1,:,:])
         proj_fname = (folder + 'preview' + os.sep + 'proj_00001_flip')
-        dxchange.write_tiff(proj_flip, fname=proj_fname, overwrite=True)
+        save_png(proj_flip, fname=proj_fname)
         print("#################################")
 
 

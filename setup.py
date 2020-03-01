@@ -15,7 +15,7 @@ setup(
     description = 'Automation for tomography.',
     license='BSD-3',
     platforms='Any',
-    scripts=glob('config/automo_*'),
+    scripts=glob('macros/automo_*'),
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Science/Research',

@@ -1,0 +1,13 @@
+automo_preview; proj_start; auto; proj_end; auto; proj_step; auto; slice_start; auto; slice_end; auto; slice_step; auto
+automo_center; rot_start; 860; rot_end; 1060; rot_step; 1; slice; 600; n_slice; -1; medfilt_size; 3; level; 0; pad_length; 1000; debug; 0
+automo_recon; center_folder; center; sino_start; 0; sino_end; 1200; sino_step; 1; medfilt_size; 1; level; 0; pad_length; 1000; chunk_size; 50; debug; 0
+automo_preview_360; proj_start; auto; proj_end; auto; proj_step; auto; slice_start; auto; slice_end; auto; slice_step; auto
+automo_center_360; rot_start; 1400; rot_end; 1650; rot_step; 1; slice_start; 600; n_slice; -1;  medfilt_size; 1; level; 0
+automo_recon_360; center_folder; center; sino_start; 0; sino_end; 1200; sino_step; 1; medfilt_size; 1; level; 0; chunk_size; 50; pad_length; 1000; debug; 0
+automo_tomosaic_reorg; ds; 1
+automo_tomosaic_create_meta; x_shift; 1000; y_shift; 1000
+automo_tomosaic_preview; frame; 0; pano; auto
+automo_tomosaic_register
+automo_tomosaic_merge
+automo_tomosaic_center; center_st; auto; center_end; auto; row_st; 0; row_end; 1; mode; discrete
+automo_tomosaic_recon; mode; merged; chunk_size; 5
